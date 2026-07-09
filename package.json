@@ -15,7 +15,8 @@
     "assets:guard": "node scripts/assert-assets-externalized.mjs",
     "musicart:guard": "node scripts/assert-musicart-data-externalized.mjs",
     "musicart-detail:guard": "node scripts/assert-musicart-detail-data-externalized.mjs",
-    "ai-teabreak:guard": "node scripts/assert-ai-teabreak-data-externalized.mjs"
+    "ai-teabreak:guard": "node scripts/assert-ai-teabreak-data-externalized.mjs",
+    "gacha:guard": "node scripts/assert-gacha-data-externalized.mjs"
   },
   "dependencies": {
     "@types/howler": "^2.2.13",
