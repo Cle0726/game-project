@@ -17,7 +17,8 @@
     "musicart-detail:guard": "node scripts/assert-musicart-detail-data-externalized.mjs",
     "ai-teabreak:guard": "node scripts/assert-ai-teabreak-data-externalized.mjs",
     "gacha:guard": "node scripts/assert-gacha-data-externalized.mjs",
-    "relationship:guard": "node scripts/assert-relationship-data-externalized.mjs"
+    "relationship:guard": "node scripts/assert-relationship-data-externalized.mjs",
+    "avatar:guard": "node scripts/assert-avatar-style-data-externalized.mjs"
   },
   "dependencies": {
     "@types/howler": "^2.2.13",
