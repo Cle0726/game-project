@@ -1,0 +1,163 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   文件: AudioSettings.css
+   功能: 听觉校准界面的样式表
+   说明: 采用白金歌剧厅的美学基调 (细金线滑块轨道，圆形金色滑块把手)
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+
+.audio-settings-container {
+  background: rgba(10, 15, 30, 0.85); /* 深邃的歌剧院暗色背景 */
+  border: 1px solid rgba(196, 154, 69, 0.3); /* 槐序暗金边框 */
+  padding: 24px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  color: #E2E8F0;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif; /* 衬线体强化古典感 */
+  width: 100%;
+  max-width: 400px;
+}
+
+.audio-settings-title {
+  color: #C49A45;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(196, 154, 69, 0.2);
+  padding-bottom: 8px;
+  font-weight: 500;
+}
+
+.audio-setting-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.audio-setting-label {
+  width: 130px;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  color: #E2E8F0;
+  opacity: 0.9;
+}
+
+.audio-setting-value {
+  width: 35px;
+  text-align: right;
+  font-size: 0.95rem;
+  color: #C49A45;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================
+   白金歌剧风格滑块 (Platinum Opera Slider) 
+   ========================================= */
+
+.platinum-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  background: transparent;
+  outline: none;
+  margin: 0;
+}
+
+/* 滑块轨道 (细金线) - WebKit */
+.platinum-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 2px;
+  cursor: pointer;
+  background: rgba(196, 154, 69, 0.4);
+  border-radius: 1px;
+  transition: background 0.3s;
+}
+
+.platinum-slider:hover::-webkit-slider-runnable-track {
+  background: rgba(196, 154, 69, 0.6);
+}
+
+/* 滑块把手 (圆形金色) - WebKit */
+.platinum-slider::-webkit-slider-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #FFEBAA, #C49A45);
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -7px; /* (Track Height / 2) - (Thumb Height / 2) */
+  box-shadow: 0 0 6px rgba(196, 154, 69, 0.5);
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1.5), box-shadow 0.2s ease;
+}
+
+.platinum-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(196, 154, 69, 0.8);
+}
+
+.platinum-slider:active::-webkit-slider-thumb {
+  transform: scale(1.1);
+  background: radial-gradient(circle at 35% 35%, #FFF, #E8B653);
+}
+
+/* Firefox 支持 */
+.platinum-slider::-moz-range-track {
+  width: 100%;
+  height: 2px;
+  cursor: pointer;
+  background: rgba(196, 154, 69, 0.4);
+  border-radius: 1px;
+}
+
+.platinum-slider::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #FFEBAA, #C49A45);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(196, 154, 69, 0.5);
+  transition: transform 0.2s ease;
+}
+
+.platinum-slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* =========================================
+   静音开关按钮 (Platinum Toggle) 
+   ========================================= */
+
+.toggle-row {
+  margin-top: 32px;
+  justify-content: space-between;
+}
+
+.platinum-toggle {
+  background: transparent;
+  border: 1px solid rgba(196, 154, 69, 0.4);
+  color: #E2E8F0;
+  padding: 6px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+.platinum-toggle:hover {
+  background: rgba(196, 154, 69, 0.1);
+  border-color: #C49A45;
+  opacity: 1;
+}
+
+.platinum-toggle.active {
+  background: rgba(196, 154, 69, 0.2);
+  border-color: #C49A45;
+  color: #C49A45;
+  box-shadow: inset 0 0 10px rgba(196, 154, 69, 0.3);
+  opacity: 1;
+}

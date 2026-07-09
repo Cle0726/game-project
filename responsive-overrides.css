@@ -1,0 +1,2629 @@
+﻿/* Extracted from style.css on 2026-07-03. Loaded after style.css to keep cascade order stable. */
+/* FINAL AUTO-ADAPTIVE LAYOUT PASS. This must stay at the end of the stylesheet. */
+#main-menu .entry-main-scroll {
+  height: 100% !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+}
+
+#main-menu .entry-page:not(.is-active) {
+  display: none !important;
+}
+
+#main-menu .entry-page.is-active {
+  min-height: 0 !important;
+}
+
+#main-menu .entry-hero-layout.entry-page.is-active {
+  height: 100% !important;
+  min-height: 0 !important;
+  grid-template-columns: minmax(118px, clamp(128px, 16vw, 270px)) minmax(280px, 1fr) minmax(230px, clamp(240px, 22vw, 380px)) !important;
+  gap: clamp(14px, 3vw, 56px) !important;
+  align-items: center !important;
+}
+
+#main-menu .entry-title-block {
+  align-content: center !important;
+  gap: clamp(8px, 1.4vmin, 16px) !important;
+  min-width: 0 !important;
+}
+
+#main-menu #game-title {
+  max-width: none !important;
+  font-size: clamp(46px, 7.4vmin, 106px) !important;
+  line-height: 0.9 !important;
+}
+
+#main-menu .entry-actions {
+  position: static !important;
+  display: grid !important;
+  width: min(460px, 100%) !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(8px, 1.2vmin, 12px) !important;
+  justify-self: center !important;
+}
+
+#main-menu .entry-side-copy {
+  align-self: end !important;
+  padding-bottom: clamp(16px, 4dvh, 64px) !important;
+}
+
+#main-menu .entry-index-card {
+  align-self: end !important;
+  margin-bottom: clamp(14px, 4dvh, 58px) !important;
+}
+
+@media (min-width: 900px) {
+  #game-container {
+    width: min(1920px, calc(100vw - 32px)) !important;
+    height: calc(100dvh - 32px) !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 32px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 24vw, 440px) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) clamp(118px, 17dvh, 178px) !important;
+    grid-template-areas:
+      "status status"
+      "quick quick"
+      "stage choices"
+      "dialogue dialogue" !important;
+    gap: clamp(6px, 0.75vmin, 10px) !important;
+    padding: clamp(10px, 1.35vmin, 16px) !important;
+    overflow: hidden !important;
+  }
+
+  #status-bar {
+    grid-area: status !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  #quick-actions {
+    grid-area: quick !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    margin: 0 !important;
+  }
+
+  #scene-area {
+    grid-area: stage !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    margin: 0 !important;
+  }
+
+  #scene-description {
+    top: clamp(16px, 2.4dvh, 30px) !important;
+    left: clamp(16px, 2.4vw, 38px) !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(590px, 48%) !important;
+    max-height: min(34dvh, 260px) !important;
+    overflow: auto !important;
+  }
+
+  #character-sprite {
+    right: clamp(12px, 5vw, 90px) !important;
+    bottom: clamp(0px, 1.2dvh, 18px) !important;
+    width: min(30vw, 390px) !important;
+    max-height: min(100%, 62dvh) !important;
+    object-fit: contain !important;
+  }
+
+  #choices-area {
+    grid-area: choices !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    width: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: auto !important;
+    z-index: 7 !important;
+  }
+
+  .choice-button {
+    min-height: clamp(46px, 6.2dvh, 64px) !important;
+    padding: clamp(10px, 1.3vmin, 15px) clamp(12px, 1.6vmin, 18px) !important;
+    font-size: clamp(14px, 1.25vmin, 17px) !important;
+  }
+
+  #dialogue-area {
+    grid-area: dialogue !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    width: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow: auto !important;
+  }
+}
+
+@media (max-width: 899px) {
+  #main-menu {
+    overflow: hidden !important;
+  }
+
+  #main-menu .entry-main-scroll {
+    overflow: auto !important;
+    scrollbar-gutter: stable both-edges !important;
+  }
+
+  #main-menu .entry-hero-layout.entry-page.is-active {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto auto !important;
+    align-content: start !important;
+    align-items: start !important;
+    gap: clamp(12px, 2.2dvh, 18px) !important;
+    padding: clamp(14px, 4vw, 22px) clamp(12px, 4vw, 18px) 24px !important;
+    overflow: auto !important;
+  }
+
+  #main-menu .entry-title-block {
+    order: 1 !important;
+    gap: clamp(7px, 1.8dvh, 12px) !important;
+  }
+
+  #main-menu .entry-kicker {
+    font-size: clamp(11px, 3vw, 14px) !important;
+    line-height: 1.2 !important;
+  }
+
+  #main-menu .entry-actions {
+    width: 100% !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    justify-self: stretch !important;
+  }
+
+  #main-menu .entry-action {
+    min-height: 48px !important;
+    padding: 10px 8px !important;
+    font-size: clamp(14px, 3.4vw, 16px) !important;
+  }
+
+  #main-menu #game-title {
+    font-size: clamp(38px, 11.8vw, 58px) !important;
+    line-height: 0.88 !important;
+  }
+
+  #main-menu .entry-subtitle {
+    max-width: 100% !important;
+    font-size: clamp(13px, 3.4vw, 16px) !important;
+    line-height: 1.7 !important;
+  }
+
+  #main-menu .entry-side-copy {
+    order: 2 !important;
+    align-self: stretch !important;
+    padding-bottom: 0 !important;
+  }
+
+  #main-menu .entry-index-card {
+    order: 3 !important;
+    align-self: stretch !important;
+    margin-bottom: 0 !important;
+    padding: 14px !important;
+  }
+
+  #main-menu .entry-index-card strong {
+    font-size: clamp(24px, 7vw, 32px) !important;
+  }
+
+  #game-container {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    grid-template-rows: auto auto minmax(0, 1fr) auto clamp(112px, 20dvh, 170px) !important;
+    overflow: hidden !important;
+  }
+}
+
+/* ═══ 移动端字号下限：任何可见文字不低于 14px ═══ */
+@media (max-width: 899px) {
+  .status-label,
+  .quick-action-button,
+  #battle-log,
+  .team-stat-grid span,
+  .entry-bottom-strip span,
+  .entry-brand span,
+  .entry-nav-links button,
+  .team-risk-chip,
+  .team-detail-button {
+    font-size: var(--font-size-sm) !important;
+  }
+}
+
+/* ═══ 平板断点（600-899px）：Final Cleanup 的 100vw 会把容器拉满，
+     这里限制到 760px 居中，避免大留白和垂直挤压 ═══ */
+@media (min-width: 600px) and (max-width: 899px) {
+  #game-container {
+    width: min(760px, calc(100vw - 32px)) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #scene-area {
+    min-height: clamp(340px, 48dvh, 520px) !important;
+  }
+
+  #choices-area {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #save-slots {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .save-slot {
+    min-height: 140px !important;
+  }
+}
+
+/* ═══ 移动端隐藏主菜单装饰条（桌面端保留作氛围装饰） ═══ */
+@media (max-width: 899px) {
+  .entry-bottom-strip {
+    display: none !important;
+  }
+}
+
+/* CH0 visual-novel UI pass: keeps CG unobstructed, separates narration, dialogue and choices. */
+#main-menu {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 9, 0.64) 0%, rgba(5, 6, 9, 0.18) 42%, rgba(5, 6, 9, 0.48) 100%),
+    linear-gradient(180deg, rgba(5, 6, 9, 0.08), rgba(5, 6, 9, 0.52)),
+    url("assets/generated/chapter0/keyvisuals/main_menu_chapter0_key_bg_v01.png") center / cover no-repeat,
+    #110d0c !important;
+}
+
+#main-menu .entry-title-block,
+#main-menu .entry-index-card,
+#main-menu .entry-side-copy {
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.72);
+}
+
+#main-menu .entry-index-card {
+  background: rgba(8, 9, 11, 0.72) !important;
+  border-color: rgba(239, 213, 154, 0.34) !important;
+}
+
+#scene-description[hidden] {
+  display: none !important;
+}
+
+#scene-description {
+  position: relative !important;
+  z-index: 5 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: clamp(12px, 1.45vmin, 18px) clamp(16px, 1.8vmin, 22px) !important;
+  overflow: auto !important;
+  border: 1px solid rgba(196, 154, 69, 0.42) !important;
+  border-left: 4px solid #d9ad55 !important;
+  background:
+    linear-gradient(90deg, rgba(217, 173, 85, 0.14), transparent 38%),
+    linear-gradient(180deg, rgba(18, 17, 17, 0.94), rgba(8, 9, 12, 0.9)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 210, 0.04),
+    0 12px 28px rgba(0, 0, 0, 0.22) !important;
+}
+
+#scene-description #description-text {
+  margin: 0 !important;
+  color: rgba(246, 234, 204, 0.92) !important;
+  font-size: clamp(15px, 1.18vmin, 18px) !important;
+  line-height: 1.8 !important;
+}
+
+#scene-description #system-prompt {
+  margin: 0 0 10px !important;
+  padding: 24px 12px 10px !important;
+  border-color: rgba(217, 173, 85, 0.64) !important;
+  background: rgba(217, 173, 85, 0.105) !important;
+  color: rgba(255, 242, 205, 0.96) !important;
+  font-size: clamp(12px, 1vmin, 14px) !important;
+  line-height: 1.65 !important;
+}
+
+#scene-area {
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+#scene-background::after {
+  background:
+    url("assets/ui/ui_scene_gold_corner_frame_v01.png") center / 100% 100% no-repeat,
+    linear-gradient(180deg, rgba(13, 15, 20, 0.02), rgba(13, 15, 20, 0.18)),
+    repeating-linear-gradient(90deg, rgba(232, 224, 204, 0.018) 0 1px, transparent 1px 44px) !important;
+  opacity: 0.72 !important;
+}
+
+#scene-area::after {
+  content: "" !important;
+}
+
+#character-sprite {
+  right: clamp(10px, 4vw, 72px) !important;
+  bottom: clamp(0px, 1dvh, 12px) !important;
+  width: min(29vw, 360px) !important;
+  max-height: min(100%, 58dvh) !important;
+}
+
+#choices-area {
+  position: relative !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: clamp(10px, 1.2vmin, 14px) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: clamp(14px, 1.5vmin, 20px) !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(196, 154, 69, 0.4) !important;
+  background:
+    linear-gradient(135deg, rgba(217, 173, 85, 0.12), transparent 32%),
+    linear-gradient(180deg, rgba(12, 13, 17, 0.96), rgba(6, 7, 10, 0.94)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 210, 0.035),
+    0 12px 30px rgba(0, 0, 0, 0.24) !important;
+}
+
+#choices-area:not(.has-choices) {
+  opacity: 0.62 !important;
+}
+
+.choices-panel-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: #efd59a !important;
+  font-family: var(--font-mono) !important;
+  font-size: clamp(12px, 1vmin, 14px) !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+
+.choices-panel-title::before,
+.choices-panel-title::after {
+  content: "" !important;
+  width: 6px !important;
+  height: 6px !important;
+  border: 1px solid currentColor !important;
+  transform: rotate(45deg) !important;
+}
+
+#choices-list {
+  display: grid !important;
+  align-content: start !important;
+  gap: clamp(10px, 1.2vmin, 14px) !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+  padding-right: 3px !important;
+  scrollbar-color: rgba(217, 173, 85, 0.42) transparent !important;
+}
+
+#choices-list .choice-button,
+#choices-list .choice-button.symphony-btn {
+  min-height: clamp(62px, 7dvh, 86px) !important;
+  margin: 0 !important;
+  padding: clamp(13px, 1.4vmin, 18px) clamp(16px, 1.8vmin, 22px) !important;
+  justify-content: flex-start !important;
+  border: 1px solid rgba(217, 173, 85, 0.46) !important;
+  background:
+    linear-gradient(90deg, rgba(217, 173, 85, 0.16), rgba(20, 18, 17, 0.9)) !important;
+  color: rgba(255, 247, 224, 0.95) !important;
+  text-align: left !important;
+  font-size: clamp(15px, 1.25vmin, 18px) !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 244, 210, 0.035) !important;
+}
+
+#choices-list .choice-button:hover,
+#choices-list .choice-button:focus-visible,
+#choices-list .choice-button.symphony-btn:hover,
+#choices-list .choice-button.symphony-btn:focus-visible {
+  border-color: rgba(239, 213, 154, 0.9) !important;
+  background:
+    linear-gradient(90deg, rgba(217, 173, 85, 0.28), rgba(32, 25, 18, 0.96)) !important;
+  color: #fff8e8 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 210, 0.08),
+    0 0 18px rgba(217, 173, 85, 0.18) !important;
+}
+
+#choices-list .symphony-content {
+  width: 100% !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  letter-spacing: 0 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.55 !important;
+}
+
+#choices-list .symphony-diamond {
+  color: rgba(239, 213, 154, 0.82) !important;
+}
+
+#choices-list .symphony-layer-halo,
+#choices-list .symphony-layer-sweep {
+  opacity: 0.28 !important;
+}
+
+#dialogue-area {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: clamp(92px, 7.5vw, 132px) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: clamp(16px, 1.8vmin, 24px) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: clamp(14px, 1.6vmin, 20px) clamp(18px, 2vmin, 26px) !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(196, 154, 69, 0.42) !important;
+  border-left: 4px solid #d9ad55 !important;
+  background:
+    linear-gradient(90deg, rgba(217, 173, 85, 0.11), transparent 24%),
+    linear-gradient(180deg, rgba(11, 13, 17, 0.96), rgba(5, 6, 9, 0.94)) !important;
+}
+
+#dialogue-area::before {
+  content: "" !important;
+}
+
+#character-avatar {
+  --avatar-accent: #c49a45;
+  position: relative !important;
+  width: clamp(88px, 7.4vw, 126px) !important;
+  height: clamp(98px, 11dvh, 142px) !important;
+  min-width: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--avatar-accent) 72%, transparent) !important;
+  border-radius: 6px !important;
+  background:
+    radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--avatar-accent) 20%, transparent), transparent 54%),
+    linear-gradient(180deg, rgba(33, 31, 31, 0.92), rgba(7, 8, 10, 0.98)) !important;
+  color: #fff8e8 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 210, 0.06),
+    0 14px 28px rgba(0, 0, 0, 0.26) !important;
+}
+
+#character-avatar .avatar-portrait {
+  position: absolute !important;
+  inset: -12% -18% -30% !important;
+  display: none !important;
+  width: 136% !important;
+  height: 142% !important;
+  object-fit: cover !important;
+  object-position: 50% 18% !important;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.34)) !important;
+}
+
+#character-avatar.has-portrait .avatar-portrait {
+  display: block !important;
+}
+
+#character-avatar .avatar-fallback {
+  position: relative !important;
+  z-index: 1 !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(28px, 2.4vw, 40px) !important;
+  color: rgba(255, 248, 232, 0.9) !important;
+}
+
+#character-avatar.has-portrait .avatar-fallback {
+  opacity: 0 !important;
+}
+
+#dialogue-content {
+  min-width: 0 !important;
+  align-self: center !important;
+}
+
+#speaker-name {
+  margin-bottom: clamp(8px, 1vmin, 12px) !important;
+  color: #efd59a !important;
+  font-size: clamp(18px, 1.55vmin, 23px) !important;
+}
+
+#dialogue-text {
+  min-height: 0 !important;
+  color: rgba(255, 248, 232, 0.92) !important;
+  font-size: clamp(17px, 1.45vmin, 21px) !important;
+  line-height: 1.85 !important;
+}
+
+.dialogue-scroll-indicator {
+  position: absolute !important;
+  right: clamp(18px, 1.8vmin, 26px) !important;
+  bottom: clamp(10px, 1.2vmin, 16px) !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-right: 1px solid #efd59a !important;
+  border-bottom: 1px solid #efd59a !important;
+  transform: rotate(45deg) !important;
+  opacity: 0.72 !important;
+  animation: dialogue-pulse 1.4s ease-in-out infinite !important;
+}
+
+@keyframes dialogue-pulse {
+  0%, 100% { transform: translateY(0) rotate(45deg); opacity: 0.42; }
+  50% { transform: translateY(4px) rotate(45deg); opacity: 0.95; }
+}
+
+@media (min-width: 900px) {
+  #game-container {
+    grid-template-columns: minmax(0, 1fr) clamp(320px, 25vw, 460px) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) clamp(100px, 13dvh, 152px) clamp(138px, 18dvh, 196px) !important;
+    grid-template-areas:
+      "status status"
+      "quick quick"
+      "stage choices"
+      "narration choices"
+      "dialogue dialogue" !important;
+  }
+
+  #scene-area {
+    grid-area: stage !important;
+    height: 100% !important;
+  }
+
+  #scene-description {
+    grid-area: narration !important;
+  }
+
+  #choices-area {
+    grid-area: choices !important;
+  }
+
+  #dialogue-area {
+    grid-area: dialogue !important;
+  }
+}
+
+@media (max-width: 899px) {
+  #game-container {
+    grid-template-rows: auto auto minmax(260px, 1fr) auto minmax(120px, auto) clamp(124px, 22dvh, 190px) !important;
+    grid-template-areas:
+      "status"
+      "quick"
+      "stage"
+      "narration"
+      "choices"
+      "dialogue" !important;
+    overflow: auto !important;
+  }
+
+  #scene-area {
+    grid-area: stage !important;
+    min-height: clamp(270px, 44dvh, 430px) !important;
+  }
+
+  #scene-description {
+    grid-area: narration !important;
+    max-height: none !important;
+  }
+
+  #choices-area {
+    grid-area: choices !important;
+    max-height: none !important;
+  }
+
+  #choices-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  #dialogue-area {
+    grid-area: dialogue !important;
+    grid-template-columns: clamp(70px, 20vw, 92px) minmax(0, 1fr) !important;
+  }
+
+  #character-avatar {
+    width: clamp(70px, 20vw, 92px) !important;
+    height: clamp(78px, 22vw, 104px) !important;
+  }
+}
+
+/* 2026-07-05 final full-bleed scene: one background behind every in-game UI layer. */
+::selection {
+  background: rgba(128, 31, 43, 0.72);
+  color: #fff4d8;
+}
+
+@media (min-width: 900px) {
+  body {
+    padding: 0 !important;
+    background: #050609 !important;
+  }
+
+  #game-container {
+    --screen-pad: clamp(18px, 2.4vw, 34px);
+    --reader-width: min(1180px, calc(100% - clamp(72px, 10vw, 180px)));
+    --dialogue-height: clamp(150px, 18dvh, 196px);
+    --narration-height: clamp(64px, 8dvh, 94px);
+    position: relative !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+    grid-template-areas:
+      "status"
+      "quick"
+      "stage" !important;
+    gap: 8px !important;
+    padding: var(--screen-pad) !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    background: #050609 !important;
+    box-shadow: none !important;
+  }
+
+  #main-menu:not([hidden]) {
+    position: relative !important;
+    z-index: 30 !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+  }
+
+  #scene-area {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    grid-area: auto !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    position: relative !important;
+    z-index: 1 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    background: #08090d !important;
+    box-shadow: none !important;
+  }
+
+  #scene-background {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    transform-origin: center center !important;
+  }
+
+  #scene-background::after {
+    background:
+      linear-gradient(90deg, rgba(5, 6, 10, 0.18) 0%, rgba(5, 6, 10, 0.03) 22%, rgba(5, 6, 10, 0.10) 58%, rgba(5, 6, 10, 0.48) 100%),
+      linear-gradient(180deg, rgba(5, 6, 10, 0.36) 0%, rgba(5, 6, 10, 0.05) 24%, rgba(5, 6, 10, 0.22) 62%, rgba(5, 6, 10, 0.72) 100%),
+      url("assets/ui/ui_star_dust_overlay_v01.png") center / cover repeat !important;
+    opacity: 1 !important;
+  }
+
+  #status-bar,
+  #quick-actions,
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+  #status-bar {
+    grid-area: status !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    min-height: 58px !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    border: 1px solid rgba(214, 173, 75, 0.30) !important;
+    background: linear-gradient(180deg, rgba(9, 10, 13, 0.68), rgba(9, 10, 13, 0.42)) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+  }
+
+  #quick-actions {
+    grid-area: quick !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-top: 1px solid rgba(214, 173, 75, 0.30) !important;
+    border-bottom: 1px solid rgba(214, 173, 75, 0.22) !important;
+    background: linear-gradient(180deg, rgba(9, 10, 13, 0.42), rgba(9, 10, 13, 0.18)) !important;
+    backdrop-filter: blur(12px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+  }
+
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    grid-area: auto !important;
+  }
+
+  #scene-description {
+    align-self: end !important;
+    justify-self: center !important;
+    width: var(--reader-width) !important;
+    max-width: var(--reader-width) !important;
+    min-height: 0 !important;
+    max-height: var(--narration-height) !important;
+    margin: 0 0 calc(var(--dialogue-height) + var(--screen-pad) - 1px) !important;
+    padding: 14px 26px 12px !important;
+    overflow: auto !important;
+    border: 1px solid rgba(227, 192, 106, 0.36) !important;
+    border-bottom: 0 !important;
+    border-left: 4px solid rgba(227, 192, 106, 0.84) !important;
+    box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.28) !important;
+    background:
+      linear-gradient(180deg, rgba(24, 22, 17, 0.72), rgba(8, 10, 15, 0.58)),
+      url("assets/ui/ui_faint_paper_grain_v01.png") center / 360px 360px repeat !important;
+    backdrop-filter: blur(18px) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+  }
+
+  #description-text {
+    color: rgba(250, 242, 220, 0.94) !important;
+    font-size: clamp(16px, 1.05vw, 18px) !important;
+    font-weight: 650 !important;
+    line-height: 1.72 !important;
+  }
+
+  #dialogue-area {
+    align-self: end !important;
+    justify-self: center !important;
+    display: flex !important;
+    gap: 22px !important;
+    width: var(--reader-width) !important;
+    min-height: var(--dialogue-height) !important;
+    height: var(--dialogue-height) !important;
+    max-height: var(--dialogue-height) !important;
+    margin: 0 0 var(--screen-pad) !important;
+    padding: 24px 30px !important;
+    overflow: auto !important;
+    border: 1px solid rgba(227, 192, 106, 0.42) !important;
+    border-left: 4px solid rgba(227, 192, 106, 0.88) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 246, 220, 0.05), 0 20px 48px rgba(0, 0, 0, 0.40) !important;
+    background:
+      linear-gradient(180deg, rgba(16, 15, 13, 0.84), rgba(5, 6, 9, 0.72)),
+      url("assets/ui/ui_faint_paper_grain_v01.png") center / 360px 360px repeat !important;
+    backdrop-filter: blur(18px) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+  }
+
+  #character-avatar {
+    flex: 0 0 92px !important;
+    width: 92px !important;
+    height: 92px !important;
+    border-radius: 6px !important;
+  }
+
+  #speaker-name {
+    color: #efd59a !important;
+    font-size: clamp(18px, 1.16vw, 20px) !important;
+    font-weight: 800 !important;
+    margin-bottom: 10px !important;
+  }
+
+  #dialogue-text {
+    color: rgba(250, 244, 226, 0.96) !important;
+    font-size: clamp(18px, 1.14vw, 20px) !important;
+    font-weight: 650 !important;
+    line-height: 1.82 !important;
+  }
+
+  #choices-area {
+    align-self: center !important;
+    justify-self: end !important;
+    width: min(410px, 24vw) !important;
+    max-height: min(50dvh, 430px) !important;
+    margin: 0 var(--screen-pad) calc(var(--dialogue-height) * 0.35) 0 !important;
+    padding: 18px 0 18px 18px !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-left: 2px solid rgba(227, 192, 106, 0.62) !important;
+    box-shadow: none !important;
+    background: linear-gradient(90deg, rgba(7, 8, 11, 0.62), rgba(7, 8, 11, 0.26)) !important;
+    backdrop-filter: blur(18px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+  }
+
+  #choices-list {
+    display: grid !important;
+    gap: 12px !important;
+    overflow: auto !important;
+  }
+
+  #choices-list .choice-button,
+  #choices-list .choice-button.symphony-btn,
+  .choice-button {
+    min-height: 72px !important;
+    padding: 17px 21px !important;
+    border: 0 !important;
+    border-left: 3px solid rgba(227, 192, 106, 0.78) !important;
+    background: linear-gradient(90deg, rgba(52, 39, 20, 0.74), rgba(12, 13, 16, 0.46)) !important;
+    color: rgba(250, 244, 226, 0.96) !important;
+    font-size: clamp(16px, 1.05vw, 18px) !important;
+    font-weight: 750 !important;
+    line-height: 1.55 !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24) !important;
+  }
+}
+
+@media (max-width: 899px) {
+  #game-container {
+    --screen-pad: 10px;
+    --reader-width: calc(100% - 20px);
+    --dialogue-height: clamp(132px, 24dvh, 178px);
+    --narration-height: clamp(58px, 11dvh, 96px);
+    position: relative !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+    grid-template-areas:
+      "status"
+      "quick"
+      "stage" !important;
+    overflow: hidden !important;
+  }
+
+  #scene-area {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    grid-area: auto !important;
+    z-index: 1 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+
+  #status-bar,
+  #quick-actions,
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    grid-area: auto !important;
+  }
+
+  #scene-description {
+    align-self: end !important;
+    justify-self: center !important;
+    width: var(--reader-width) !important;
+    max-height: var(--narration-height) !important;
+    margin: 0 0 calc(var(--dialogue-height) + var(--screen-pad) - 1px) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+  }
+
+  #dialogue-area {
+    align-self: end !important;
+    justify-self: center !important;
+    width: var(--reader-width) !important;
+    min-height: var(--dialogue-height) !important;
+    height: var(--dialogue-height) !important;
+    max-height: var(--dialogue-height) !important;
+    margin: 0 0 var(--screen-pad) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+  }
+
+  #choices-area {
+    align-self: end !important;
+    justify-self: stretch !important;
+    width: auto !important;
+    max-height: 18dvh !important;
+    margin: 0 10px calc(var(--dialogue-height) + var(--narration-height) + 16px) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2026-07-04 final live-load override
+   responsive-overrides.css 在 style.css 后加载，此段保证最终浏览器结果使用新版 VN 叠层布局。
+   ═══════════════════════════════════════════════════════════════════════════ */
+::selection {
+  background: rgba(142, 37, 49, 0.72);
+  color: #fff4d8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.72);
+}
+
+#game-container {
+  --vn-dialogue-height: clamp(156px, 19dvh, 206px);
+  --vn-reader-width: min(1120px, calc(100% - clamp(36px, 6vw, 96px)));
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  grid-template-areas:
+    "status"
+    "quick"
+    "stage" !important;
+  gap: 8px !important;
+  background:
+    radial-gradient(circle at 50% 8%, rgba(214, 173, 75, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(8, 10, 15, 0.84), rgba(5, 6, 10, 0.94)) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.76);
+}
+
+#status-bar {
+  grid-area: status !important;
+  gap: 10px !important;
+  min-height: 60px !important;
+  padding: 10px 12px !important;
+  border-color: rgba(214, 173, 75, 0.34) !important;
+  background: linear-gradient(180deg, rgba(17, 19, 25, 0.78), rgba(8, 10, 15, 0.58)) !important;
+  backdrop-filter: blur(12px);
+}
+
+.status-item {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 6px 12px !important;
+  border: 1px solid rgba(214, 173, 75, 0.16) !important;
+  background: rgba(10, 12, 18, 0.46) !important;
+  font-size: 15px !important;
+  font-weight: 650 !important;
+}
+
+.status-icon,
+.configured-icon {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 24px !important;
+}
+
+.status-body {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 4px 8px !important;
+  min-width: 0 !important;
+}
+
+.status-value {
+  color: #fff6dc !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+}
+
+#quick-actions {
+  grid-area: quick !important;
+  grid-template-columns: repeat(7, minmax(94px, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 0 2px 4px !important;
+  border-top: 1px solid rgba(214, 173, 75, 0.28) !important;
+  border-bottom: 1px solid rgba(214, 173, 75, 0.22) !important;
+}
+
+.quick-action-button {
+  min-height: 44px !important;
+  padding: 10px 14px !important;
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  box-shadow: none !important;
+  background: linear-gradient(180deg, rgba(28, 25, 20, 0.34), rgba(8, 10, 15, 0.1)) !important;
+  color: rgba(245, 235, 206, 0.82) !important;
+  font-size: 15px !important;
+  font-weight: 650 !important;
+}
+
+.quick-action-button:hover,
+.quick-action-button:focus-visible {
+  border-bottom-color: rgba(227, 192, 106, 0.9) !important;
+  background: linear-gradient(180deg, rgba(91, 70, 31, 0.36), rgba(8, 10, 15, 0.16)) !important;
+  color: #fff2c8 !important;
+}
+
+#quick-worldmap-button::before { content: "◇" !important; }
+#quick-restart-chapter-button::before { content: "↻" !important; }
+#quick-load-button {
+  border-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+#scene-area {
+  grid-area: stage !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  margin: 0 !important;
+  border: 0 !important;
+  box-shadow: inset 0 0 0 1px rgba(214, 173, 75, 0.18), 0 20px 60px rgba(0, 0, 0, 0.36) !important;
+  background: #090a0e !important;
+}
+
+#scene-background::after {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 10, 0.12) 0%, transparent 20%, transparent 62%, rgba(5, 6, 10, 0.62) 100%),
+    linear-gradient(180deg, rgba(5, 6, 10, 0.08) 0%, rgba(5, 6, 10, 0.16) 48%, rgba(5, 6, 10, 0.72) 100%),
+    url("assets/ui/ui_star_dust_overlay_v01.png") center / cover repeat !important;
+  opacity: 0.88 !important;
+}
+
+#scene-area::before,
+#scene-area::after,
+#dialogue-area::before {
+  display: none !important;
+  content: none !important;
+}
+
+#scene-description,
+#dialogue-area,
+#choices-area {
+  grid-area: stage !important;
+  backdrop-filter: blur(12px) saturate(150%) !important;
+}
+
+#scene-description {
+  align-self: end !important;
+  justify-self: center !important;
+  width: var(--vn-reader-width) !important;
+  max-width: var(--vn-reader-width) !important;
+  max-height: clamp(76px, 15dvh, 142px) !important;
+  min-height: 0 !important;
+  margin: 0 0 calc(var(--vn-dialogue-height) - 1px) !important;
+  padding: 16px 24px 12px !important;
+  overflow: auto !important;
+  border: 1px solid rgba(214, 173, 75, 0.36) !important;
+  border-bottom: 0 !important;
+  box-shadow: 0 -16px 34px rgba(0, 0, 0, 0.26) !important;
+  background:
+    url("assets/ui/ui_faint_paper_grain_v01.png") center / 360px 360px repeat,
+    linear-gradient(180deg, rgba(24, 22, 17, 0.72), rgba(8, 10, 15, 0.68)) !important;
+}
+
+#scene-description #description-text,
+#description-text {
+  color: rgba(246, 238, 216, 0.92) !important;
+  font-size: clamp(16px, 1.35vw, 19px) !important;
+  font-weight: 600 !important;
+  line-height: 1.78 !important;
+}
+
+#dialogue-area {
+  align-self: end !important;
+  justify-self: center !important;
+  display: flex !important;
+  grid-template-columns: none !important;
+  width: var(--vn-reader-width) !important;
+  min-height: var(--vn-dialogue-height) !important;
+  height: var(--vn-dialogue-height) !important;
+  max-height: var(--vn-dialogue-height) !important;
+  margin: 0 0 clamp(18px, 2.4dvh, 30px) !important;
+  padding: 22px 28px !important;
+  overflow: auto !important;
+  border: 1px solid rgba(214, 173, 75, 0.42) !important;
+  border-left: 4px solid rgba(227, 192, 106, 0.86) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 246, 220, 0.05), 0 18px 44px rgba(0, 0, 0, 0.38) !important;
+  background:
+    url("assets/ui/ui_faint_paper_grain_v01.png") center / 360px 360px repeat,
+    linear-gradient(180deg, rgba(17, 16, 14, 0.84), rgba(7, 8, 12, 0.78)) !important;
+}
+
+#character-avatar {
+  flex: 0 0 76px !important;
+  width: 76px !important;
+  height: 76px !important;
+  border-radius: 6px !important;
+}
+
+#speaker-name {
+  color: #efd59a !important;
+  font-size: clamp(17px, 1.35vw, 20px) !important;
+  font-weight: 800 !important;
+}
+
+#dialogue-text {
+  color: rgba(248, 241, 222, 0.95) !important;
+  font-size: clamp(17px, 1.32vw, 20px) !important;
+  font-weight: 600 !important;
+  line-height: 1.82 !important;
+}
+
+#choices-area {
+  align-self: center !important;
+  justify-self: end !important;
+  display: grid !important;
+  width: min(420px, 30vw) !important;
+  max-height: min(50dvh, 430px) !important;
+  margin: 0 clamp(24px, 3.6vw, 56px) clamp(96px, 14dvh, 150px) 0 !important;
+  padding: 18px 0 18px 18px !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-left: 2px solid rgba(214, 173, 75, 0.58) !important;
+  box-shadow: none !important;
+  background: linear-gradient(90deg, rgba(9, 10, 13, 0.46), rgba(9, 10, 13, 0.24)) !important;
+}
+
+#choices-list .choice-button,
+#choices-list .choice-button.symphony-btn,
+.choice-button {
+  min-height: 76px !important;
+  padding: 18px 22px !important;
+  border: 0 !important;
+  border-left: 3px solid rgba(214, 173, 75, 0.74) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 246, 220, 0.04), 0 10px 28px rgba(0, 0, 0, 0.24) !important;
+  background: linear-gradient(90deg, rgba(31, 25, 17, 0.8), rgba(17, 17, 18, 0.54)) !important;
+  color: rgba(248, 241, 222, 0.94) !important;
+  font-size: clamp(16px, 1.15vw, 18px) !important;
+  font-weight: 700 !important;
+  line-height: 1.55 !important;
+}
+
+@media (max-width: 899px) {
+  #game-container {
+    --vn-dialogue-height: clamp(138px, 24dvh, 188px);
+    --vn-reader-width: calc(100% - 20px);
+  }
+
+  #status-bar {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    min-height: 54px !important;
+    padding: 6px !important;
+  }
+
+  .status-item {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 5px !important;
+    font-size: 12px !important;
+  }
+
+  .status-icon,
+  .configured-icon,
+  .status-label {
+    display: none !important;
+  }
+
+  .status-value {
+    font-size: 17px !important;
+    text-align: center !important;
+  }
+
+  #quick-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .quick-action-button {
+    min-height: 38px !important;
+    padding: 8px 6px !important;
+    font-size: 13px !important;
+  }
+
+  #scene-description {
+    max-height: 96px !important;
+    padding: 12px 14px 10px !important;
+  }
+
+  #dialogue-area {
+    padding: 14px !important;
+    margin-bottom: 8px !important;
+  }
+
+  #character-avatar {
+    flex-basis: 54px !important;
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  #choices-area {
+    align-self: end !important;
+    justify-self: stretch !important;
+    width: auto !important;
+    max-height: 18dvh !important;
+    margin: 0 10px calc(var(--vn-dialogue-height) + 96px) !important;
+    padding: 8px 0 8px 10px !important;
+  }
+
+  #choices-list .choice-button,
+  #choices-list .choice-button.symphony-btn,
+  .choice-button {
+    min-height: 54px !important;
+    padding: 12px 14px !important;
+  }
+}
+
+/* 2026-07-04 hotfix: repair VN stage composition after live-load override. */
+#main-menu:not([hidden]) {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 / -1 !important;
+}
+
+#game-container {
+  --vn-reader-width: min(1180px, calc(100% - 88px));
+  --vn-dialogue-height: clamp(150px, 18dvh, 190px);
+  --vn-narration-height: clamp(58px, 8dvh, 92px);
+}
+
+#scene-background {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-size: cover !important;
+  background-position: center center !important;
+}
+
+@media (min-width: 900px) {
+  body {
+    padding: 24px !important;
+  }
+
+  #game-container {
+    width: min(1780px, calc(100vw - 48px)) !important;
+    height: calc(100dvh - 48px) !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 48px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+    grid-template-areas:
+      "status"
+      "quick"
+      "stage" !important;
+    gap: 8px !important;
+    padding: 16px !important;
+    overflow: hidden !important;
+  }
+
+  #status-bar {
+    grid-area: status !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  #quick-actions {
+    grid-area: quick !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  }
+
+  #scene-area {
+    grid-area: stage !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    position: relative !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    background: #07080b !important;
+  }
+
+  #scene-area[hidden] {
+    display: none !important;
+  }
+
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    grid-area: stage !important;
+    position: relative !important;
+    z-index: 8 !important;
+  }
+
+  #scene-description {
+    align-self: end !important;
+    justify-self: center !important;
+    width: var(--vn-reader-width) !important;
+    max-width: var(--vn-reader-width) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: var(--vn-narration-height) !important;
+    margin: 0 0 calc(var(--vn-dialogue-height) + 18px) !important;
+    padding: 13px 24px !important;
+    overflow: auto !important;
+    border: 1px solid rgba(214, 173, 75, 0.38) !important;
+    border-bottom: 0 !important;
+    border-left: 4px solid rgba(227, 192, 106, 0.86) !important;
+    box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.28) !important;
+    background:
+      url("assets/ui/ui_faint_paper_grain_v01.png") center / 360px 360px repeat,
+      linear-gradient(180deg, rgba(24, 22, 17, 0.74), rgba(8, 10, 15, 0.66)) !important;
+    backdrop-filter: blur(12px) saturate(140%) !important;
+  }
+
+  #description-text {
+    font-size: 17px !important;
+    line-height: 1.7 !important;
+    font-weight: 650 !important;
+  }
+
+  #dialogue-area {
+    align-self: end !important;
+    justify-self: center !important;
+    display: flex !important;
+    gap: 22px !important;
+    width: var(--vn-reader-width) !important;
+    min-height: var(--vn-dialogue-height) !important;
+    height: var(--vn-dialogue-height) !important;
+    max-height: var(--vn-dialogue-height) !important;
+    margin: 0 0 18px !important;
+    padding: 24px 30px !important;
+    overflow: auto !important;
+    border: 1px solid rgba(214, 173, 75, 0.42) !important;
+    border-left: 4px solid rgba(227, 192, 106, 0.86) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 246, 220, 0.05),
+      0 18px 44px rgba(0, 0, 0, 0.38) !important;
+    background:
+      url("assets/ui/ui_faint_paper_grain_v01.png") center / 360px 360px repeat,
+      linear-gradient(180deg, rgba(16, 15, 13, 0.9), rgba(5, 6, 9, 0.82)) !important;
+    backdrop-filter: blur(12px) saturate(140%) !important;
+  }
+
+  #character-avatar {
+    flex: 0 0 92px !important;
+    width: 92px !important;
+    height: 92px !important;
+  }
+
+  #speaker-name {
+    font-size: 19px !important;
+    margin-bottom: 10px !important;
+  }
+
+  #dialogue-text {
+    font-size: 19px !important;
+    line-height: 1.8 !important;
+  }
+
+  #choices-area {
+    align-self: center !important;
+    justify-self: end !important;
+    width: min(390px, 24vw) !important;
+    max-height: min(48dvh, 430px) !important;
+    margin: 0 clamp(28px, 3vw, 52px) calc(var(--vn-dialogue-height) * 0.45) 0 !important;
+    padding: 16px 0 16px 18px !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-left: 2px solid rgba(214, 173, 75, 0.58) !important;
+    background: linear-gradient(90deg, rgba(8, 9, 12, 0.58), rgba(8, 9, 12, 0.18)) !important;
+    backdrop-filter: blur(10px) saturate(130%) !important;
+  }
+
+  #choices-list .choice-button,
+  #choices-list .choice-button.symphony-btn,
+  .choice-button {
+    min-height: 72px !important;
+    padding: 17px 21px !important;
+    font-size: 17px !important;
+    line-height: 1.55 !important;
+  }
+}
+
+@media (max-width: 899px) {
+  #game-container {
+    --vn-reader-width: calc(100% - 20px);
+    --vn-dialogue-height: clamp(132px, 24dvh, 176px);
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+  }
+
+  #scene-area {
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+
+  #scene-description {
+    width: var(--vn-reader-width) !important;
+    margin: 0 0 calc(var(--vn-dialogue-height) + 8px) !important;
+  }
+
+  #dialogue-area {
+    width: var(--vn-reader-width) !important;
+    min-height: var(--vn-dialogue-height) !important;
+    height: var(--vn-dialogue-height) !important;
+    margin: 0 0 8px !important;
+  }
+
+  #choices-area {
+    margin: 0 10px calc(var(--vn-dialogue-height) + 92px) !important;
+  }
+}
+
+/* FINAL MOBILE READABILITY PASS: keep every play surface readable and tappable. */
+@media (max-width: 599px) {
+  #game-container {
+    gap: 8px !important;
+    padding: 12px !important;
+    grid-template-rows:
+      auto
+      auto
+      minmax(238px, 42dvh)
+      minmax(126px, 18dvh)
+      minmax(132px, 19dvh) !important;
+  }
+
+  #status-bar {
+    gap: 4px !important;
+    padding: 5px !important;
+  }
+
+  #quick-actions {
+    gap: 5px !important;
+  }
+
+  .quick-action-button {
+    min-height: 36px !important;
+    padding: 7px 3px !important;
+    white-space: nowrap !important;
+  }
+
+  #scene-area {
+    min-height: 0 !important;
+  }
+
+  #scene-description {
+    top: 12px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-height: min(24dvh, 188px) !important;
+    padding: 14px 14px 16px !important;
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+    background: linear-gradient(135deg, rgba(13, 15, 20, 0.86), rgba(18, 19, 26, 0.62)) !important;
+  }
+
+  #scene-description #system-prompt {
+    margin-bottom: 10px !important;
+    padding: 9px 10px !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+
+  #description-text {
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+  }
+
+  #character-sprite {
+    right: 8px !important;
+    bottom: 2px !important;
+    width: min(40vw, 168px) !important;
+    max-height: 31dvh !important;
+  }
+
+  #choices-area {
+    display: grid !important;
+    grid-auto-rows: minmax(42px, auto) !important;
+    gap: 8px !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow: auto !important;
+  }
+
+  .choice-button {
+    min-height: 42px !important;
+    padding: 9px 10px !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+  }
+
+  #choices-area .choice-button.motion-item {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition:
+      background-color var(--duration-fast) ease,
+      color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease !important;
+  }
+
+  #choices-area .symphony-btn {
+    min-height: 42px !important;
+    margin-top: 0 !important;
+    padding: 9px 10px !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+  }
+
+  #choices-area .symphony-layer-halo,
+  #choices-area .symphony-layer-sweep {
+    display: none !important;
+  }
+
+  #choices-area .symphony-content {
+    width: 100% !important;
+    gap: 6px !important;
+    justify-content: center !important;
+    letter-spacing: 0 !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  #choices-area .symphony-diamond {
+    flex: 0 0 auto !important;
+  }
+
+  #dialogue-area {
+    gap: 10px !important;
+    padding: 12px !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+  }
+
+  #character-avatar {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    font-size: 18px !important;
+  }
+
+  #speaker-name {
+    font-size: 15px !important;
+  }
+
+  #dialogue-text {
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+  }
+}
+
+/* CH0 visual-novel final cascade guard: this block must stay at the stylesheet end. */
+#main-menu {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 9, 0.64) 0%, rgba(5, 6, 9, 0.18) 42%, rgba(5, 6, 9, 0.48) 100%),
+    linear-gradient(180deg, rgba(5, 6, 9, 0.08), rgba(5, 6, 9, 0.52)),
+    url("assets/generated/chapter0/keyvisuals/main_menu_chapter0_key_bg_v01.png") center / cover no-repeat,
+    #110d0c !important;
+}
+
+#scene-description[hidden] {
+  display: none !important;
+}
+
+#scene-description {
+  position: relative !important;
+  z-index: 5 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: clamp(12px, 1.45vmin, 18px) clamp(16px, 1.8vmin, 22px) !important;
+  overflow: auto !important;
+  border: 0 !important;
+  box-shadow: inset 3px 0 0 rgba(217, 173, 85, 0.72) !important;
+  background:
+    linear-gradient(90deg, rgba(217, 173, 85, 0.16), transparent 44%),
+    linear-gradient(180deg, rgba(18, 17, 17, 0.84), rgba(8, 9, 12, 0.78)) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+#scene-description #description-text {
+  margin: 0 !important;
+  color: rgba(246, 234, 204, 0.92) !important;
+  font-size: clamp(15px, 1.18vmin, 18px) !important;
+  line-height: 1.8 !important;
+}
+
+#scene-description #system-prompt {
+  margin: 0 0 10px !important;
+  padding: 24px 12px 10px !important;
+  border: 0 !important;
+  box-shadow: inset 2px 0 0 rgba(217, 173, 85, 0.72) !important;
+  background: linear-gradient(90deg, rgba(217, 173, 85, 0.15), rgba(217, 173, 85, 0.04)) !important;
+  color: rgba(255, 242, 205, 0.96) !important;
+}
+
+#scene-area {
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+#scene-background::after {
+  background: linear-gradient(180deg, rgba(13, 15, 20, 0.00), rgba(13, 15, 20, 0.10)) !important;
+  opacity: 1 !important;
+}
+
+#scene-area::before {
+  display: none !important;
+}
+
+#scene-area::after,
+#dialogue-area::before {
+  content: none !important;
+  display: none !important;
+}
+
+#choices-area {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: clamp(10px, 1.2vmin, 14px) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: clamp(14px, 1.5vmin, 20px) !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  box-shadow: inset 2px 0 0 rgba(217, 173, 85, 0.42) !important;
+  background:
+    linear-gradient(135deg, rgba(217, 173, 85, 0.10), transparent 34%),
+    linear-gradient(180deg, rgba(12, 13, 17, 0.82), rgba(6, 7, 10, 0.72)) !important;
+  backdrop-filter: blur(3px) !important;
+}
+
+#choices-area:not(.has-choices) {
+  opacity: 0.78 !important;
+}
+
+#choices-area:not(.has-choices)::after {
+  content: "等待下一拍" !important;
+  align-self: center !important;
+  justify-self: center !important;
+  color: rgba(239, 213, 154, 0.36) !important;
+  font-family: var(--font-mono) !important;
+  font-size: clamp(13px, 1.1vmin, 16px) !important;
+  letter-spacing: 0.18em !important;
+}
+
+#choices-list {
+  display: grid !important;
+  align-content: start !important;
+  gap: clamp(10px, 1.2vmin, 14px) !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+}
+
+#scene-description,
+#choices-list {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(217, 173, 85, 0.5) rgba(8, 9, 12, 0.36) !important;
+}
+
+#scene-description::-webkit-scrollbar,
+#choices-list::-webkit-scrollbar {
+  width: 7px !important;
+}
+
+#scene-description::-webkit-scrollbar-track,
+#choices-list::-webkit-scrollbar-track {
+  background: rgba(8, 9, 12, 0.36) !important;
+}
+
+#scene-description::-webkit-scrollbar-thumb,
+#choices-list::-webkit-scrollbar-thumb {
+  background: rgba(217, 173, 85, 0.5) !important;
+  border-radius: 999px !important;
+}
+
+#choices-list .choice-button,
+#choices-list .choice-button.symphony-btn {
+  min-height: clamp(62px, 7dvh, 86px) !important;
+  margin: 0 !important;
+  padding: clamp(13px, 1.4vmin, 18px) clamp(16px, 1.8vmin, 22px) !important;
+  justify-content: flex-start !important;
+  border: 0 !important;
+  box-shadow: inset 3px 0 0 rgba(217, 173, 85, 0.62) !important;
+  background: linear-gradient(90deg, rgba(217, 173, 85, 0.18), rgba(20, 18, 17, 0.68)) !important;
+  color: rgba(255, 247, 224, 0.95) !important;
+  text-align: left !important;
+  font-size: clamp(15px, 1.25vmin, 18px) !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
+}
+
+#choices-list .symphony-content {
+  width: 100% !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  letter-spacing: 0 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+#dialogue-area {
+  display: grid !important;
+  grid-template-columns: clamp(92px, 7.5vw, 132px) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: clamp(16px, 1.8vmin, 24px) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: clamp(14px, 1.6vmin, 20px) clamp(18px, 2vmin, 26px) !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  box-shadow: inset 3px 0 0 rgba(217, 173, 85, 0.62) !important;
+  background:
+    linear-gradient(90deg, rgba(217, 173, 85, 0.10), transparent 28%),
+    linear-gradient(180deg, rgba(11, 13, 17, 0.84), rgba(5, 6, 9, 0.78)) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+#character-avatar {
+  --avatar-accent: #c49a45;
+  position: relative !important;
+  width: clamp(88px, 7.4vw, 126px) !important;
+  height: clamp(98px, 11dvh, 142px) !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--avatar-accent) 45%, transparent) !important;
+  background:
+    radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--avatar-accent) 20%, transparent), transparent 54%),
+    linear-gradient(180deg, rgba(33, 31, 31, 0.68), rgba(7, 8, 10, 0.74)) !important;
+}
+
+#character-avatar .avatar-portrait {
+  position: absolute !important;
+  inset: -12% -18% -30% !important;
+  display: none !important;
+  width: 136% !important;
+  height: 142% !important;
+  object-fit: cover !important;
+  object-position: 50% 18% !important;
+}
+
+#character-avatar.has-portrait .avatar-portrait {
+  display: block !important;
+}
+
+#character-avatar.has-portrait .avatar-fallback {
+  opacity: 0 !important;
+}
+
+.dialogue-scroll-indicator {
+  position: absolute !important;
+  right: clamp(18px, 1.8vmin, 26px) !important;
+  bottom: clamp(10px, 1.2vmin, 16px) !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-right: 1px solid #efd59a !important;
+  border-bottom: 1px solid #efd59a !important;
+  transform: rotate(45deg) !important;
+  opacity: 0.72 !important;
+  animation: dialogue-pulse 1.4s ease-in-out infinite !important;
+}
+
+@media (min-width: 900px) {
+  #game-container {
+    grid-template-columns: minmax(0, 1fr) clamp(320px, 25vw, 460px) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) clamp(100px, 13dvh, 152px) clamp(138px, 18dvh, 196px) !important;
+    grid-template-areas:
+      "status status"
+      "quick quick"
+      "stage choices"
+      "narration choices"
+      "dialogue dialogue" !important;
+  }
+
+  #scene-area { grid-area: stage !important; }
+  #scene-description { grid-area: narration !important; }
+  #choices-area { grid-area: choices !important; }
+  #dialogue-area { grid-area: dialogue !important; }
+}
+
+@media (max-width: 899px) {
+  #game-container {
+    grid-template-rows: auto auto minmax(260px, 1fr) auto minmax(120px, auto) clamp(124px, 22dvh, 190px) !important;
+    grid-template-areas:
+      "status"
+      "quick"
+      "stage"
+      "narration"
+      "choices"
+      "dialogue" !important;
+    overflow: auto !important;
+  }
+
+  #scene-area { grid-area: stage !important; }
+  #scene-description { grid-area: narration !important; }
+  #choices-area { grid-area: choices !important; }
+  #dialogue-area {
+    grid-area: dialogue !important;
+    grid-template-columns: clamp(70px, 20vw, 92px) minmax(0, 1fr) !important;
+  }
+  #character-avatar {
+    width: clamp(70px, 20vw, 92px) !important;
+    height: clamp(78px, 22vw, 104px) !important;
+  }
+}
+
+
+/* 2026-07-05 ABSOLUTE FINAL full-bleed scene layer. Keep this at EOF. */
+::selection {
+  background: rgba(128, 31, 43, 0.72);
+  color: #fff4d8;
+}
+
+@media (min-width: 900px) {
+  body {
+    padding: 0 !important;
+    background: #050609 !important;
+  }
+
+  #game-container {
+    --screen-pad: clamp(18px, 2.4vw, 34px);
+    --reader-width: min(1180px, calc(100% - clamp(72px, 10vw, 180px)));
+    --dialogue-height: clamp(150px, 18dvh, 196px);
+    --narration-height: clamp(64px, 8dvh, 94px);
+    position: relative !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+    grid-template-areas:
+      "status"
+      "quick"
+      "stage" !important;
+    gap: 8px !important;
+    padding: var(--screen-pad) !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    background: #050609 !important;
+    box-shadow: none !important;
+  }
+
+  #main-menu:not([hidden]) {
+    position: relative !important;
+    z-index: 30 !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+  }
+
+  #scene-area {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    grid-area: auto !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    position: relative !important;
+    z-index: 1 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    background: #08090d !important;
+    box-shadow: none !important;
+  }
+
+  #scene-background {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    transform-origin: center center !important;
+  }
+
+  #scene-background::after {
+    background:
+      linear-gradient(90deg, rgba(5, 6, 10, 0.18) 0%, rgba(5, 6, 10, 0.03) 22%, rgba(5, 6, 10, 0.10) 58%, rgba(5, 6, 10, 0.48) 100%),
+      linear-gradient(180deg, rgba(5, 6, 10, 0.36) 0%, rgba(5, 6, 10, 0.05) 24%, rgba(5, 6, 10, 0.22) 62%, rgba(5, 6, 10, 0.72) 100%),
+      url("assets/ui/ui_star_dust_overlay_v01.png") center / cover repeat !important;
+    opacity: 1 !important;
+  }
+
+  #status-bar,
+  #quick-actions,
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+  #status-bar {
+    grid-area: status !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    min-height: 58px !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    border: 1px solid rgba(214, 173, 75, 0.30) !important;
+    background: linear-gradient(180deg, rgba(9, 10, 13, 0.68), rgba(9, 10, 13, 0.42)) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+  }
+
+  #quick-actions {
+    grid-area: quick !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-top: 1px solid rgba(214, 173, 75, 0.30) !important;
+    border-bottom: 1px solid rgba(214, 173, 75, 0.22) !important;
+    background: linear-gradient(180deg, rgba(9, 10, 13, 0.42), rgba(9, 10, 13, 0.18)) !important;
+    backdrop-filter: blur(12px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+  }
+
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    grid-area: auto !important;
+  }
+
+  #scene-description {
+    align-self: end !important;
+    justify-self: center !important;
+    width: var(--reader-width) !important;
+    max-width: var(--reader-width) !important;
+    min-height: 0 !important;
+    max-height: var(--narration-height) !important;
+    margin: 0 0 calc(var(--dialogue-height) + var(--screen-pad) - 1px) !important;
+    padding: 14px 26px 12px !important;
+    overflow: auto !important;
+    border: 1px solid rgba(227, 192, 106, 0.36) !important;
+    border-bottom: 0 !important;
+    border-left: 4px solid rgba(227, 192, 106, 0.84) !important;
+    box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.28) !important;
+    background:
+      linear-gradient(180deg, rgba(24, 22, 17, 0.72), rgba(8, 10, 15, 0.58)),
+      url("assets/ui/ui_faint_paper_grain_v01.png") center / 360px 360px repeat !important;
+    backdrop-filter: blur(18px) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+  }
+
+  #description-text {
+    color: rgba(250, 242, 220, 0.94) !important;
+    font-size: clamp(16px, 1.05vw, 18px) !important;
+    font-weight: 650 !important;
+    line-height: 1.72 !important;
+  }
+
+  #dialogue-area {
+    align-self: end !important;
+    justify-self: center !important;
+    display: flex !important;
+    gap: 22px !important;
+    width: var(--reader-width) !important;
+    min-height: var(--dialogue-height) !important;
+    height: var(--dialogue-height) !important;
+    max-height: var(--dialogue-height) !important;
+    margin: 0 0 var(--screen-pad) !important;
+    padding: 24px 30px !important;
+    overflow: auto !important;
+    border: 1px solid rgba(227, 192, 106, 0.42) !important;
+    border-left: 4px solid rgba(227, 192, 106, 0.88) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 246, 220, 0.05), 0 20px 48px rgba(0, 0, 0, 0.40) !important;
+    background:
+      linear-gradient(180deg, rgba(16, 15, 13, 0.84), rgba(5, 6, 9, 0.72)),
+      url("assets/ui/ui_faint_paper_grain_v01.png") center / 360px 360px repeat !important;
+    backdrop-filter: blur(18px) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+  }
+
+  #character-avatar {
+    flex: 0 0 92px !important;
+    width: 92px !important;
+    height: 92px !important;
+    border-radius: 6px !important;
+  }
+
+  #speaker-name {
+    color: #efd59a !important;
+    font-size: clamp(18px, 1.16vw, 20px) !important;
+    font-weight: 800 !important;
+    margin-bottom: 10px !important;
+  }
+
+  #dialogue-text {
+    color: rgba(250, 244, 226, 0.96) !important;
+    font-size: clamp(18px, 1.14vw, 20px) !important;
+    font-weight: 650 !important;
+    line-height: 1.82 !important;
+  }
+
+  #choices-area {
+    align-self: center !important;
+    justify-self: end !important;
+    width: min(410px, 24vw) !important;
+    max-height: min(50dvh, 430px) !important;
+    margin: 0 var(--screen-pad) calc(var(--dialogue-height) * 0.35) 0 !important;
+    padding: 18px 0 18px 18px !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-left: 2px solid rgba(227, 192, 106, 0.62) !important;
+    box-shadow: none !important;
+    background: linear-gradient(90deg, rgba(7, 8, 11, 0.62), rgba(7, 8, 11, 0.26)) !important;
+    backdrop-filter: blur(18px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+  }
+
+  #choices-list {
+    display: grid !important;
+    gap: 12px !important;
+    overflow: auto !important;
+  }
+
+  #choices-list .choice-button,
+  #choices-list .choice-button.symphony-btn,
+  .choice-button {
+    min-height: 72px !important;
+    padding: 17px 21px !important;
+    border: 0 !important;
+    border-left: 3px solid rgba(227, 192, 106, 0.78) !important;
+    background: linear-gradient(90deg, rgba(52, 39, 20, 0.74), rgba(12, 13, 16, 0.46)) !important;
+    color: rgba(250, 244, 226, 0.96) !important;
+    font-size: clamp(16px, 1.05vw, 18px) !important;
+    font-weight: 750 !important;
+    line-height: 1.55 !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24) !important;
+  }
+}
+
+@media (max-width: 899px) {
+  #game-container {
+    --screen-pad: 10px;
+    --reader-width: calc(100% - 20px);
+    --dialogue-height: clamp(132px, 24dvh, 178px);
+    --narration-height: clamp(58px, 11dvh, 96px);
+    position: relative !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+    grid-template-areas:
+      "status"
+      "quick"
+      "stage" !important;
+    overflow: hidden !important;
+  }
+
+  #scene-area {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    grid-area: auto !important;
+    z-index: 1 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+
+  #status-bar,
+  #quick-actions,
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    grid-area: auto !important;
+  }
+
+  #scene-description {
+    align-self: end !important;
+    justify-self: center !important;
+    width: var(--reader-width) !important;
+    max-height: var(--narration-height) !important;
+    margin: 0 0 calc(var(--dialogue-height) + var(--screen-pad) - 1px) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+  }
+
+  #dialogue-area {
+    align-self: end !important;
+    justify-self: center !important;
+    width: var(--reader-width) !important;
+    min-height: var(--dialogue-height) !important;
+    height: var(--dialogue-height) !important;
+    max-height: var(--dialogue-height) !important;
+    margin: 0 0 var(--screen-pad) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+  }
+
+  #choices-area {
+    align-self: end !important;
+    justify-self: stretch !important;
+    width: auto !important;
+    max-height: 18dvh !important;
+    margin: 0 10px calc(var(--dialogue-height) + var(--narration-height) + 16px) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+  }
+}
+
+/* 2026-07-05 EOF grid-area correction for full-bleed layers. */
+@media (min-width: 900px) {
+  #scene-area,
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    grid-area: 1 / 1 / -1 / -1 !important;
+  }
+
+  #scene-area {
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #scene-background {
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+@media (max-width: 899px) {
+  #scene-area,
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    grid-area: 1 / 1 / -1 / -1 !important;
+  }
+}
+
+/* 2026-07-05 EOF visibility correction: prevent transition residue from dimming the full-screen art. */
+#scene-background {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+#scene-area.motion-active #scene-background {
+  transform: scale(1.035) translate3d(var(--parallax-x, 0px), var(--parallax-y, 0px), 0) !important;
+}
+
+#scene-background::after {
+  opacity: 0.72 !important;
+  background:
+    linear-gradient(90deg, rgba(5, 6, 10, 0.10) 0%, rgba(5, 6, 10, 0.00) 24%, rgba(5, 6, 10, 0.06) 62%, rgba(5, 6, 10, 0.34) 100%),
+    linear-gradient(180deg, rgba(5, 6, 10, 0.18) 0%, rgba(5, 6, 10, 0.00) 28%, rgba(5, 6, 10, 0.16) 66%, rgba(5, 6, 10, 0.52) 100%),
+    url("assets/ui/ui_star_dust_overlay_v01.png") center / cover repeat !important;
+}
+
+/* Keep particle notes from becoming an opaque black scrim over the full-screen art. */
+#note-effects-canvas {
+  opacity: 0.12 !important;
+  mix-blend-mode: screen !important;
+}
+
+/* 2026-07-05 narrative clarity pass: reduce HUD weight and keep choices off the character art. */
+@media (min-width: 900px) {
+  #game-container {
+    --screen-pad: clamp(14px, 1.6vw, 24px) !important;
+    --reader-width: min(1020px, calc(100% - clamp(220px, 30vw, 540px))) !important;
+    --dialogue-height: clamp(136px, 16dvh, 176px) !important;
+    --narration-height: clamp(0px, 0px, 0px) !important;
+    gap: 6px !important;
+    padding: var(--screen-pad) !important;
+  }
+
+  #status-bar {
+    grid-template-columns: repeat(5, minmax(118px, 1fr)) !important;
+    min-height: 42px !important;
+    padding: 6px 8px !important;
+    gap: 8px !important;
+    border-color: rgba(227, 192, 106, 0.18) !important;
+    background: linear-gradient(180deg, rgba(6, 7, 10, 0.58), rgba(6, 7, 10, 0.30)) !important;
+    backdrop-filter: blur(10px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+  }
+
+  .status-item {
+    min-height: 30px !important;
+    gap: 7px !important;
+    padding: 4px 9px !important;
+    border-color: rgba(227, 192, 106, 0.12) !important;
+    background: rgba(6, 7, 10, 0.32) !important;
+    font-size: 12px !important;
+  }
+
+  .status-icon,
+  .configured-icon {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 18px !important;
+  }
+
+  .status-value {
+    font-size: 15px !important;
+  }
+
+  .status-label {
+    font-size: 11px !important;
+    color: rgba(232, 224, 204, 0.68) !important;
+  }
+
+  .status-meter {
+    height: 2px !important;
+    background: rgba(232, 224, 204, 0.09) !important;
+  }
+
+  #quick-actions {
+    min-height: 34px !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    border-top-color: rgba(227, 192, 106, 0.16) !important;
+    border-bottom-color: rgba(227, 192, 106, 0.12) !important;
+    background: linear-gradient(180deg, rgba(6, 7, 10, 0.28), rgba(6, 7, 10, 0.10)) !important;
+  }
+
+  .quick-action-button {
+    min-height: 34px !important;
+    padding: 6px 10px !important;
+    color: rgba(245, 235, 206, 0.72) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+  }
+
+  .quick-action-button::before {
+    font-size: 14px !important;
+  }
+
+  #scene-background::after {
+    opacity: 0.84 !important;
+    background:
+      linear-gradient(90deg, rgba(5, 6, 10, 0.20) 0%, rgba(5, 6, 10, 0.02) 24%, rgba(5, 6, 10, 0.06) 55%, rgba(5, 6, 10, 0.38) 100%),
+      linear-gradient(180deg, rgba(5, 6, 10, 0.24) 0%, rgba(5, 6, 10, 0.00) 28%, rgba(5, 6, 10, 0.10) 58%, rgba(5, 6, 10, 0.68) 100%),
+      url("assets/ui/ui_star_dust_overlay_v01.png") center / cover repeat !important;
+  }
+
+  #character-sprite {
+    right: clamp(32px, 6vw, 112px) !important;
+    bottom: clamp(12px, 2dvh, 28px) !important;
+    width: min(24vw, 330px) !important;
+    max-height: min(66dvh, 620px) !important;
+    z-index: 4 !important;
+  }
+
+  #scene-description {
+    align-self: end !important;
+    justify-self: center !important;
+    width: var(--reader-width) !important;
+    max-width: var(--reader-width) !important;
+    max-height: clamp(58px, 8dvh, 84px) !important;
+    margin: 0 0 calc(var(--dialogue-height) + var(--screen-pad) - 1px) !important;
+    padding: 10px 20px 8px !important;
+    border: 0 !important;
+    border-left: 3px solid rgba(227, 192, 106, 0.68) !important;
+    box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.18) !important;
+    background: linear-gradient(180deg, rgba(18, 17, 15, 0.68), rgba(6, 7, 10, 0.54)) !important;
+    backdrop-filter: blur(12px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+  }
+
+  #description-text {
+    font-size: clamp(14px, 0.94vw, 16px) !important;
+    font-weight: 550 !important;
+    line-height: 1.62 !important;
+  }
+
+  #dialogue-area {
+    width: var(--reader-width) !important;
+    max-width: var(--reader-width) !important;
+    min-height: var(--dialogue-height) !important;
+    height: var(--dialogue-height) !important;
+    max-height: var(--dialogue-height) !important;
+    padding: clamp(16px, 1.35vw, 22px) clamp(20px, 1.7vw, 28px) !important;
+    gap: clamp(16px, 1.3vw, 22px) !important;
+    border-color: rgba(227, 192, 106, 0.30) !important;
+    border-left-color: rgba(227, 192, 106, 0.82) !important;
+    background:
+      linear-gradient(90deg, rgba(227, 192, 106, 0.08), transparent 28%),
+      linear-gradient(180deg, rgba(13, 12, 11, 0.88), rgba(4, 5, 8, 0.80)) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 246, 220, 0.04), 0 18px 42px rgba(0, 0, 0, 0.34) !important;
+    backdrop-filter: blur(14px) saturate(138%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(138%) !important;
+  }
+
+  #character-avatar {
+    flex: 0 0 clamp(76px, 5.6vw, 96px) !important;
+    width: clamp(76px, 5.6vw, 96px) !important;
+    height: clamp(76px, 5.6vw, 96px) !important;
+  }
+
+  #speaker-name {
+    margin-bottom: 7px !important;
+    font-size: clamp(16px, 1vw, 18px) !important;
+  }
+
+  #dialogue-text {
+    min-height: 0 !important;
+    font-size: clamp(16px, 1.02vw, 18px) !important;
+    font-weight: 600 !important;
+    line-height: 1.74 !important;
+  }
+
+  #choices-area {
+    align-self: center !important;
+    justify-self: start !important;
+    width: min(390px, 25vw) !important;
+    max-height: min(45dvh, 390px) !important;
+    margin: clamp(46px, 7dvh, 88px) 0 calc(var(--dialogue-height) * 0.52) var(--screen-pad) !important;
+    padding: 16px 18px !important;
+    border: 1px solid rgba(227, 192, 106, 0.22) !important;
+    border-left: 3px solid rgba(227, 192, 106, 0.70) !important;
+    background:
+      linear-gradient(135deg, rgba(227, 192, 106, 0.10), transparent 34%),
+      linear-gradient(180deg, rgba(8, 9, 12, 0.82), rgba(4, 5, 8, 0.68)) !important;
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.30) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(135%) !important;
+  }
+
+  .choices-panel-title {
+    margin-bottom: 0 !important;
+    font-size: 12px !important;
+    color: rgba(239, 213, 154, 0.82) !important;
+    letter-spacing: 0.10em !important;
+  }
+
+  #choices-list {
+    gap: 10px !important;
+    padding-right: 2px !important;
+  }
+
+  #choices-list .choice-button,
+  #choices-list .choice-button.symphony-btn,
+  .choice-button {
+    min-height: clamp(58px, 6dvh, 72px) !important;
+    padding: 14px 18px !important;
+    border-left: 3px solid rgba(227, 192, 106, 0.66) !important;
+    background: linear-gradient(90deg, rgba(35, 27, 17, 0.78), rgba(9, 10, 13, 0.52)) !important;
+    color: rgba(250, 244, 226, 0.94) !important;
+    font-size: clamp(15px, 0.98vw, 17px) !important;
+    font-weight: 700 !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 246, 220, 0.035), 0 10px 22px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  #choices-list .choice-button:hover,
+  #choices-list .choice-button:focus-visible,
+  #choices-list .choice-button.symphony-btn:hover,
+  #choices-list .choice-button.symphony-btn:focus-visible {
+    border-left-color: rgba(255, 234, 180, 0.96) !important;
+    background: linear-gradient(90deg, rgba(68, 49, 25, 0.88), rgba(14, 15, 18, 0.68)) !important;
+    color: #fff8e8 !important;
+    transform: translateX(2px) !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  #game-container {
+    --reader-width: min(1000px, calc(100% - clamp(360px, 35vw, 640px))) !important;
+  }
+
+  #choices-area {
+    width: min(410px, 24vw) !important;
+  }
+}
+
+@media (max-width: 899px) {
+  #status-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    padding: 6px !important;
+  }
+
+  #quick-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    min-height: 36px !important;
+  }
+
+  .quick-action-button {
+    min-height: 36px !important;
+    padding: 6px 8px !important;
+  }
+
+  #choices-area {
+    margin: 0 10px calc(var(--dialogue-height) + var(--narration-height) + 12px) !important;
+  }
+}
+
+/* 2026-07-05 stable VN layout pass: stop floating panels from competing with the stage. */
+@media (min-width: 900px) {
+  #game-container {
+    --screen-pad: clamp(14px, 1.35vw, 22px) !important;
+    --side-panel-width: clamp(350px, 27vw, 470px) !important;
+    --dialogue-height: clamp(136px, 17dvh, 184px) !important;
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) var(--side-panel-width) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) clamp(58px, 8dvh, 88px) var(--dialogue-height) !important;
+    grid-template-areas:
+      "status status"
+      "quick quick"
+      "stage choices"
+      "narration choices"
+      "dialogue choices" !important;
+    gap: clamp(8px, 0.8vw, 12px) !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    padding: var(--screen-pad) !important;
+    overflow: hidden !important;
+    background:
+      radial-gradient(circle at 42% 34%, rgba(91, 54, 36, 0.16), transparent 38%),
+      linear-gradient(180deg, #050609, #07080d) !important;
+  }
+
+  #status-bar,
+  #quick-actions,
+  #scene-area,
+  #scene-description,
+  #dialogue-area,
+  #choices-area {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  #status-bar {
+    grid-area: status !important;
+    min-height: 38px !important;
+    padding: 5px 7px !important;
+    gap: 7px !important;
+  }
+
+  #quick-actions {
+    grid-area: quick !important;
+    min-height: 32px !important;
+    padding: 0 !important;
+  }
+
+  .quick-action-button {
+    min-height: 32px !important;
+  }
+
+  #scene-area {
+    grid-area: stage !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(227, 192, 106, 0.18) !important;
+    background: #08090d !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 244, 210, 0.03), 0 18px 44px rgba(0, 0, 0, 0.28) !important;
+  }
+
+  #scene-background {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-size: cover !important;
+    background-position: center center !important;
+  }
+
+  #scene-background::after {
+    opacity: 0.62 !important;
+    background:
+      linear-gradient(90deg, rgba(5, 6, 10, 0.12), transparent 28%, rgba(5, 6, 10, 0.16) 100%),
+      linear-gradient(180deg, rgba(5, 6, 10, 0.06), transparent 46%, rgba(5, 6, 10, 0.50) 100%),
+      url("assets/ui/ui_star_dust_overlay_v01.png") center / cover repeat !important;
+  }
+
+  #character-sprite {
+    right: clamp(20px, 3.5vw, 72px) !important;
+    bottom: clamp(0px, 1.4dvh, 16px) !important;
+    width: min(22vw, 300px) !important;
+    max-height: min(100%, 64dvh) !important;
+    z-index: 4 !important;
+  }
+
+  #scene-description {
+    grid-area: narration !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: clamp(10px, 1vw, 14px) clamp(16px, 1.4vw, 22px) !important;
+    overflow: auto !important;
+    border: 0 !important;
+    border-left: 3px solid rgba(227, 192, 106, 0.68) !important;
+    background:
+      linear-gradient(90deg, rgba(227, 192, 106, 0.08), transparent 32%),
+      linear-gradient(180deg, rgba(17, 16, 14, 0.78), rgba(6, 7, 10, 0.70)) !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(8px) saturate(126%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(126%) !important;
+  }
+
+  #description-text {
+    font-size: clamp(14px, 0.9vw, 16px) !important;
+    line-height: 1.58 !important;
+    font-weight: 540 !important;
+  }
+
+  #dialogue-area {
+    grid-area: dialogue !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    display: grid !important;
+    grid-template-columns: clamp(72px, 5.4vw, 96px) minmax(0, 1fr) !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: clamp(14px, 1.2vw, 20px) clamp(18px, 1.5vw, 26px) !important;
+    overflow: auto !important;
+    border: 0 !important;
+    border-left: 4px solid rgba(227, 192, 106, 0.78) !important;
+    background:
+      linear-gradient(90deg, rgba(227, 192, 106, 0.08), transparent 28%),
+      linear-gradient(180deg, rgba(12, 12, 13, 0.88), rgba(4, 5, 8, 0.82)) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 246, 220, 0.05), 0 16px 36px rgba(0, 0, 0, 0.26) !important;
+    backdrop-filter: blur(10px) saturate(132%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(132%) !important;
+  }
+
+  #character-avatar {
+    flex: none !important;
+    width: clamp(72px, 5.4vw, 96px) !important;
+    height: clamp(82px, 7dvh, 112px) !important;
+  }
+
+  #speaker-name {
+    margin-bottom: 6px !important;
+    font-size: clamp(15px, 0.98vw, 17px) !important;
+  }
+
+  #dialogue-text {
+    font-size: clamp(15px, 1vw, 18px) !important;
+    line-height: 1.68 !important;
+  }
+
+  #choices-area {
+    grid-area: choices !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: clamp(14px, 1.3vw, 20px) !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(227, 192, 106, 0.22) !important;
+    border-left: 3px solid rgba(227, 192, 106, 0.72) !important;
+    background:
+      linear-gradient(135deg, rgba(227, 192, 106, 0.10), transparent 30%),
+      linear-gradient(180deg, rgba(8, 9, 12, 0.86), rgba(4, 5, 8, 0.78)) !important;
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.28) !important;
+    backdrop-filter: blur(10px) saturate(132%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(132%) !important;
+  }
+
+  #choices-list {
+    display: grid !important;
+    align-content: start !important;
+    gap: clamp(10px, 1vw, 14px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: auto !important;
+  }
+
+  #choices-list .choice-button,
+  #choices-list .choice-button.symphony-btn,
+  .choice-button {
+    min-height: clamp(58px, 6.2dvh, 76px) !important;
+    padding: clamp(13px, 1.1vw, 18px) clamp(15px, 1.25vw, 20px) !important;
+    font-size: clamp(14px, 0.98vw, 17px) !important;
+  }
+}

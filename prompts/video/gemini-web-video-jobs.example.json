@@ -1,0 +1,26 @@
+{
+  "defaults": {
+    "duration": "6 seconds",
+    "aspectRatio": "16:9",
+    "style": "high saturation anime game cinematic, gothic opera fantasy, black red gold costume language, warm visible highlights, detailed but not too dark",
+    "negativePrompt": "black screen, overly dark ruins, muddy shadows, unreadable silhouette, horror gore, text overlay, watermark, logo"
+  },
+  "jobs": [
+    {
+      "id": "ch2_opening_overture_transition",
+      "prompt": "Create a looping chapter transition video for a tactical opera RPG. A luminous musical staff road unfolds across a rain-washed night highway, gold notes flowing forward like a guide line, distant gothic theater lights waking up through mist, no characters, elegant camera push-in."
+    },
+    {
+      "id": "ch2_safe_house_record_player",
+      "prompt": "A warm secret music room inside a forbidden era safe house. An old record player begins to spin, amber lamplight, red ribbon markers, preserved scores and brass tools on the desk, soft dust in the air, slow parallax camera movement, cozy but tense."
+    },
+    {
+      "id": "ch2_mist_station_alarm",
+      "prompt": "A foggy abandoned rail platform at dawn, station lamps flickering gold, rain on the rails, faint red warning lights pulsing in rhythm, scattered sealed instrument cases, no people, cinematic slow dolly shot, suitable for a visual novel background loop."
+    },
+    {
+      "id": "ch2_baton_contract_glow",
+      "prompt": "Close-up cinematic game cutscene: a black and gold conductor baton floats above an open palm, golden music staff lines spiral around the wrist like a contract mark, rose thorn motifs, bright readable highlights, dramatic but not pitch black, no face shown."
+    }
+  ]
+}

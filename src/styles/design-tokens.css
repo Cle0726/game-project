@@ -1,0 +1,34 @@
+:root {
+  --color-bg-base: #0d0f14;
+  --color-bg-night: #0a0f1e;
+  --color-bg-surface: rgba(13, 15, 20, 0.82);
+  --color-bg-surface-strong: rgba(13, 15, 20, 0.92);
+  --color-accent: #c49a45;
+  --color-accent-hover: #e3c06a;
+  --color-accent-soft: rgba(196, 154, 69, 0.14);
+  --color-accent-border-soft: rgba(196, 154, 69, 0.28);
+  --color-accent-border-strong: rgba(196, 154, 69, 0.72);
+  --color-danger: #9b2335;
+  --color-teal: #4aa69a;
+  --color-blue-shadow: #182033;
+  --color-muted-border: rgba(74, 85, 104, 0.7);
+  --color-text-primary: #e8e0cc;
+  --color-text-secondary: rgba(232, 224, 204, 0.72);
+  --color-text-strong: #f1e6c6;
+  --color-text-danger: #f0c8ce;
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-body: Georgia, "Times New Roman", serif;
+  --font-mono: "Courier New", monospace;
+  --font-size-xs: 13px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 22px;
+  --radius-sm: 4px;
+  --radius-base: 8px;
+  --radius-full: 9999px;
+  --duration-fast: 160ms;
+  --duration-base: 300ms;
+  --duration-slow: 500ms;
+  --duration-battle-enter: 1400ms;
+}

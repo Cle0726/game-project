@@ -1,0 +1,35 @@
+{
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "concurrently \"npm run index:test\" \"cd server && uvicorn main:app --reload --port 8000\"",
+    "battle:guard": "node scripts/assert-battle-boundaries.mjs",
+    "character:guard": "node scripts/assert-character-state-sprites.mjs",
+    "battle:test": "vite --open /tests/battle-test.html",
+    "index:test": "vite --open /index.html",
+    "portrait:test": "vite --open /tests/portrait-test.html",
+    "portrait:build": "vite build",
+    "video:gemini:login": "node scripts/gemini-web-video-assets.mjs --login",
+    "video:gemini:auto": "node scripts/gemini-web-video-assets.mjs --auto --wait-minutes 45",
+    "video:gemini:web": "node scripts/gemini-web-video-assets.mjs",
+    "worldmap:test": "vite --open /tests/worldmap-test.html"
+  },
+  "dependencies": {
+    "@types/howler": "^2.2.13",
+    "gsap": "^3.13.0",
+    "howler": "^2.2.4",
+    "pixi.js": "^8.9.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tone": "^15.1.22",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.20",
+    "@types/react-dom": "^18.3.6",
+    "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^10.0.3",
+    "playwright-core": "^1.61.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}

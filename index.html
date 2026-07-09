@@ -1,0 +1,528 @@
+﻿<!-- ═══════════════════════════════════════════════════════════════════════════════════════
+   文件: index.html | 行号: 1-213
+   功能: 游戏主页面 —— 定义所有 UI 区域的 DOM 结构
+   ⚠️ 修改注意: ID 值被 game.js 和 style.css 大量引用，修改 ID 必须同步更新所有文件
+   ═══════════════════════════════════════════════════════════════════════════════════════════ -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>宿命回响：残响之途</title>
+  <link rel="stylesheet" href="style.css?v=base-20260703">
+  <link rel="stylesheet" href="responsive-overrides.css?v=responsive-20260703">
+  <link rel="stylesheet" href="gacha_overhaul.css">
+  <!-- VFX ENGINE DEPENDENCIES -->
+  <!-- ═══ HEAD: 外部依赖 (GSAP/PixiJS/SplitType/vfx.js) ═══ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/EasePack.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/8.1.0/pixi.min.js"></script>
+  <script src="https://unpkg.com/split-type"></script>
+  <script src="vfx.js"></script>
+  <script src="vfx_advanced.js"></script>
+  <script src="vfx_teabreak.js"></script>
+  <script src="vfx_transition.js"></script>
+  <script src="vfx_ultimate.js"></script>
+  <script src="vfx_dysregulation.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <script src="audio_manager.js"></script>
+  <script src="vfx_boss.js"></script>
+</head>
+<body>
+  <main id="game-container" aria-label="宿命回响：残响之途 游戏界面">
+    <!-- ═══ #opening-animation: 开场动画层 ═══ -->
+    <div id="opening-animation" aria-hidden="true">
+      <div class="opening-line"></div>
+      <div class="opening-orbit"></div>
+      <div class="opening-title-mask">
+        <span>RESIDUAL PATH</span>
+      </div>
+    </div>
+
+    <!-- ═══ #note-effects-canvas: 音符粒子画布 ═══ -->
+    <canvas id="note-effects-canvas" aria-hidden="true"></canvas>
+
+    <!-- ═══ #main-menu: 主菜单界面 ═══ -->
+    <section id="main-menu" aria-label="主菜单">
+      <div id="menu-amber-line" aria-hidden="true"></div>
+      <nav class="entry-topbar" aria-label="入口导航">
+        <button type="button" class="entry-brand" id="entry-home-button" aria-label="返回入口首页">
+          <span>Residual Path</span>
+          <strong>宿命回响</strong>
+        </button>
+        <div class="entry-nav-links">
+          <button type="button" data-entry-jump="entry-chapters">章节</button>
+          <button type="button" data-entry-jump="entry-archive-panel">档案</button>
+          <button type="button" id="entry-worldmap-top-button">世界地图</button>
+          <button type="button" id="entry-ai-button">AI茶歇</button>
+        </div>
+      </nav>
+
+      <div class="entry-main-scroll">
+        <section class="entry-hero-layout entry-page is-active" id="entry-home" data-entry-page="home" aria-labelledby="game-title">
+          <aside class="entry-side-copy" aria-label="世界状态">
+            <span>01</span>
+            <p>Silent Era, Year XVII</p>
+            <p>白谱院记录：静默边界仍在扩张。</p>
+          </aside>
+
+          <div id="menu-content" class="entry-title-block">
+            <p class="entry-kicker">Tactical Opera / Musicart Chronicle</p>
+            <h1 id="game-title">
+              <span>宿命回响</span>
+              <span>残响之途</span>
+            </h1>
+            <p id="game-subtitle" class="entry-subtitle">和音乐化身同行，穿过失调世界留下的余响。</p>
+            <div id="menu-actions" class="entry-actions">
+              <button type="button" class="menu-button entry-action primary" id="continue-button">开始第零章</button>
+              <button type="button" class="menu-button entry-action primary" id="entry-worldmap-button">世界地图</button>
+              <button type="button" class="menu-button entry-action secondary" id="save-records-button">存档记录</button>
+              <button type="button" class="menu-button entry-action secondary" id="entry-gacha-button">残响档案</button>
+              <button type="button" class="menu-button entry-action secondary" id="entry-settings-button">系统设置</button>
+            </div>
+          </div>
+
+          <aside class="entry-index-card" aria-label="当前档案">
+            <span class="entry-index-number">No. 017</span>
+            <strong>残响之途</strong>
+            <p id="entry-save-state" aria-live="polite">正在检查本地记录。</p>
+          </aside>
+        </section>
+
+        <section class="entry-panel entry-panel-gallery entry-page" id="entry-chapters" data-entry-page="chapters" aria-labelledby="entry-chapters-title">
+          <div class="entry-section-heading">
+            <span>02</span>
+            <h2 id="entry-chapters-title">章节入口</h2>
+          </div>
+          <div class="entry-gallery">
+            <button type="button" class="entry-gallery-card is-active" data-entry-scene="chapter0_start">
+              <img src="assets/generated/chapter_covers/cover_ch0_forbidden_song_v01.png" alt="禁曲未响">
+              <span>Chapter 0 · 独立篇章</span>
+              <strong>禁曲未响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter1_start">
+              <img src="assets/generated/chapter_covers/cover_ch1_black_half_v01.png" alt="黑巡半响">
+              <span>Chapter I · 路线B</span>
+              <strong>黑巡半响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter2_start">
+              <img src="assets/generated/chapter_covers/cover_ch2_frost_score_v01.png" alt="雪谱冻响">
+              <span>Chapter II · 路线B-2</span>
+              <strong>雪谱冻响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter3_white_start">
+              <img src="assets/generated/chapter_covers/cover_ch3_white_score_v01.png" alt="白谱缚响">
+              <span>Chapter III · 路线C-3</span>
+              <strong>白谱缚响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter4_start">
+              <img src="assets/generated/chapter_covers/cover_ch4_nightless_finale_v01.png" alt="不夜终响">
+              <span>Chapter IV · 路线D</span>
+              <strong>不夜终响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter3_archive_start">
+              <img src="assets/generated/chapter_covers/cover_ch3_legacy_archive_v01.png" alt="第三章旧案合辑">
+              <span>Chapter III · 旧案归档</span>
+              <strong>旧一至三章合辑</strong>
+            </button>
+          </div>
+        </section>
+
+        <section class="entry-panel entry-panel-archives entry-page" id="entry-archive-panel" data-entry-page="archive" aria-labelledby="entry-archives-title">
+          <div class="entry-section-heading">
+            <span>03</span>
+            <h2 id="entry-archives-title">开发入口</h2>
+          </div>
+          <div class="entry-archive-grid">
+            <button type="button" class="entry-archive-card" id="entry-team-preview-button">
+              <span>01</span>
+              <strong>队伍与角色档案</strong>
+              <p>进入队伍选择，后续新增律者时会沿用详细档案页结构。</p>
+            </button>
+            <button type="button" class="entry-archive-card" id="entry-tea-preview-button">
+              <span>02</span>
+              <strong>茶歇与AI调试</strong>
+              <p>快速打开茶歇入口，测试不同律者的人设回复与关系变化。</p>
+            </button>
+            <button type="button" class="entry-archive-card" id="entry-gacha-card-button">
+              <span>03</span>
+              <strong>调律抽取池</strong>
+              <p>本地抽取角色档案、场景碎片和开发用素材标记，方便后续扩展。</p>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="entry-bottom-strip" aria-hidden="true">
+        <span>WHITE SCORE INSTITUTE</span>
+        <span>DISSONANCE FRONTIER</span>
+        <span>MUSICART DOSSIER</span>
+      </div>
+      <p id="menu-tagline">不是刷副本，是和一群音乐化身一起走过失谐世界。</p>
+    </section>
+
+    <!-- ═══ #team-select-area: 队伍选择界面 (含律者详情页) ═══ -->
+    <section id="team-select-area" aria-label="出战准备" hidden>
+      <div class="team-select-shell">
+        <div class="team-select-header">
+          <p class="team-select-kicker">出战准备</p>
+          <h2>选择两名律者同行</h2>
+        </div>
+
+        <div class="conductor-toggle" aria-label="选择奏者性别">
+          <button type="button" class="conductor-toggle-button" data-team-gender="男">男</button>
+          <button type="button" class="conductor-toggle-button" data-team-gender="女">女</button>
+          <button type="button" class="conductor-toggle-button" data-team-gender="未标注">未标注</button>
+        </div>
+
+        <div id="team-musicart-list" class="team-musicart-list"></div>
+
+        <div id="team-risk-note" class="team-risk-note" aria-live="polite"></div>
+
+        <div class="team-select-actions">
+          <button type="button" id="team-back-button" class="team-secondary-button">返回当前场景</button>
+          <button type="button" id="team-confirm-button" class="team-confirm-button">确认出战</button>
+        </div>
+      </div>
+
+      <section id="musicart-detail-page" class="musicart-detail-page" aria-label="律者详细资料" hidden></section>
+    </section>
+
+    <!-- ═══ #status-bar: 顶部状态栏 (城邦稳定度/失谐度/粮药/音芯/健康) ═══ -->
+    <header id="status-bar" aria-label="玩法状态栏" aria-live="polite">
+      <div class="status-item" data-status-key="stability" title="城邦稳定度：降到0会进入城邦崩溃结局。">
+        <span class="status-icon" data-icon-key="cityStability" aria-hidden="true"></span>
+        <span class="status-body">
+          <span class="status-label">城邦稳定</span>
+          <span class="status-value" id="stability-value">--</span>
+          <span class="status-meter" aria-hidden="true"><span id="stability-meter"></span></span>
+        </span>
+      </div>
+      <div class="status-item" data-status-key="discord" title="世界失谐度：达到100会进入失谐结局。">
+        <span class="status-icon danger" data-icon-key="worldDissonance" aria-hidden="true"></span>
+        <span class="status-body">
+          <span class="status-label">世界失谐</span>
+          <span class="status-value" id="discord-value">--</span>
+          <span class="status-meter danger-meter" aria-hidden="true"><span id="discord-meter"></span></span>
+        </span>
+      </div>
+      <div class="status-item" data-status-key="supply" title="粮药：用于地图事件、补给选择与部分战斗代价。">
+        <span class="status-icon" data-icon-key="foodMedicine" aria-hidden="true"></span>
+        <span class="status-body">
+          <span class="status-label">粮药</span>
+          <span class="status-value" id="supply-value">--</span>
+          <span class="status-meter" aria-hidden="true"><span id="supply-meter"></span></span>
+        </span>
+      </div>
+      <div class="status-item" data-status-key="core" title="音芯：用于高阶调律、战斗行动与关键资源判定。">
+        <span class="status-icon" data-icon-key="soundCore" aria-hidden="true"></span>
+        <span class="status-body">
+          <span class="status-label">音芯</span>
+          <span class="status-value" id="core-value">--</span>
+          <span class="status-meter" aria-hidden="true"><span id="core-meter"></span></span>
+        </span>
+      </div>
+      <div class="status-item" data-status-key="health" title="奏者健康：影响战斗压力、失调风险与强行指挥代价。">
+        <span class="status-icon" data-icon-key="conductorHealth" aria-hidden="true"></span>
+        <span class="status-body">
+          <span class="status-label">奏者健康</span>
+          <span class="status-value" id="health-value">--</span>
+          <span class="status-meter" aria-hidden="true"><span id="health-meter"></span></span>
+        </span>
+      </div>
+    </header>
+
+    <!-- ═══ #quick-actions: 底部快捷栏 (包含叙事功能拓展) ═══ -->
+    <nav id="quick-actions" aria-label="常用功能">
+      <button type="button" class="quick-action-button" id="quick-team-button">队伍</button>
+      <button type="button" class="quick-action-button" id="quick-dossier-button">律者档案</button>
+      <button type="button" class="quick-action-button" id="quick-worldmap-button">地图</button>
+      <button type="button" class="quick-action-button" id="quick-tea-button">茶歇</button>
+      <button type="button" class="quick-action-button" id="quick-caravan-button">巡演车厢</button>
+      <button type="button" class="quick-action-button" id="quick-log-button">残谱纪事</button>
+      <button type="button" class="quick-action-button" id="quick-comms-button">频段通讯</button>
+      <button type="button" class="quick-action-button" id="quick-save-button">保存</button>
+      <button type="button" class="quick-action-button" id="quick-load-button">读档</button>
+      <button type="button" class="quick-action-button danger" id="quick-menu-button">菜单</button>
+    </nav>
+
+    <!-- ═══ #scene-area: 主场景区 (背景+角色立绘) ═══ -->
+    <section id="scene-area" aria-label="场景区">
+      <div id="scene-background"></div>
+      <img id="character-sprite" alt="" aria-hidden="true" hidden>
+    </section>
+
+    <!-- ═══ #scene-description: 剧情说明区 (系统提示+叙述文本) ═══ -->
+    <section id="scene-description" aria-label="剧情说明">
+      <div id="system-prompt" hidden></div>
+      <p id="description-text"></p>
+    </section>
+
+    <!-- ═══ #dialogue-area: 对话区 (头像+发言者+台词) ═══ -->
+    <section id="dialogue-area" aria-label="对话区">
+      <div id="character-avatar" aria-hidden="true">
+        <span class="avatar-fallback">旁</span>
+        <img class="avatar-portrait" alt="">
+      </div>
+      <div id="dialogue-content">
+        <div id="speaker-name">旁白</div>
+        <p id="dialogue-text"></p>
+      </div>
+      <span class="dialogue-scroll-indicator" aria-hidden="true"></span>
+    </section>
+
+    <!-- ═══ #choices-area: 剧情选择区 ═══ -->
+    <nav id="choices-area" aria-label="选择区">
+      <div class="choices-panel-title" aria-hidden="true">行动 / 选择</div>
+      <div id="choices-list"></div>
+    </nav>
+
+    <!-- ═══ #battle-area: 战斗/代价场景 (进度条/视觉/日志/行动) ═══ -->
+    <section id="battle-area" aria-label="代价场景" hidden>
+      <div id="react-battle-root"></div>
+      <div id="battle-header">
+        <h1 id="battle-name">调律代价</h1>
+        <p id="battle-enemy">威胁状态</p>
+      </div>
+
+      <div id="battle-progress-panel">
+        <div id="battle-progress-label">调律进度</div>
+        <div id="battle-progress-track" aria-hidden="true">
+          <div id="battle-progress-fill"></div>
+        </div>
+      </div>
+
+      <div id="battle-visuals" aria-label="调律视觉区">
+        <div id="enemy-visuals"></div>
+        <div id="ally-visuals"></div>
+      </div>
+
+      <div id="battle-log" aria-live="polite"></div>
+
+      <nav id="battle-actions" aria-label="调律行动"></nav>
+    </section>
+
+    <section id="world-map-area" aria-label="世界地图" hidden>
+      <div id="react-worldmap-root"></div>
+    </section>
+
+    <!-- ═══ #toast-area: 浮动弹窗区 (状态变化提示) ═══ -->
+    <div id="toast-area" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- ═══ 模态弹窗区 ═══ -->
+    <!-- #save-modal: 存档记录弹窗 -->
+    <div id="save-modal" class="modal-overlay" hidden>
+      <section class="save-panel" aria-label="存档记录">
+        <div class="save-panel-header">
+          <h2 id="save-modal-title">存档记录</h2>
+          <button type="button" id="save-modal-close" aria-label="关闭存档记录">×</button>
+        </div>
+        <div id="save-slots"></div>
+      </section>
+    </div>
+
+    <!-- #conductor-modal: 奏者身份选择弹窗 -->
+    <div id="conductor-modal" class="modal-overlay" hidden>
+      <section class="save-panel conductor-panel" aria-label="选择奏者身份">
+        <div class="save-panel-header">
+          <h2 id="conductor-modal-title">选择奏者身份</h2>
+        </div>
+        <p class="conductor-copy">你还不是华丽指挥家，只是会弹琴、会修谱、会在旅途中搬东西的人。奏者身份来自右腕契约刻痕；这个选择会影响部分律者的失调判定。</p>
+        <div id="conductor-options">
+          <button type="button" class="save-slot conductor-option" data-gender="男" data-default-name="凛澈">
+            <span class="save-slot-title">凛澈 / 男性奏者</span>
+            <span class="save-slot-meta">安静、执拗、疲惫；看到钢琴会失控。男性律者在共鸣不足时可能发生失调摩擦。</span>
+          </button>
+          <button type="button" class="save-slot conductor-option" data-gender="女" data-default-name="凛纱">
+            <span class="save-slot-title">凛纱 / 女性奏者</span>
+            <span class="save-slot-meta">冷静、温柔、倔强；会照顾别人，也很会隐藏崩溃。</span>
+          </button>
+          <button type="button" class="save-slot conductor-option" data-gender="未标注">
+            <span class="save-slot-title">未标注</span>
+            <span class="save-slot-meta">正常指挥概率，极低概率触发共鸣超载。</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- #ai-settings-modal: AI 对话设置弹窗 -->
+    <div id="ai-settings-modal" class="modal-overlay" hidden>
+      <section class="save-panel ai-settings-panel" aria-label="AI 对话设置">
+        <div class="save-panel-header">
+          <h2 id="ai-settings-title">AI 实时对话设置</h2>
+          <button type="button" id="ai-settings-close" aria-label="关闭设置">×</button>
+        </div>
+        <div class="ai-settings-content">
+          <p class="ai-settings-desc">
+            输入 DeepSeek API 密钥以启用 AI 实时对话。密钥仅保存在本地浏览器中，不会上传到任何服务器。
+          </p>
+          <div class="ai-settings-input-group">
+            <label for="deepseek-api-key-input">API 密钥</label>
+            <input type="password" id="deepseek-api-key-input" placeholder="sk-xxxxxxxxxxxxxxxx" autocomplete="off">
+          </div>
+          <div class="ai-settings-status">
+            <span id="ai-status-text">当前状态：未启用</span>
+          </div>
+          <div class="ai-settings-actions">
+            <button type="button" id="save-api-key-button" class="team-confirm-button">保存密钥</button>
+            <button type="button" id="clear-api-key-button" class="team-secondary-button">清除密钥</button>
+            <button type="button" id="clear-chat-history-button" class="team-secondary-button">清除对话历史</button>
+          </div>
+          <p class="ai-settings-note">
+            提示：启用后，茶歇对话将使用 DeepSeek AI 生成实时回复。如果 API 调用失败，会自动回退到本地预设对话。
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <!-- #gacha-modal: 调律抽取 / 资料收集弹窗 -->
+    <div id="gacha-modal" class="modal-overlay" hidden>
+      <section class="save-panel entry-modal-panel gacha-panel" aria-label="调律抽取">
+        <div class="save-panel-header">
+          <h2>调律抽取</h2>
+          <button type="button" id="gacha-modal-close" aria-label="关闭调律抽取">×</button>
+        </div>
+        <div class="gacha-layout">
+          <div class="gacha-banner">
+            <span>Archive Resonance</span>
+            <strong>残响档案池</strong>
+            <p>本地开发用抽取系统。当前只记录档案、场景碎片和律者资料，不改动主线数值。</p>
+            <div class="gacha-actions">
+              <button type="button" id="gacha-draw-one" class="team-confirm-button">单次抽取</button>
+              <button type="button" id="gacha-draw-ten" class="team-secondary-button">十连抽取</button>
+              <button type="button" id="gacha-clear" class="team-secondary-button">清空记录</button>
+            </div>
+          </div>
+          <div class="gacha-results" id="gacha-results" aria-live="polite">
+            <p class="gacha-empty">尚未抽取。可用于测试后续角色、章节与素材投放节奏。</p>
+          </div>
+        </div>
+        <div class="gacha-collection">
+          <h3>已记录档案</h3>
+          <div id="gacha-collection-list"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- #settings-modal: 通用系统设置弹窗 -->
+    <div id="settings-modal" class="modal-overlay" hidden>
+      <section class="save-panel entry-modal-panel settings-panel" aria-label="系统设置">
+        <div class="save-panel-header">
+          <h2>系统设置</h2>
+          <button type="button" id="settings-modal-close" aria-label="关闭系统设置">×</button>
+        </div>
+        <div class="settings-grid">
+          <label class="settings-field">
+            <span>界面缩放</span>
+            <select id="setting-ui-scale">
+              <option value="normal">标准</option>
+              <option value="compact">紧凑</option>
+              <option value="large">大字号</option>
+            </select>
+          </label>
+          <label class="settings-field">
+            <span>动效强度</span>
+            <select id="setting-motion">
+              <option value="full">完整</option>
+              <option value="reduced">减弱</option>
+            </select>
+          </label>
+          <label class="settings-field">
+            <span>打字速度</span>
+            <select id="setting-typewriter">
+              <option value="fast">快速</option>
+              <option value="normal">标准</option>
+              <option value="slow">慢速</option>
+            </select>
+          </label>
+          <label class="settings-field">
+            <span>HUD密度</span>
+            <select id="setting-hud-density">
+              <option value="normal">标准</option>
+              <option value="compact">紧凑</option>
+            </select>
+          </label>
+        </div>
+        <div class="settings-actions">
+          <button type="button" id="settings-reset-button" class="team-secondary-button">恢复默认</button>
+          <button type="button" id="settings-apply-button" class="team-confirm-button">应用设置</button>
+        </div>
+        <p class="settings-note">设置保存在本地浏览器，后续章节更换视觉风格时仍沿用这套通用入口。</p>
+      </section>
+    </div>
+
+    <!-- #dossier-modal: 律者档案弹窗 -->
+    <div id="dossier-modal" class="modal-overlay" hidden>
+      <section class="save-panel entry-modal-panel dossier-panel" aria-label="律者档案">
+        <div class="save-panel-header">
+          <h2>律者档案</h2>
+          <button type="button" id="dossier-modal-close" aria-label="关闭律者档案">×</button>
+        </div>
+        <div class="dossier-layout">
+          <nav class="dossier-list" id="dossier-list" aria-label="律者列表"></nav>
+          <div class="dossier-detail" id="dossier-detail" aria-live="polite">
+            <p class="dossier-empty">选择左侧律者查看档案。</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- === #gacha-universe: 全新沉浸式抽卡系统 === -->
+    <div id="gacha-universe" class="gacha-universe-overlay" hidden>
+      <div id="gacha-particles" class="gacha-particles-container"></div>
+      
+      <div class="gacha-dashboard" id="gacha-dashboard">
+        <div class="gacha-title-area">
+          <span>Archive Resonance</span>
+          <h2>残响档案池 · 深度调律</h2>
+          <p>从静默的深渊中，打捞那些未被世界遗忘的音符与记忆。</p>
+        </div>
+        
+        <button type="button" class="gacha-close-button" id="gacha-universe-close" aria-label="退出">×</button>
+        
+        <div class="gacha-centerpiece">
+          <div class="css-resonance-ring"></div>
+          <div class="css-resonance-ring inner"></div>
+          <img src="assets/generated/gacha/tuning_fork_archive_resonance_v02.png" class="gacha-tuning-fork" id="gacha-tuning-fork" alt="调律音叉">
+        </div>
+        
+        <div class="gacha-actions-area">
+          <button type="button" class="gacha-btn primary" id="gacha-btn-single">单次降维</button>
+          <button type="button" class="gacha-btn premium" id="gacha-btn-ten">十连深潜</button>
+          <button type="button" class="gacha-btn secondary" id="gacha-btn-collection">查看图鉴记录</button>
+        </div>
+      </div>
+
+      <!-- 抽卡结果展示台 -->
+      <div class="gacha-results-stage" id="gacha-results-stage" hidden>
+        <button type="button" class="gacha-close-btn" id="gacha-results-close">完成调律</button>
+        <div class="gacha-cards-container" id="gacha-cards-container"></div>
+      </div>
+
+      <!-- 图鉴抽卡记录面版 -->
+      <div class="gacha-collection-panel" id="gacha-collection-panel" hidden>
+        <div class="gacha-collection-header">
+          <h3>调律记录</h3>
+          <button type="button" class="gacha-close-btn" id="gacha-collection-close">关闭</button>
+        </div>
+        <div class="gacha-collection-list" id="gacha-collection-list"></div>
+        <div class="gacha-collection-footer">
+          <button type="button" class="gacha-text-btn danger" id="gacha-clear-btn">抹除记录</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══ FOOTER: 脚本加载 (game.js 主引擎) ═══ -->
+  <script src="game.js"></script>
+  <script type="module" src="/src/battle-legacy-main.tsx"></script>
+  <script type="module" src="/src/worldmap-legacy-main.tsx"></script>
+
+  <!-- Gacha Overhaul Dependencies (Dynamically Loaded in JS) -->
+  <script src="ui_interaction_patch.js"></script>
+  <script src="gacha_overhaul.js"></script>
+</body>
+</html>
+

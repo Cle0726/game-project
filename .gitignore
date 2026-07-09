@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.vite/
+.cache/
+
+# Local runtime/test artifacts
+tmp/
+test-results/
+playwright-report/
+coverage/
+*.log
+*.tmp
+
+# Local agent/tool state
+.browser-profiles/
+.workbuddy/
+.codeatlas/
+.codex/
+.agents/
+.learnings/
+
+# Backups and generated scratch files
+.backup/
+archive/backups/
+archive/legacy-fixes/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+!server/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python backend/runtime
+server/.venv/
+server/venv/
+server/*.db
+server/**/*.db
+server/__pycache__/
+server/**/__pycache__/
+__pycache__/
+*.py[cod]
+*.pyd
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

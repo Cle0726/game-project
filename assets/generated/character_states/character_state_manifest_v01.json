@@ -1,0 +1,18 @@
+{
+  "???": {
+    "default": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_default_v01.png",
+    "smile": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_smile_v01.png",
+    "worried": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_worried_v01.png",
+    "serious": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_serious_v01.png",
+    "shocked": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_shocked_v01.png",
+    "special": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_special_v01.png"
+  },
+  "??": {
+    "default": "assets/generated/character_states/sprites/char_tiya_sprite_default_v01.png",
+    "smile": "assets/generated/character_states/sprites/char_tiya_sprite_smile_v01.png",
+    "worried": "assets/generated/character_states/sprites/char_tiya_sprite_worried_v01.png",
+    "serious": "assets/generated/character_states/sprites/char_tiya_sprite_serious_v01.png",
+    "shocked": "assets/generated/character_states/sprites/char_tiya_sprite_shocked_v01.png",
+    "special": "assets/generated/character_states/sprites/char_tiya_sprite_special_v01.png"
+  }
+}

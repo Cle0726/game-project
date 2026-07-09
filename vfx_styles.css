@@ -1,0 +1,269 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   文件: vfx_styles.css | 行号: 1-256
+   功能: VFX 特效引擎的专属样式表（Toast / Symphony按钮 / Ultimate容器）
+   依赖: style.css 中的 CSS 变量（--font-*, --color-*）
+   被引用: update_style.js 将此文件内容合并写入 style.css 末尾
+   ⚠️ 修改注意: 此文件的样式在 style.css 行 2914-3168 有一份副本，两处需同步修改
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────
+   区域: Relationship Toast (好感度弹窗) | 行号: 7-89
+   依赖: vfx.js 中的 VFXManager.showRelationshipToast()
+   ⚠️ 注意: #toast-area 同时被 style.css Final Cleanup 覆盖层重新定义
+   ─────────────────────────────────── */
+#toast-area {
+  position: fixed;
+  top: 80px;
+  right: 32px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.vfx-toast {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: stretch;
+  border-radius: 4px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  min-width: 240px;
+  max-width: 320px;
+  pointer-events: none;
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+
+.vfx-toast-decorator {
+  width: 3px;
+  flex-shrink: 0;
+}
+
+.vfx-toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  gap: 6px;
+}
+
+.vfx-toast-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vfx-toast-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.vfx-toast-name {
+  font-size: 13px;
+  color: rgba(250, 246, 239, 0.6);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vfx-toast-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.vfx-toast-stat {
+  font-size: 15px;
+  line-height: 1.4;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  word-break: break-word;
+}
+
+.vfx-toast-val {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 12px rgba(212,175,55,0.3);
+  flex-shrink: 0;
+}
+
+/* ───────────────────────────────────
+   区域: Symphony Button (交响按钮) | 行号: 92-195
+   依赖: vfx.js 中的 VFXManager.bindSymphonyButton()
+   ─────────────────────────────────── */
+.symphony-btn {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 56px;
+  background: rgba(26,26,26,0.85);
+  border: 1px solid rgba(212,175,55,0.4);
+  color: #FAF6EF;
+  font-family: var(--font-body);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.symphony-layer-halo {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.15) 0%, transparent 70%);
+  transform: scaleX(0);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.symphony-layer-sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -30%;
+  width: 30px;
+  background: white;
+  transform: skewX(-15deg);
+  opacity: 0;
+  transition: none;
+  pointer-events: none;
+}
+
+.symphony-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: 2px;
+}
+
+.symphony-diamond {
+  font-size: 10px;
+  color: rgba(212,175,55,0.5);
+  transition: color 0.3s ease;
+}
+
+/* Hover States */
+.symphony-btn:hover {
+  border-color: rgba(212,175,55,1);
+  box-shadow: 0 0 12px rgba(212,175,55,0.4), inset 0 0 8px rgba(212,175,55,0.1);
+  color: #D4AF37;
+}
+
+.symphony-btn:hover .symphony-layer-halo {
+  transform: scaleX(1.2);
+}
+
+.symphony-btn:hover .symphony-layer-sweep {
+  animation: symphony-sweep 0.4s ease forwards;
+}
+
+.symphony-btn:hover .symphony-diamond {
+  color: #D4AF37;
+  text-shadow: 0 0 8px #D4AF37;
+}
+
+@keyframes symphony-sweep {
+  0% { left: -30%; opacity: 0; }
+  50% { opacity: 0.4; }
+  100% { left: 120%; opacity: 0; }
+}
+
+/* Crimson Variant */
+.symphony-btn-crimson { border-color: rgba(139,35,84,0.4); }
+.symphony-btn-crimson .symphony-layer-halo { background: radial-gradient(ellipse at center, rgba(139,35,84,0.15) 0%, transparent 70%); }
+.symphony-btn-crimson .symphony-diamond { color: rgba(139,35,84,0.5); }
+.symphony-btn-crimson:hover {
+  border-color: rgba(139,35,84,1);
+  box-shadow: 0 0 12px rgba(139,35,84,0.4), inset 0 0 8px rgba(139,35,84,0.1);
+  color: #8B2354;
+}
+.symphony-btn-crimson:hover .symphony-diamond {
+  color: #8B2354; text-shadow: 0 0 8px #8B2354;
+}
+
+/* Click Flash */
+.symphony-click-flash {
+  position: fixed;
+  width: 200vw;
+  height: 200vw;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  mix-blend-mode: screen;
+}
+
+/* ───────────────────────────────────
+   区域: Ultimate Container (独演全屏容器) | 行号: 199-256
+   依赖: vfx.js 中的 VFXManager.playHuaixuUltimate()
+   ─────────────────────────────────── */
+#vfx-ultimate-container {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.vfx-ult-pixi {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.vfx-ult-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse at 50% 100%, rgba(30,25,15,0) 0%, rgba(10,8,5,0.95) 100%);
+}
+.vfx-ult-spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: radial-gradient(circle at 50% 65%, rgba(212,175,55,0.08) 0%, transparent 45%);
+}
+.vfx-ult-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: white;
+}
+.vfx-ult-text {
+  position: relative;
+  z-index: 4;
+  color: #FAF6EF;
+  font-family: var(--font-body);
+  text-align: center;
+  font-size: 22px;
+  line-height: 2;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+.vfx-ult-para {
+  position: relative;
+  margin-bottom: 8px;
+}
+.vfx-ult-line {
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.8), transparent);
+}
+.vfx-ult-post {
+  font-size: 24px;
+  color: #C49A45;
+  letter-spacing: 2px;
+}
