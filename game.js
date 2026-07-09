@@ -29,12 +29,11 @@ const GACHA_COLLECTION_KEY = "residual_path_gacha_collection_v1";
 const TYPEWRITER_DELAY = 30;
 const DIALOGUE_GAP = 360;
 
-const DEFAULT_UI_SETTINGS = {
-  uiScale: "normal",
-  motion: "full",
-  typewriter: "normal",
-  hudDensity: "normal"
-};
+/* ───────────────────────────────────────────────────────────
+   模块: DEFAULT_UI_SETTINGS
+   UI 设置默认值已抽离到 ui_settings_data.js，并在 index.html 中先于 game.js 加载。
+   这里不再声明 DEFAULT_UI_SETTINGS，避免继续扩大 game.js。
+   ─────────────────────────────────────────────────────────── */
 
 /* ───────────────────────────────────────────────────────────
    模块: DEFAULT_GAME_STATE (默认游戏状态) | 行号: ~9-42

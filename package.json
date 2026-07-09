@@ -19,7 +19,8 @@
     "gacha:guard": "node scripts/assert-gacha-data-externalized.mjs",
     "relationship:guard": "node scripts/assert-relationship-data-externalized.mjs",
     "avatar:guard": "node scripts/assert-avatar-style-data-externalized.mjs",
-    "tea-break-scenes:guard": "node scripts/assert-tea-break-scene-data-externalized.mjs"
+    "tea-break-scenes:guard": "node scripts/assert-tea-break-scene-data-externalized.mjs",
+    "ui-settings:guard": "node scripts/assert-ui-settings-data-externalized.mjs"
   },
   "dependencies": {
     "@types/howler": "^2.2.13",
