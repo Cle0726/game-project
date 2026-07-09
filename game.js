@@ -170,14 +170,11 @@ const DEFAULT_GAME_STATE = {
    功能: 将角色名映射到对应的茶歇场景 ID
    被引用: showScene() (茶歇场景跳转), buildTeaBreakHubChoices()
    ─────────────────────────────────────────────────────────── */
-const TEA_BREAK_SCENES = {
-  阿缇娅: "tea_break_atya",
-  弥洛: "tea_break_milo",
-  槐序: "tea_break_huaixu",
-  洛温: "tea_break_luowen",
-  伊芙白: "tea_break_yifubai",
-  明弦: "tea_break_mingxian"
-};
+/* ───────────────────────────────────────────────────────────
+   模块: TEA_BREAK_SCENES
+   茶歇角色到场景 ID 映射已抽离到 tea_break_scene_data.js，并在 index.html 中先于 game.js 加载。
+   这里不再声明 TEA_BREAK_SCENES，避免继续扩大 game.js。
+   ─────────────────────────────────────────────────────────── */
 
 /* ───────────────────────────────────────────────────────────
    模块: CONCERTO_RULES (协奏规则) | 行号: ~146-194
