@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const manifestPath = "assets/generated/character_states/character_state_manifest_v02.json";
-const gamePath = "game.js";
+const wiringPaths = ["game.js", "assets_data.js"];
 
 const requiredStates = ["default", "smile", "worried", "serious", "shocked", "special"];
 const requiredCharacters = [
@@ -26,7 +26,10 @@ if (!fs.existsSync(manifestPath)) {
 }
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-const gameSource = fs.existsSync(gamePath) ? fs.readFileSync(gamePath, "utf8") : "";
+const wiringSource = wiringPaths
+  .filter((wiringPath) => fs.existsSync(wiringPath))
+  .map((wiringPath) => fs.readFileSync(wiringPath, "utf8"))
+  .join("\n");
 const errors = [];
 
 for (const slug of requiredCharacters) {
@@ -58,8 +61,8 @@ for (const slug of requiredCharacters) {
     }
 
     const normalized = assetPath.replaceAll(path.sep, "/");
-    if (!gameSource.includes(normalized)) {
-      errors.push(`${slug}.${state}: asset exists but is not wired in game.js`);
+    if (!wiringSource.includes(normalized)) {
+      errors.push(`${slug}.${state}: asset exists but is not wired in game.js or assets_data.js`);
     }
   }
 
