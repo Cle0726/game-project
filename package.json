@@ -12,7 +12,8 @@
     "video:gemini:auto": "node scripts/gemini-web-video-assets.mjs --auto --wait-minutes 45",
     "video:gemini:web": "node scripts/gemini-web-video-assets.mjs",
     "worldmap:test": "vite --open /tests/worldmap-test.html",
-    "assets:guard": "node scripts/assert-assets-externalized.mjs"
+    "assets:guard": "node scripts/assert-assets-externalized.mjs",
+    "musicart:guard": "node scripts/assert-musicart-data-externalized.mjs"
   },
   "dependencies": {
     "@types/howler": "^2.2.13",
