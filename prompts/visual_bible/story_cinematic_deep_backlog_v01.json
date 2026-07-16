@@ -1,0 +1,132 @@
+{
+  "version": "1.0.0",
+  "purpose": "Second-pass story-image backlog selected from output/story-visual-gap-report-v01.json.",
+  "rules": {
+    "execution": "Generate, inspect and integrate exactly one asset at a time.",
+    "identity": "Prefer clean mother sheets. If no clean identity mother exists, frame the scene around objects, hands, silhouettes or environment rather than inventing a new face.",
+    "uiSafeArea": "Keep the lower 22 percent quiet for dialogue UI.",
+    "forbiddenReferences": ["*_v02.png damaged cutouts", "*_v03.png edge-repair outputs", "green-fringed sprites", "low-resolution cropped sprites"]
+  },
+  "jobs": [
+    {
+      "id": "DEEP-CH00-01",
+      "chapter": 0,
+      "sceneId": "ch0_004_silent_keys",
+      "assetClass": "interaction-closeup",
+      "path": "assets/generated/chapter0/keyvisuals/cg_ch0_half-pressed_silent_keys_v01.png",
+      "references": ["assets/generated/chapter0/backgrounds/bg_ch0_miansha_town_square_piano_v01.png"],
+      "identityRisk": "low",
+      "promptSeed": "Close view of a child's careful fingers depressing old piano keys only halfway while the hammers remain short of the strings; Noi watches as a soft silhouette outside the focal plane; rain, sealed piano, no sounding note."
+    },
+    {
+      "id": "DEEP-CH01-01",
+      "chapter": 1,
+      "sceneId": "ch1_black_011",
+      "assetClass": "reveal-object",
+      "path": "assets/generated/chapter1/keyvisuals/cg_ch1_broadcast_pendant_reveal_v01.png",
+      "references": ["assets/generated/chapter1/backgrounds/bg_ch1_mujian_station_platform_v01.png"],
+      "identityRisk": "low",
+      "promptSeed": "The abandoned station broadcast wakes by itself while a gloved hand holds one broken half of a white pendant under the clock; the matching silhouette appears only as a distorted reflection in wet black glass, no readable text and no visible villain face."
+    },
+    {
+      "id": "DEEP-CH02-01",
+      "chapter": 2,
+      "sceneId": "ch2_minigame_echo_calibration",
+      "assetClass": "device-closeup",
+      "path": "assets/generated/chapter2/keyvisuals/cg_ch2_echo_calibration_hands_v01.png",
+      "references": ["assets/generated/chapter2/backgrounds/bg_ch2_core_recording_chamber_v01.png"],
+      "identityRisk": "low",
+      "promptSeed": "Two cold hands align a frost-sealed resonance recorder, tuning one human voice out of blue-white noise; the mother's profile remains an incomplete reflection in the instrument glass, never a resurrected body."
+    },
+    {
+      "id": "DEEP-CH03-01",
+      "chapter": 3,
+      "sceneId": "ch3_side_juheng_room",
+      "assetClass": "character-object-intimacy",
+      "path": "assets/generated/chapter3/keyvisuals/cg_ch3_juheng_voluntary_oath_v01.png",
+      "references": ["assets/generated/chapter3/backgrounds/bg_ch3_reception_hall_v01.png"],
+      "identityRisk": "low",
+      "promptSeed": "A restrained private-room still life: a handwritten voluntary contract oath, a numbered plate engraved with a personal name and one white-gold gloved hand resting beside them; identity through objects, no readable paragraph text."
+    },
+    {
+      "id": "DEEP-CH04-01",
+      "chapter": 4,
+      "sceneId": "ch4_015",
+      "assetClass": "environment-collapse",
+      "path": "assets/generated/chapter4/keyvisuals/cg_ch4_false_applause_collapse_v01.png",
+      "references": ["assets/generated/chapter4/backgrounds/bg_ch4_core_organ_chamber_v01.png"],
+      "identityRisk": "none",
+      "promptSeed": "The black opera train begins to collapse; mechanical applause hands stop mid-clap, velvet curtains tear loose and the first honest breaths fog the carriage windows, with no victory lineup."
+    },
+    {
+      "id": "DEEP-CH05-01",
+      "chapter": 5,
+      "sceneId": "chapter5_event_minigame_chestnut",
+      "assetClass": "ordinary-choice",
+      "path": "assets/generated/chapter5/keyvisuals/cg_ch5_sequence04_chestnut_choice_v01.png",
+      "references": ["assets/generated/chapter4/sprites/characters/char_ch4_sequence04_mother_sheet_v02.png", "assets/generated/chapter5/backgrounds/bg_ch5_floating_circus_camp_v01.png"],
+      "identityRisk": "medium",
+      "promptSeed": "Sequence Four seriously compares one sweeter and one slightly charred roasted chestnut under circus string lights, a tiny ordinary decision treated with the same care as a tactical choice; preserve her exact recovered face and white feather-like outfit."
+    },
+    {
+      "id": "DEEP-CH06-01",
+      "chapter": 6,
+      "sceneId": "chapter6_event_minigame_hot_spring_tea",
+      "assetClass": "rest-closeup",
+      "path": "assets/generated/chapter6/keyvisuals/cg_ch6_hot_spring_tea_pause_v01.png",
+      "references": ["assets/generated/chapter6/backgrounds/bg_ch6_hot_spring_talk_v01.png"],
+      "identityRisk": "low",
+      "promptSeed": "Steam, two tea cups and relaxed hands at a hot-spring edge; nobody is hurried into speaking, wind bells and terraced fields soften in the background, healing through unforced silence."
+    },
+    {
+      "id": "DEEP-CH07-01",
+      "chapter": 7,
+      "sceneId": "ch7_005",
+      "assetClass": "public-testimony",
+      "path": "assets/generated/chapter7/keyvisuals/cg_ch7_old_wound_public_testimony_v01.png",
+      "references": ["assets/generated/chapter7/backgrounds/bg_ch7_admin_hearing_chamber_v01.png"],
+      "identityRisk": "low",
+      "promptSeed": "An elderly witness with a cane reaches the hearing podium and publicly acknowledges the old wounds of the Zero Conductor plan; frame from behind and across the silent audience so no unverified close face is invented."
+    },
+    {
+      "id": "DEEP-CH08-01",
+      "chapter": 8,
+      "sceneId": "ch8_008",
+      "assetClass": "two-character-intimacy",
+      "path": "assets/generated/chapter8/keyvisuals/cg_ch8_sequence04_anning_open_heart_v01.png",
+      "references": ["assets/generated/chapter4/sprites/characters/char_ch4_sequence04_mother_sheet_v02.png", "assets/generated/chapter0/characters/char_ch0_anning_mechanic_mother_v01.png", "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png"],
+      "identityRisk": "medium",
+      "promptSeed": "Sequence Four tells Anning she wants to become someone who can catch others, not only someone rescued; both sit by a modest campfire, eye contact hesitant and equal, no romance pose."
+    },
+    {
+      "id": "DEEP-CH09-01",
+      "chapter": 9,
+      "sceneId": "ch9_011",
+      "assetClass": "clue-handoff",
+      "path": "assets/generated/chapter9/keyvisuals/cg_ch9_mother_invitation_clue_v01.png",
+      "references": ["assets/generated/chapter9/backgrounds/bg_ch9_abandoned_outpost_archive_v01.png"],
+      "identityRisk": "low",
+      "promptSeed": "A torn investigation-note corner, an unopened invitation seal and the protagonist's pendant are placed together on a dark archive table as the clue about the mother's refusal lands; no readable prose and no new face."
+    },
+    {
+      "id": "DEEP-CH10-01",
+      "chapter": 10,
+      "sceneId": "ch10_009",
+      "assetClass": "letter-discovery",
+      "path": "assets/generated/chapter10/keyvisuals/cg_ch10_unsent_mother_letter_v01.png",
+      "references": ["assets/generated/chapter10/backgrounds/bg_ch10_mother_old_study_v01.png"],
+      "identityRisk": "none",
+      "promptSeed": "An unsent handwritten letter draft is lifted from a half-open secret compartment beside a familiar old hairpin and dust-covered acoustic diagrams; emotion through hands and objects, no readable paragraph text."
+    },
+    {
+      "id": "DEEP-CH11-01",
+      "chapter": 11,
+      "sceneId": "chapter11_event_E1111",
+      "assetClass": "sisterhood-silhouette",
+      "path": "assets/generated/chapter11/keyvisuals/cg_ch11_hunter_twins_warm_memory_v01.png",
+      "references": ["assets/generated/chapter11/backgrounds/bg_ch11_snowridge_ambush_v01.png"],
+      "identityRisk": "low",
+      "promptSeed": "Two hunter sisters reset a snowfield warning line together in mirrored practical motions while a traveler watches, allowing the memory of another separated pair of sisters to carry warmth instead of only pain; faces remain secondary."
+    }
+  ]
+}

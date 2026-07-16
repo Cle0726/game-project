@@ -1,0 +1,109 @@
+{
+  "version": "1.0.0",
+  "createdAt": "2026-07-14",
+  "renderFamily": "opera-painterly-anime-v1",
+  "rules": {
+    "execution": "Generate and inspect one image at a time, but continue the approved batch without waiting between images.",
+    "identity": "Only clean mother art, clean source panels, or a deterministic crop/composite made from them may be used as identity references. Never use damaged green-fringed v02 sprites or edge-repair v03 sprites.",
+    "composition": "16:9 cinematic visual-novel image with readable faces/hands and a calm lower edge for dialogue UI.",
+    "avoid": ["readable text", "watermark", "UI", "face drift", "outfit redesign", "extra fingers", "green fringe", "magenta background"]
+  },
+  "jobs": [
+    {
+      "id": "CG-CH00-CONTRACT-MOTHS",
+      "scene": "ch0_016_moth_swarm_tutorial",
+      "path": "assets/generated/chapter0/keyvisuals/cg_ch0_contract_moth_swarm_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_atya_musicart_mother_v01.png"],
+      "promptSummary": "Foreground conductor hand catches the black-gold baton as luminous five-line staffs enter the wrist; exact transformed Atya waits amid score-moths in the ruined theater."
+    },
+    {
+      "id": "CG-CH01-CHOIR-OVERTONE",
+      "scene": "ch1_006_b,ch1_006_minigame",
+      "path": "assets/generated/chapter1/keyvisuals/cg_ch1_choir_overtone_detection_v01.png",
+      "references": ["assets/generated/backgrounds/bg_white_score_morning_bell_plaza_v02.png"],
+      "promptSummary": "Academy choir stops beneath the half-beat clock tower as a translucent second voice appears only in the lead singer's cut-off tail note."
+    },
+    {
+      "id": "CG-CH02-FROZEN-RESIDUAL",
+      "scene": "ch2_snow_004",
+      "path": "assets/generated/chapter2/keyvisuals/cg_ch2_frozen_residual_encounter_v01.png",
+      "references": [],
+      "promptSummary": "A failed awakening with a human silhouette and weak amber tuning-fork core peels from a blue-white crystal corridor while two travelers stop rather than attack."
+    },
+    {
+      "id": "CG-CH03-JUHENG-OATH",
+      "scene": "ch3_side_juheng_room",
+      "path": "assets/generated/chapter3/keyvisuals/cg_ch3_juheng_voluntary_oath_v01.png",
+      "references": ["assets/generated/chapter3/sprites/characters/char_ch3_juheng_sprite_default_v01.png"],
+      "referenceNote": "Use only the deterministic clean middle-panel crop at output/imagegen_refs/juheng_clean_panel_ref.png.",
+      "promptSummary": "Juheng stands in an austere rest room beside her handwritten voluntary oath and named registration plate."
+    },
+    {
+      "id": "CG-CH04-KARON-ORGAN-REVEAL",
+      "scene": "ch4_014",
+      "path": "assets/generated/chapter4/keyvisuals/cg_ch4_karon_organ_boss_reveal_v01.png",
+      "references": [],
+      "promptSummary": "Karon raises one baton beneath the colossal black train organ as empty seats, porcelain masks and spectral hands produce false applause."
+    },
+    {
+      "id": "CG-CH05-CHESTNUT-CHOICE",
+      "scene": "chapter5_event_minigame_chestnut",
+      "path": "assets/generated/chapter5/keyvisuals/cg_ch5_sequence04_chestnut_choice_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_anning_mechanic_mother_v01.png", "assets/generated/chapter4/sprites/characters/char_ch4_sequence04_sprite_default_v02_source.png"],
+      "referenceNote": "Use the single deterministic identity board at output/imagegen_refs/anning_seq04_identity_board.png; ignore its magenta key field.",
+      "promptSummary": "Sequence Four compares sweet and caramelized chestnuts while Anning patiently confirms that a harmless wrong choice is allowed."
+    },
+    {
+      "id": "CG-CH07-LIVING-CASES",
+      "scene": "ch7_021",
+      "path": "assets/generated/chapter7/keyvisuals/cg_ch7_living_cases_testimony_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_atya_musicart_mother_v01.png", "assets/generated/chapter4/sprites/characters/char_ch4_sequence04_sprite_default_v02_source.png"],
+      "referenceNote": "Use the single deterministic identity board at output/imagegen_refs/atya_seq04_identity_board.png.",
+      "promptSummary": "Exact Atya and Sequence Four testify at separate lecterns before a packed White Score hearing chamber that has finally stopped writing and begun listening."
+    },
+    {
+      "id": "CG-CH08-OPEN-HEART",
+      "scene": "ch8_008",
+      "path": "assets/generated/chapter8/keyvisuals/cg_ch8_sequence04_anning_open_heart_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_anning_mechanic_mother_v01.png", "assets/generated/chapter4/sprites/characters/char_ch4_sequence04_sprite_default_v02_source.png"],
+      "referenceNote": "Use output/imagegen_refs/anning_seq04_identity_board.png.",
+      "promptSummary": "At a rain-dark roadside camp, Sequence Four offers an open hand and Anning answers with only her fingertips, an understated friendship promise."
+    },
+    {
+      "id": "CG-CH09-TEMP-CAMP-STRATEGY",
+      "scene": "ch9_000",
+      "path": "assets/generated/chapter9/keyvisuals/cg_ch9_temp_camp_strategy_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_atya_musicart_mother_v01.png", "assets/generated/chapter0/characters/char_ch0_milo_low_hum_knight_mother_v01.png"],
+      "referenceNote": "Use output/imagegen_refs/atya_milo_identity_board.png.",
+      "promptSummary": "Exact Atya and Milo study a wet route map marked with two broken pendant pairs before dawn."
+    },
+    {
+      "id": "CG-CH10-ATYA-AFTER-TACIT",
+      "scene": "story_atya_02",
+      "path": "assets/generated/chapter10/keyvisuals/cg_ch10_atya_after_tacit_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_atya_musicart_mother_v01.png"],
+      "promptSummary": "Exact Atya moves closer beside a dying northern campfire and reaches toward the faceless protagonist without touching."
+    },
+    {
+      "id": "CG-CH10-MILO-AFTER-TACIT",
+      "scene": "story_milo_02",
+      "path": "assets/generated/chapter10/keyvisuals/cg_ch10_milo_after_tacit_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_milo_low_hum_knight_mother_v01.png"],
+      "promptSummary": "Exact Milo sits beside low embers and finally speaks while the faceless protagonist's hand rests nearby."
+    },
+    {
+      "id": "BG-CH11-FROZEN-TRAVEL",
+      "scene": "ch11_002",
+      "path": "assets/generated/chapter11/backgrounds/bg_ch11_frozen_travel_expanse_v01.png",
+      "references": [],
+      "promptSummary": "Character-free snowfield route toward a fortified pass, with resonance poles, brass wind chimes and a buried supply sled."
+    },
+    {
+      "id": "CG-CH11-AMBUSH-TRACKS",
+      "scene": "ch11_010",
+      "path": "assets/generated/chapter11/keyvisuals/cg_ch11_ambush_tracks_analysis_v01.png",
+      "references": [],
+      "promptSummary": "Low investigation view of doubled wagon ruts, sheltered boot prints, a retreat cord and one brass chime bead proving professional planning."
+    }
+  ]
+}

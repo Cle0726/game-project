@@ -9,16 +9,18 @@ interface BattleHUDProps {
 }
 
 export function BattleHUD({ state, onSelectMusicart, onSkill }: BattleHUDProps) {
+  const activeMusicart = state.musicarts.find((musicart) => musicart.id === state.activeMusicartId) ?? state.musicarts[0];
+
   return (
     <section className="battle-hud" aria-label="Battle HUD">
-      <header className="battle-hud__enemy">
-        <div>
-          <p className="battle-hud__label">ENEMY</p>
+      <header className="battle-hud__topline">
+        <div className="battle-hud__enemy-card">
+          <p className="battle-hud__label">敌方目标</p>
           <h1>{state.enemy.name}</h1>
           <p>{state.enemy.statusText}</p>
         </div>
-        <div className="battle-hud__intent">
-          <span>Intent</span>
+        <div className="battle-hud__intent-card">
+          <span>下一拍意图</span>
           <strong>{state.enemy.intentText}</strong>
         </div>
       </header>
@@ -28,9 +30,13 @@ export function BattleHUD({ state, onSelectMusicart, onSkill }: BattleHUDProps) 
         <BattleMeter label="奏者健康" value={state.resources.conductorHealthPercent} tone="health" />
       </section>
 
-      <BattleLogPanel entries={state.log.slice(-3)} />
+      <BattleLogPanel entries={state.log.slice(-5)} />
 
       <section className="battle-hud__command" aria-label="Musicart commands">
+        <div className="battle-hud__command-header">
+          <span>指令谱面</span>
+          <strong>{activeMusicart?.name ?? '律者'}</strong>
+        </div>
         <div className="battle-hud__switcher" role="tablist" aria-label="律者切换">
           {state.musicarts.slice(0, 2).map((musicart) => (
             <button

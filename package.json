@@ -4,6 +4,9 @@
     "dev": "concurrently \"npm run index:test\" \"cd server && uvicorn main:app --reload --port 8000\"",
     "battle:guard": "node scripts/assert-battle-boundaries.mjs",
     "character:guard": "node scripts/assert-character-state-sprites.mjs",
+    "visual:audit": "node scripts/audit-story-visual-coverage.mjs",
+    "visual:gaps": "node scripts/report-story-visual-gaps.mjs",
+    "visual:speaker-guard": "node scripts/assert-story-speaker-visuals.mjs",
     "battle:test": "vite --open /tests/battle-test.html",
     "index:test": "vite --open /index.html",
     "portrait:test": "vite --open /tests/portrait-test.html",
@@ -22,7 +25,8 @@
     "tea-break-scenes:guard": "node scripts/assert-tea-break-scene-data-externalized.mjs",
     "ui-settings:guard": "node scripts/assert-ui-settings-data-externalized.mjs",
     "runtime-config:guard": "node scripts/assert-runtime-config-data-externalized.mjs",
-    "event-pool:guard": "node scripts/assert-event-pool-data-externalized.mjs"
+    "event-pool:guard": "node scripts/assert-event-pool-data-externalized.mjs",
+    "production:guard": "node scripts/assert-production-security.mjs"
   },
   "dependencies": {
     "@types/howler": "^2.2.13",

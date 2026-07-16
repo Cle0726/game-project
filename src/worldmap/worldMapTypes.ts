@@ -33,6 +33,7 @@ export interface LocationNode {
 
 export type LocationNodeType =
   | 'story'
+  | 'battle'
   | 'tuning_platform'
   | 'event_pool'
   | 'sublevel_entry';

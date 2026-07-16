@@ -79,6 +79,7 @@ export interface BattleResourceBars {
 export interface BattleScreenState {
   id: string;
   phase: BattlePhase;
+  variant?: 'standard' | 'skirmish' | 'boss' | 'finale';
   enemy: BattleEnemyState;
   resources: BattleResourceBars;
   musicarts: [BattleMusicartState, BattleMusicartState] | BattleMusicartState[];

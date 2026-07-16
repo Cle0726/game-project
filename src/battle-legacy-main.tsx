@@ -13,6 +13,11 @@ declare global {
 let root: Root | null = null;
 
 function getBattleRoot(): HTMLElement | null {
+  const battleArea = document.getElementById('battle-area');
+  if (battleArea && battleArea.parentElement !== document.body) {
+    document.body.appendChild(battleArea);
+  }
+
   const container = document.getElementById('react-battle-root');
   if (!container) return null;
 

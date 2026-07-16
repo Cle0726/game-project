@@ -13,7 +13,9 @@ const requiredCharacters = [
   "ningsu",
   "shen_zhiwei",
   "juheng",
-  "sequence04"
+  "sequence04",
+  "chengwu",
+  "yu"
 ];
 
 function fail(message) {

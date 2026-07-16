@@ -70,6 +70,10 @@ const DEFAULT_GAME_STATE = {
   弥洛信任: 24,
   弥洛共鸣: 20,
   弥洛压力: 30,
+  弥洛好感: 24,
+  零四信任: 18,
+  零四共鸣: 12,
+  零四压力: 45,
   安柠好感: 30,
   缇雅好感: 35,
   诺伊好感: 20,
@@ -96,6 +100,38 @@ const DEFAULT_GAME_STATE = {
   归还值: 0,
   真相值: 0,
   伊莱娜隐藏好感值: 0,
+  心防判定值: 0,
+  小雀信任值: 0,
+  零四恢复进度: 0,
+  卓玛风铃好感: 0,
+  安心值: 0,
+  屿好感: 0,
+  澄芜好感: 0,
+  默契值: 0,
+  阿缇娅情愫值: 0,
+  弥洛情愫值: 0,
+  安柠零四友情值: 0,
+  赤稳定度: 0,
+  屿赤契约进度: 0,
+  威压值: 0,
+  岐好感值: 0,
+  岚离场分支值: 0,
+  初响会情报值: 0,
+  观察期存废倾向: 0,
+  临时看管权限倾向: 0,
+  历史责任公开倾向: 0,
+  老院监用印倾向: 0,
+  沈知微最终立场值: 0,
+  补给完备度: 0,
+  保暖装备完备度: 0,
+  干粮储备完备度: 0,
+  向导雇佣状态: 0,
+  地图情报完整度: 0,
+  老雪好感值: 0,
+  苏婆好感值: 0,
+  阿雁好感值: 0,
+  阿霜好感值: 0,
+  霜隘镇好感度: 0,
   白谱院声望: "中立",
   白谱院声望值: 0,
   回声议会声望值: 0,
@@ -259,7 +295,7 @@ const CONCERTO_RULES = {
 
 
 
-const USE_REACT_BATTLE_SCREEN = false;
+const USE_REACT_BATTLE_SCREEN = true;
 let latestReactBattleLog = [];
 let reactBattleLogSequence = 0;
 
@@ -301,14 +337,12 @@ function clearReactBattleScreenFromLegacy() {
 function buildReactBattleScreenState(state) {
   const config = state.config;
   const progress = getReactBattleProgress(state);
-  const selectedMusicarts = (state.selectedMusicarts || GameState.出战律者 || []).slice(0, 2);
-  while (selectedMusicarts.length < 2) {
-    selectedMusicarts.push(selectedMusicarts.length === 0 ? "槐序" : "洛温");
-  }
+  const selectedMusicarts = (state.selectedMusicarts || GameState.出战律者 || []).slice(0, getBattleTeamMax(config));
 
   return {
     id: config.id || config.name || "legacy-battle",
     phase: state.reactPhase || (state.battleEnded ? "resolving" : "active"),
+    variant: getReactBattleVariant(config),
     enemy: {
       id: config.id || "enemy",
       name: config.enemy || config.name || "噬响体",
@@ -324,10 +358,52 @@ function buildReactBattleScreenState(state) {
       conductorHealthPercent: clamp(GameState.奏者健康, 0, 100)
     },
     musicarts: selectedMusicarts.map((name, index) => buildReactMusicartState(name, index, state)),
-    activeMusicartId: getReactBattleCharacterId(selectedMusicarts[0]),
+    activeMusicartId: getReactBattleCharacterId(selectedMusicarts[0] || config.defaultMusicarts?.[0] || "musicart"),
     log: latestReactBattleLog.slice(-6),
     skills: buildReactBattleSkills(config.actions || {}, state)
   };
+}
+
+function getReactBattleVariant(config) {
+  if (config.battleVariant) {
+    return config.battleVariant;
+  }
+
+  const id = String(config.id || "");
+  const name = String(config.name || "");
+  if (/final|charon|终战|卡戎/.test(id) || /终战|卡戎/.test(name)) {
+    return "finale";
+  }
+  if (/boss|seluomi|juheng|scoreheart|sound_stripping|stage_crawler|beatless|瑟萝弥|珏衡|谱心|剥音|舞台爬行者|无拍者/.test(id + name)) {
+    return "boss";
+  }
+  if (/moth|hound|patrol|qilan|guardian|puppet|飞蛾|猎犬|巡逻|岐岚|仪仗/.test(id + name)) {
+    return "skirmish";
+  }
+  return "standard";
+}
+
+function getBattleTeamMax(config) {
+  const availableMusicarts = config?.availableMusicarts || config?.defaultMusicarts || [];
+  const availableCount = availableMusicarts.length || 2;
+  const explicitMax = Number(config?.maxMusicarts || config?.teamSize);
+  const maxMusicarts = Number.isFinite(explicitMax) ? explicitMax : Math.min(2, availableCount);
+  return Math.max(1, Math.min(maxMusicarts, availableCount));
+}
+
+function getBattleTeamMin(config) {
+  const maxMusicarts = getBattleTeamMax(config);
+  const explicitMin = Number(config?.minMusicarts || config?.teamSize);
+  const minMusicarts = Number.isFinite(explicitMin) ? explicitMin : Math.min(2, maxMusicarts);
+  return Math.max(1, Math.min(minMusicarts, maxMusicarts));
+}
+
+function getBattleTeamRequirementText(config) {
+  const minMusicarts = getBattleTeamMin(config);
+  const maxMusicarts = getBattleTeamMax(config);
+  return minMusicarts === maxMusicarts
+    ? `${maxMusicarts}名律者`
+    : `${minMusicarts}-${maxMusicarts}名律者`;
 }
 
 function buildReactMusicartState(name, index, state) {
@@ -425,12 +501,14 @@ function getReactEnemyHpPercent(state) {
 }
 
 function getReactEnemyImage(config) {
-  const image = config.enemyImages?.[0] || config.enemyImage || ASSETS.enemies.offbeatBeast || "assets/battle/enemies/broken_beat_beast_idle.png";
+  const firstEnemy = config.enemyImages?.[0];
+  const image = firstEnemy?.src || firstEnemy || config.enemyImage || ASSETS.enemies.offbeatBeast || "assets/battle/enemies/broken_beat_beast_idle.png";
   return normalizeAssetPath(image);
 }
 
 function getReactAllyImage(config, index) {
-  return normalizeAssetPath(config.allyImages?.[index] || "");
+  const ally = config.allyImages?.[index];
+  return normalizeAssetPath(ally?.src || ally || "");
 }
 
 function getReactBattleCharacterId(name) {
@@ -510,29 +588,22 @@ function clearConversationHistory(character) {
   }
 }
 
-// 获取DeepSeek API密钥
+// 清理旧版浏览器端 DeepSeek API 密钥
 /* ───────────────────────────────────────────────────────────
    模块: DeepSeek API 密钥管理 | 行号: ~332-359
    函数: getDeepSeekApiKey(), saveDeepSeekApiKey(), isDeepSeekEnabled()
-   存储: localStorage (密钥明文存在浏览器本地)
+   说明: API 密钥改由后端 .env / 环境变量管理，浏览器端只保留清理旧值的兼容接口。
    被引用: handleSaveApiKey(), AI设置模态框
    ─────────────────────────────────────────────────────────── */
 function getDeepSeekApiKey() {
-  try {
-    return localStorage.getItem(DEEPSEEK_CONFIG.storageKey) || "";
-  } catch {
-    return "";
-  }
+  return "";
 }
 
-// 保存DeepSeek API密钥
+// 不再保存 DeepSeek API 密钥；只清理旧版 localStorage 遗留值
 function saveDeepSeekApiKey(key) {
   try {
-    if (key) {
-      localStorage.setItem(DEEPSEEK_CONFIG.storageKey, key);
-    } else {
-      localStorage.removeItem(DEEPSEEK_CONFIG.storageKey);
-    }
+    localStorage.removeItem(DEEPSEEK_CONFIG.storageKey);
+    localStorage.removeItem(DEEPSEEK_CONFIG.enabledKey);
     return true;
   } catch {
     return false;
@@ -541,7 +612,7 @@ function saveDeepSeekApiKey(key) {
 
 // 检查是否启用DeepSeek
 function isDeepSeekEnabled() {
-  return !!getDeepSeekApiKey();
+  return true;
 }
 
 // 构建玩家态度到自然语言的映射
@@ -952,7 +1023,7 @@ const SCENES = {
   },
   "ch0_001_road_entrance": {
     background: "#0d1016",
-    backgroundImage: ASSETS.backgrounds.ch0MianshaTownSquare,
+    backgroundImage: ASSETS.backgrounds.ch0MianshaResidentialAlley,
     description: "眠沙镇不像死城。它更像一座被命令屏住呼吸的城。唱片店橱窗里摆着被刮花的黑胶，乐器行的门被钉死，酒馆牌子写着：本店不播放音乐，请安心入内。",
     dialogues: [
       { speaker: "诺伊", text: "你们是外面来的？你们车上……有乐器吗？" },
@@ -968,7 +1039,7 @@ const SCENES = {
   },
   "ch0_002_silent_town": {
     background: "#111827",
-    backgroundImage: ASSETS.backgrounds.ch0MianshaTownSquare,
+    backgroundImage: ASSETS.backgrounds.ch0MianshaResidentialAlley,
     description: "广场中央的旧钢琴被三层禁演封条缠住。雨水打在琴盖上，风干蔷薇贴着封条颤动，像某个每年偷偷回来的人留下的证据。",
     dialogues: [
       { speaker: "诺伊", text: "他们说，只要钢琴响，怪物就会来。" },
@@ -997,7 +1068,8 @@ const SCENES = {
   },
   "ch0_004_silent_keys": {
     background: "#15110f",
-    backgroundImage: ASSETS.backgrounds.ch0MianshaTownSquare,
+    backgroundImage: ASSETS.backgrounds.ch0HalfPressedSilentKeys,
+    presentation: "cinematic",
     description: "无声琴键的诀窍，是让按键只下沉一半，不让琴槌真正敲击琴弦。诺伊盯着你的手，像第一次看见旋律可以不依赖声音而存在。",
     systemPrompt: "迷你游戏：无声琴键。保持半键下沉，不能让琴槌真正敲响琴弦。",
     dialogues: [
@@ -1027,7 +1099,8 @@ const SCENES = {
   },
   "ch0_006_mother_dream": {
     background: "#16141b",
-    backgroundImage: ASSETS.backgrounds.ch0ChildhoodSilentPianoRoom,
+    backgroundImage: ASSETS.backgrounds.ch0SilentPianoMemory,
+    presentation: "cinematic",
     description: "梦里的旧屋开始漏雨。母亲坐在沉默钢琴前，金色音符像灰尘一样浮在灯下；门外有另一个人的指挥棒敲在地面上，第三下始终没有落下。",
     dialogues: [
       { speaker: "母亲", text: "你还是想按下去。" },
@@ -1175,7 +1248,8 @@ const SCENES = {
   },
   "ch0_016_moth_swarm_tutorial": {
     background: "#121012",
-    backgroundImage: ASSETS.backgrounds.ch0AbandonedTheaterStage,
+    backgroundImage: ASSETS.backgrounds.ch0ContractMothSwarm,
+    presentation: "cinematic",
     description: "金色五线谱从指缝钻入皮肤，沿血管爬上右腕。默谱飞蛾群从剧场地下涌出，翅面像被雨泡坏的乐谱。你终于明白，命令她战斗，会从你身上扣下生命。",
     systemPrompt: "【指挥权限建立】【奏者契约成立】【律者：阿缇娅 · 暮星序曲 已接入】【警告：非正规契约】【技能释放将消耗指挥家健康值】",
     dialogues: [
@@ -1497,7 +1571,8 @@ const SCENES = {
   },
   "ch1_minigame_ensemble": {
     background: "#151d20",
-    backgroundImage: ASSETS.backgrounds.ch1MujianStationPlatform,
+    backgroundImage: ASSETS.backgrounds.ch1DuetCoordination,
+    presentation: "cinematic",
     description: "站台边缘，阿缇娅的指挥棒轨迹与弥洛的长枪轨迹被你重新画在雾里。你尝试在0.5秒的判定窗口里，把两条不属于同一调性的旋律压进同一拍。",
     systemPrompt: "小游戏：合奏节拍器。完美判定会强化后续隐藏路线。",
     dialogues: [
@@ -1512,7 +1587,7 @@ const SCENES = {
   },
   "ch1_black_007": {
     background: "#241c17",
-    backgroundImage: ASSETS.backgrounds.ch1StationInnWarm,
+    backgroundImage: ASSETS.backgrounds.ch1StationInnDiningDawn,
     defaultSpeaker: "尤娜",
     description: "夜晚的站台旅馆里，尤娜端着两杯掺了太多糖的热饮坐到你对面，笑得有点勉强。",
     systemPrompt: "茶歇剧情：尤娜的秘密。",
@@ -1591,7 +1666,7 @@ const SCENES = {
   },
   "ch1_black_010_a": {
     background: "#1b2020",
-    backgroundImage: ASSETS.backgrounds.ch1StationInnWarm,
+    backgroundImage: ASSETS.backgrounds.ch1StationInnDiningDawn,
     description: "瑟萝弥被击退到雾墙边缘，忽然停手。尤娜安然无恙，扑进柯婆婆怀里大哭一场。你们赢得了时间，仅此而已，但这一次，名字没有被编号覆盖。",
     systemPrompt: "结局甲：暂缓收编。获得称号【暂缓的判决】。",
     dialogues: [
@@ -1606,7 +1681,7 @@ const SCENES = {
   },
   "ch1_black_010_b": {
     background: "#1b2020",
-    backgroundImage: ASSETS.backgrounds.ch1StationInnWarm,
+    backgroundImage: ASSETS.backgrounds.ch1StationInnDiningDawn,
     description: "瑟萝弥撤退，但尤娜在战斗中因心肺负荷过重当场晕厥。安柠用维修车里的应急药箱稳住了她，却换来一个更具体的期限。",
     systemPrompt: "结局乙：带伤守住。获得称号【用时间换来的时间】。",
     dialogues: [
@@ -1620,7 +1695,7 @@ const SCENES = {
   },
   "ch1_black_010_c": {
     background: "#11171b",
-    backgroundImage: ASSETS.backgrounds.ch1SeluomiStandoff,
+    backgroundImage: ASSETS.backgrounds.ch1StationInnDiningDawn,
     defaultSpeaker: "尤娜",
     description: "瑟萝弥的动作快过了所有人的预判。冷白色光从尤娜胸口吊坠裂缝涌出，尖叫只持续了半秒，就被更深的寂静取代。",
     systemPrompt: "结局丙：未能及时。尤娜被强制转化为静默序列-零七。",
@@ -1636,7 +1711,7 @@ const SCENES = {
   },
   "ch1_black_010": {
     background: "#1b2020",
-    backgroundImage: ASSETS.backgrounds.ch1StationInnWarm,
+    backgroundImage: ASSETS.backgrounds.ch1StationInnDiningDawn,
     description: "翌日清晨，浓雾第一次出现短暂稀薄。柯婆婆把一枚吊坠碎片塞进你手里，像把一个名字托付给你。",
     systemPrompt: "第一章尾声：残响与决意。",
     dialogues: [
@@ -1708,7 +1783,8 @@ const SCENES = {
   },
   "ch1_black_011": {
     background: "#d7d0bd",
-    backgroundImage: ASSETS.backgrounds.ch1MujianStationPlatform,
+    backgroundImage: ASSETS.backgrounds.ch1BroadcastPendantReveal,
+    presentation: "cinematic",
     description: "车队准备离开雾茧站时，站台广播忽然自行启动。卡戎的声音清晰得可怕：你们手上那半枚吊坠的另一半，我这里恰好也有一片。",
     systemPrompt: "章末钩子：卡戎知道主角母亲；进入路线分歧节点。",
     dialogues: [
@@ -1724,7 +1800,7 @@ const SCENES = {
   },
   "ch1_black_013": {
     background: "#1b2020",
-    backgroundImage: ASSETS.backgrounds.ch1StationInnWarm,
+    backgroundImage: ASSETS.backgrounds.ch1StationInnDiningDawn,
     description: "翌日清晨，浓雾第一次出现短暂稀薄。柯婆婆把一枚吊坠碎片塞进你手里，像把一个名字托付给你。安柠把零四的断裂节拍器、巡逻日志残页和吊坠碎片逐一封存。",
     systemPrompt: "ch1_013 尾声：残响与决意。根据结局甲/乙/丙汇合，整理本章关键道具与情感余波。",
     dialogues: [
@@ -1842,7 +1918,8 @@ const SCENES = {
   "ch2_snow_004": {
     chapter: 2,
     background: "#cbe4ef",
-    backgroundImage: ASSETS.backgrounds.ch2CrystalCorridor,
+    backgroundImage: ASSETS.backgrounds.ch2FrozenResidualEncounter,
+    presentation: "cinematic",
     description: "回廊深处，一具冰封残奏从墙内剥离。它不像野兽，更像一个没能完成觉醒的人，被冻结在害怕与希望之间。",
     systemPrompt: "ch2_004 遭遇：冰封残奏。小怪生态首次出现。",
     dialogues: [
@@ -2038,7 +2115,8 @@ const SCENES = {
   "ch2_minigame_echo_calibration": {
     chapter: 2,
     background: "#e2f3fa",
-    backgroundImage: ASSETS.backgrounds.ch2CoreChamber,
+    backgroundImage: ASSETS.backgrounds.ch2EchoCalibrationHands,
+    presentation: "cinematic",
     description: "残响记录仪校准：旋钮像一枚被冰封的音量钮。你需要把杂音中的人声频段对齐，让母亲的声音从蓝白噪声中慢慢浮出。",
     systemPrompt: "小游戏：残响记录仪校准。影响演出清晰度，不改变核心剧情文本。",
     dialogues: [
@@ -2121,7 +2199,8 @@ const SCENES = {
   "ch2_side_atya_nameless": {
     chapter: 2,
     background: "#d2e8f2",
-    backgroundImage: ASSETS.backgrounds.ch2SnowfieldApproach,
+    backgroundImage: ASSETS.backgrounds.ch2AtyaNamelessScoreCamp,
+    presentation: "cinematic",
     description: "营地夜晚，阿缇娅长久凝视着无名律者的谱线残片。冰蓝火光映在她的眼影上，像暮星被雪覆盖了一半。",
     systemPrompt: "茶歇：阿缇娅个人故事线 · 无名律者的谱线残片。",
     dialogues: [
@@ -2135,7 +2214,7 @@ const SCENES = {
   "ch2_side_milo_origin": {
     chapter: 2,
     background: "#d2e8f2",
-    backgroundImage: ASSETS.backgrounds.ch2SnowfieldApproach,
+    backgroundImage: ASSETS.backgrounds.ch2SnowCampNight,
     description: "篝火旁，弥洛终于完整讲述自己的过去片段。他的声音很低，低到像是在替那些没能活下来的编号留出位置。",
     systemPrompt: "茶歇：弥洛个人故事线 · 身世第二块拼图。",
     dialogues: [
@@ -2164,7 +2243,7 @@ const SCENES = {
   "ch2_side_ningsu_camp": {
     chapter: 2,
     background: "#d2e8f2",
-    backgroundImage: ASSETS.backgrounds.ch2SnowfieldApproach,
+    backgroundImage: ASSETS.backgrounds.ch2SnowCampNight,
     description: "宁溯正式加入后的第一次营地夜谈，她坐得很端正，像连吃饭都还在遵守封存设施的轮值表。",
     systemPrompt: "茶歇：宁溯专属互动。仅加入队伍后可访问。",
     dialogues: [
@@ -2207,7 +2286,7 @@ const SCENES = {
       { text: "进入旧第二段：灰弦长廊", nextScene: "ch2_001" },
       { text: "进入旧第三段：盛典异常", nextScene: "ch3_001" },
       { text: "查看新第一章雾茧站支线入口", nextScene: "ch1_black_004" },
-      { text: "返回新第一章占位入口", nextScene: "chapter1_start" },
+      { text: "返回第一章入口", nextScene: "chapter1_start" },
       { text: "保存进度", effect: () => saveGame() }
     ]
   },
@@ -2279,7 +2358,7 @@ const SCENES = {
   "ch3_white_003": {
     chapter: 3,
     background: "#f1eadf",
-    backgroundImage: ASSETS.backgrounds.ch3ArchiveCorridor,
+    backgroundImage: ASSETS.backgrounds.ch3AcademyArchiveReadingRoom,
     description: "早期实验档案区里，你们找到一份编号为“试制零零一”的个体记录。照片模糊，但轮廓与弥洛高度吻合。",
     systemPrompt: "ch3_003 档案室：弥洛的旧编号。确认早期实验体身份。",
     dialogues: [
@@ -2293,7 +2372,7 @@ const SCENES = {
   "ch3_white_004": {
     chapter: 3,
     background: "#f1eadf",
-    backgroundImage: ASSETS.backgrounds.ch3ArchiveCorridor,
+    backgroundImage: ASSETS.backgrounds.ch3AcademyArchiveReadingRoom,
     description: "同一批档案中，安柠找到了父亲的完整记录。机械维护组二级技师，负责零号奏者计划早期原型装置的日常维护。",
     systemPrompt: "ch3_004 档案室：安柠父亲的真相。",
     dialogues: [
@@ -2323,7 +2402,7 @@ const SCENES = {
   "ch3_white_006": {
     chapter: 3,
     background: "#eee7dd",
-    backgroundImage: ASSETS.backgrounds.ch3ArchiveCorridor,
+    backgroundImage: ASSETS.backgrounds.ch3AcademyArchiveReadingRoom,
     description: "夜晚的档案室外，年轻研究员柏舟主动找上你。他紧张得把资料抱得很紧，却没有后退。",
     systemPrompt: "ch3_006 柏舟的私下接触。体制内同盟者支援。",
     dialogues: [
@@ -2471,7 +2550,7 @@ const SCENES = {
   "ch3_minigame_file_sorting": {
     chapter: 3,
     background: "#f1eadf",
-    backgroundImage: ASSETS.backgrounds.ch3ArchiveCorridor,
+    backgroundImage: ASSETS.backgrounds.ch3AcademyArchiveReadingRoom,
     description: "文件分类挑战：将打乱的档案按部门、年份、密级三重标准归类。你不是在讨好系统，而是在用系统自己的语法，把它锁住的资料取出来。",
     systemPrompt: "小游戏：文件分类挑战。对应E301，可加速解锁ch3_012并提升沈知微好感。",
     dialogues: [
@@ -2569,7 +2648,8 @@ const SCENES = {
   "ch3_side_juheng_room": {
     chapter: 3,
     background: "#f1eadf",
-    backgroundImage: ASSETS.backgrounds.ch3ReceptionHall,
+    backgroundImage: ASSETS.backgrounds.ch3JuhengVoluntaryOath,
+    presentation: "cinematic",
     description: "珏衡的休息室简单克制，唯一的私人物品是一份手写的《自愿契约誓词》。编号牌旁边刻着她的名字，这一点比任何辩解都更安静。",
     systemPrompt: "E305 珏衡的休息室：仅在战后结局一/二可访问。",
     dialogues: [
@@ -2599,7 +2679,7 @@ const SCENES = {
   "ch4_000": {
     chapter: 4,
     background: "#14070a",
-    backgroundImage: ASSETS.backgrounds.ch4NightlessTrainCorridor,
+    backgroundImage: ASSETS.backgrounds.ch4TrainExteriorBoarding,
     description: "白谱院外围山道，返程路口。安柠将母亲留下的三份资料并排铺开，结合白谱院档案与钟先生旧情报，终于锁定黑色列车的周期路线。",
     systemPrompt: "ch4_000 楔子：不夜巡演号的踪迹。",
     dialogues: [
@@ -2614,7 +2694,7 @@ const SCENES = {
   "ch4_001": {
     chapter: 4,
     background: "#1b090d",
-    backgroundImage: ASSETS.backgrounds.ch4NightlessTrainCorridor,
+    backgroundImage: ASSETS.backgrounds.ch4TrainExteriorBoarding,
     description: "安柠操控改装维修车，与不断移动的黑色列车完成惊险并线。车厢内部与外部破败截然相反：黑漆、绯红丝绒、烛台、水晶灯，一切干净得近乎不该存在。",
     systemPrompt: "ch4_001 潜入：黑色列车。解锁不夜巡演号与三线交织判定。",
     dialogues: [
@@ -2679,7 +2759,7 @@ const SCENES = {
     systemPrompt: "ch4_005 零四的抉择。救赎值高位将解锁长期同行伏笔。",
     dialogues: [
       { speaker: "阿缇娅", sprite: "worried", text: "我不知道你还记不记得自己叫什么名字。但那天，你为了那半拍，一定是想起了什么。" },
-      { speaker: "系统", text: "小游戏占位：节拍共鸣唤醒。正式制作时将加入轻柔点击与回退判定。" }
+      { speaker: "系统", text: "【节拍共鸣唤醒】先听见零四自己的残响，再用最轻的一拍把她从假掌声里带出来。" }
     ],
     choices: [
       { text: "由主角尝试用未鸣共鸣唤醒零四。", effects: [{ type: "change", key: "救赎值", value: 20 }, { type: "event", value: "零四未鸣共鸣唤醒" }], nextScene: "ch4_006" },
@@ -2700,7 +2780,7 @@ const SCENES = {
     ],
     choices: [
       { text: "尝试说服岐与岚放弃拦截。", effects: [{ type: "change", key: "真相值", value: 8 }, { type: "event", value: "岐岚动摇但未倒戈" }], nextScene: "ch4_008" },
-      { text: "直接应战，快速突破。", effects: [{ type: "event", value: "岐岚组合战完成" }], nextScene: "ch4_008" },
+      { text: "直接应战，快速突破。", effects: [{ type: "event", value: "岐岚组合战开始" }], effect: () => startBattle("ch4_qilan_duo", { selectedMusicarts: ["阿缇娅", "弥洛"] }) },
       { text: "尝试单独说服岚。", effects: [{ type: "change", key: "真相值", value: 5 }, { type: "event", value: "岚先行松动" }], nextScene: "ch4_008" },
       { text: "先调查观众席另一侧的零七踪迹。", conditions: [{ operator: "includes", value: "寻找并唤回零七" }], nextScene: "ch4_007" }
     ]
@@ -2738,7 +2818,7 @@ const SCENES = {
   "ch4_009": {
     chapter: 4,
     background: "#2a0d16",
-    backgroundImage: ASSETS.backgrounds.ch4NightlessTrainCorridor,
+    backgroundImage: ASSETS.backgrounds.ch4AltarCarriage,
     description: "祭坛车厢前，瑟萝弥终于正面拦住队伍。她的信仰没有崩塌，却第一次在问题面前失去完整的形状。",
     systemPrompt: "ch4_009 瑟萝弥的动摇。",
     dialogues: [
@@ -2753,16 +2833,16 @@ const SCENES = {
   "ch4_010": {
     chapter: 4,
     background: "#2e0f18",
-    backgroundImage: ASSETS.backgrounds.ch4NightlessTrainCorridor,
+    backgroundImage: ASSETS.backgrounds.ch4AltarCarriage,
     description: "瑟萝弥的最后一战。十字裁定仍然锋利，但每一次落枪都比上一章慢了半拍。",
-    systemPrompt: "ch4_010 Boss战：瑟萝弥的最后一战。正式战斗将在下一阶段接入。",
+    systemPrompt: "ch4_010 Boss战：瑟萝弥的最后一战。已接入正式战斗系统。",
     dialogues: [
-      { speaker: "系统", text: "Boss占位：瑟萝弥最终战。P1圣咏领域，P2十字裁定·终，P3崩解的信仰。" },
+      { speaker: "系统", text: "Boss战：瑟萝弥最终战。P1圣咏领域，P2十字裁定·终，P3崩解的信仰。" },
       { speaker: "瑟萝弥", text: "如果你们真的找到了别的办法，就证明给我看。不要用道理，用你们的演奏。" }
     ],
     choices: [
-      { text: "触发暮弦双鸣，正面击破她的迟疑。", effects: [{ type: "event", value: "瑟萝弥倒戈支援" }, { type: "change", key: "真相值", value: 15 }], nextScene: "ch4_011" },
-      { text: "标准胜利，继续深入核心车厢。", effects: [{ type: "event", value: "瑟萝弥撤往核心车厢" }], nextScene: "ch4_011" }
+      { text: "触发暮弦双鸣，正面击破她的迟疑。", effects: [{ type: "event", value: "瑟萝弥最终战标准进入" }, { type: "change", key: "真相值", value: 5 }], effect: () => startBattle("ch4_seluomi_final", { selectedMusicarts: ["阿缇娅", "弥洛"] }) },
+      { text: "标准迎战，继续深入核心车厢。", effects: [{ type: "event", value: "瑟萝弥最终战标准进入" }], effect: () => startBattle("ch4_seluomi_final", { selectedMusicarts: ["阿缇娅", "弥洛"] }) }
     ]
   },
   "ch4_011": {
@@ -2812,22 +2892,24 @@ const SCENES = {
   "ch4_014": {
     chapter: 4,
     background: "#0e0407",
-    backgroundImage: ASSETS.backgrounds.ch4CoreOrganChamber,
+    backgroundImage: ASSETS.backgrounds.ch4KaronOrganBossReveal,
+    presentation: "cinematic",
     description: "核心车厢，巨大黑色管风琴正下方。卡戎以巡演指挥家姿态举起指挥棒，整列列车的假掌声同时响起。",
-    systemPrompt: "ch4_014 Boss战：卡戎。三段式终战将在下一阶段接入正式战斗系统。",
+    systemPrompt: "ch4_014 Boss战：卡戎。三段式终战已接入正式战斗系统。",
     dialogues: [
       { speaker: "卡戎", text: "让我看看，你们那套温柔但缓慢的办法，在真正的生死关头，到底扛不扛得住。" },
-      { speaker: "系统", text: "Boss占位：P1巡演指挥家，P2管风琴共鸣体，P3卸下指挥棒的人。正式机制下一阶段接入。" }
+      { speaker: "系统", text: "Boss战：P1巡演指挥家，P2管风琴共鸣体，P3卸下指挥棒的人。" }
     ],
     choices: [
-      { text: "以暮弦双鸣贯穿管风琴共鸣体。", effects: [{ type: "event", value: "卡戎终战完成" }, { type: "change", key: "真相值", value: 15 }], nextScene: "ch4_015" },
-      { text: "优先救下仍有反应的静默序列。", effects: [{ type: "event", value: "终战优先救人" }, { type: "change", key: "救赎值", value: 10 }, { type: "change", key: "真相值", value: 10 }], nextScene: "ch4_015" }
+      { text: "以暮弦双鸣贯穿管风琴共鸣体。", effects: [{ type: "event", value: "卡戎终战开始" }, { type: "change", key: "真相值", value: 5 }], effect: () => startBattle("ch4_charon_final", { selectedMusicarts: ["阿缇娅", "弥洛"] }) },
+      { text: "优先救下仍有反应的静默序列。", effects: [{ type: "event", value: "终战优先救人" }, { type: "change", key: "救赎值", value: 5 }, { type: "change", key: "真相值", value: 3 }], effect: () => startBattle("ch4_charon_final", { selectedMusicarts: ["阿缇娅", "弥洛"] }) }
     ]
   },
   "ch4_015": {
     chapter: 4,
     background: "#1c080c",
-    backgroundImage: ASSETS.backgrounds.ch4CoreOrganChamber,
+    backgroundImage: ASSETS.backgrounds.ch4FalseApplauseCollapse,
+    presentation: "cinematic",
     description: "不夜巡演号开始崩解。第一次，列车广播里没有假掌声，只有铁轨摩擦声和人们真正的呼吸。",
     systemPrompt: "ch4_015 崩解：不夜巡演号的终章。根据真相值决定卡戎处置。",
     dialogues: [
@@ -2841,7 +2923,7 @@ const SCENES = {
   "ch4_016": {
     chapter: 4,
     background: "#24100c",
-    backgroundImage: ASSETS.backgrounds.ch4MainKey,
+    backgroundImage: ASSETS.backgrounds.ch4DawnStoppedTrain,
     description: "清晨，黑漆列车停在旷野上。被救下的静默序列个体第一次不需要维持鼓掌姿态，只需要学会呼吸。",
     systemPrompt: "ch4_016 尾声：救回来的与没能救回来的。",
     dialogues: [
@@ -2855,7 +2937,7 @@ const SCENES = {
   "ch4_017": {
     chapter: 4,
     background: "#2b1810",
-    backgroundImage: ASSETS.backgrounds.ch4MainKey,
+    backgroundImage: ASSETS.backgrounds.ch4DawnStoppedTrain,
     description: "残响之后。卡戎主线正式收束，但不夜巡演号留下的名字远比一场终战更多。",
     systemPrompt: "ch4_017 终章：残响之后。",
     dialogues: [
@@ -2870,7 +2952,7 @@ const SCENES = {
   "ch4_018": {
     chapter: 4,
     background: "#2f1c12",
-    backgroundImage: ASSETS.backgrounds.ch4MainKey,
+    backgroundImage: ASSETS.backgrounds.ch4DawnStoppedTrain,
     description: "不夜巡演号最终停下的地方，没有观众，没有掌声。只有清晨的风，和一群第一次不需要表演、只需要喘口气的人。",
     systemPrompt: "ch4_018 章末：新的地平线。第四章完成后进入多线并行自由篇章阶段。",
     dialogues: [
@@ -2880,6 +2962,2332 @@ const SCENES = {
     choices: [
       { text: "回到第四章章节入口。", effects: [{ type: "set", key: "chapterProgress", value: 4 }, { type: "event", value: "chapter4_complete" }], nextScene: "chapter4_start" },
       { text: "保存第四章完成记录。", effect: () => saveGame() }
+    ]
+  },
+  "chapter5_start": {
+    isMapNode: true,
+    chapter: 5,
+    background: "#3a160b",
+    backgroundImage: ASSETS.backgrounds.ch5MainKey,
+    description: "第五章 · 浮光伶响。追查卡戎主线暂告一段落后，队伍转向零一至零三下落。暖橙串灯下的浮光马戏团，看起来像一处终于愿意欢迎所有人的家。",
+    systemPrompt: "第五章 · 浮光伶响｜自由篇章：寻找零一。新增机制：心防判定值、小雀信任值、零四恢复进度、表演掩护。",
+    dialogues: [
+      { speaker: "系统", text: "本章进入暖色流浪马戏团风格：温暖本身会成为需要辨认的陷阱。" },
+      { speaker: "零四", sprite: "worried", text: "零一……是，第一个吗？我想，见见她。" }
+    ],
+    choices: [
+      { text: "开始第五章：浮光伶响。", effects: [{ type: "set", key: "心防判定值", value: 0 }, { type: "set", key: "小雀信任值", value: 0 }, { type: "set", key: "零四恢复进度", value: 0 }, { type: "set", key: "卓玛风铃好感", value: 0 }, { type: "event", value: "chapter5_route_started" }, { type: "set", key: "chapterProgress", value: 5 }], nextScene: "ch5_000" },
+      { text: "先保存第四章后的出发记录。", effect: () => saveGame() }
+    ]
+  },
+  "ch5_000": {
+    chapter: 5,
+    background: "#30160d",
+    backgroundImage: ASSETS.backgrounds.ch5MainKey,
+    description: "第四章结束后数日，安柠从阿俞与溪吟带来的顺路消息里筛出一条奇怪线索：一支流浪马戏团的团长银紫色长发、异色瞳，脾气古怪却特别护短。",
+    systemPrompt: "ch5_000 楔子：马戏团的传闻。零一线正式展开。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "阿俞说，他们上次路过一个流浪马戏团。团长是个脾气古怪但特别护短的女人，银紫色头发，一只眼睛颜色跟另一只不一样。" },
+      { speaker: "弥洛", sprite: "serious", text: "异色瞳……早期实验体才会有的痕迹。如果我没猜错，那可能是——零一。" },
+      { speaker: "零四", sprite: "worried", text: "零一……是，第一个吗？我想，见见她。" }
+    ],
+    choices: [
+      { text: "那我们就去会一会这位团长。", effects: [{ type: "event", value: "ch5_zero_one_lead_accepted" }], nextScene: "ch5_001" },
+      { text: "先确认零四是否真的准备好了。", effects: [{ type: "change", key: "零四恢复进度", value: 5 }, { type: "change", key: "零四信任", value: 2 }, { type: "event", value: "ch5_checked_sequence04_readiness" }], nextScene: "ch5_001" }
+    ]
+  },
+  "ch5_001": {
+    chapter: 5,
+    background: "#4b1d0f",
+    backgroundImage: ASSETS.backgrounds.ch5FloatingCircusCamp,
+    description: "队伍远远看见那片温暖的光：巨大的红橙色帆布帐篷缠满暖黄色串灯，热闹的手绘海报在风里轻轻晃动。",
+    systemPrompt: "ch5_001 抵达：暖橙帐篷下的家。解锁浮光马戏团地图与表演掩护机制。",
+    dialogues: [
+      { speaker: "安柠", sprite: "smile", text: "这么多年在外面跑，第一次觉得，有个地方看起来这么……欢迎人。" },
+      { speaker: "阿缇娅", sprite: "worried", text: "是啊。看起来是这样。" },
+      { speaker: "系统", text: "【解锁地图：浮光马戏团】【表演掩护机制建立：本章内可将共鸣伪装成杂技动作。】" }
+    ],
+    choices: [
+      { text: "进入浮光马戏团营地。", effects: [{ type: "event", value: "ch5_circus_map_unlocked" }], nextScene: "ch5_002" },
+      { text: "先观察营地周边。", effects: [{ type: "change", key: "世界观信息", value: 1 }, { type: "event", value: "ch5_circus_camp_observed" }], nextScene: "chapter5_event_E503" }
+    ]
+  },
+  "ch5_002": {
+    chapter: 5,
+    background: "#552411",
+    backgroundImage: ASSETS.backgrounds.ch5FloatingCircusCamp,
+    description: "入口处，一对活力四射的搭档热情迎来。卓玛笑得爽朗，风铃则从半空丝绸上倒挂下来，像一阵被灯光染暖的风。",
+    systemPrompt: "ch5_002 卓玛与风铃的欢迎。建立马戏团内部温暖表层。",
+    dialogues: [
+      { speaker: "卓玛", text: "新面孔！想加入巡演，还是单纯路过看戏？" },
+      { speaker: "风铃", text: "团长最近心情不错，路过的客人多半能蹭顿热饭。" }
+    ],
+    choices: [
+      { text: "我们是路过的旅人，听说这里的表演很精彩。", effects: [{ type: "change", key: "卓玛风铃好感", value: 5 }, { type: "event", value: "ch5_guest_cover_kept" }], nextScene: "ch5_003" },
+      { text: "直接表明想找团长。", effects: [{ type: "change", key: "卓玛风铃好感", value: 2 }, { type: "event", value: "ch5_directly_asked_for_liuli" }], nextScene: "ch5_006" }
+    ]
+  },
+  "ch5_003": {
+    chapter: 5,
+    background: "#4b1d0f",
+    backgroundImage: ASSETS.backgrounds.ch5BackstagePropWorkshop,
+    description: "后台道具区，一位画着朴素小丑妆的老者正在整理道具。看到零四时，他的脚步停顿了一下。",
+    systemPrompt: "ch5_003 沉月的暗示。提示零一的保护与控制主题。",
+    dialogues: [
+      { speaker: "沉月", text: "许久没见过，眼睛里带着这种刚学会看世界的新鲜劲儿的孩子了。你是……新来的？还是，路过的？" },
+      { speaker: "零四", sprite: "serious", text: "路过。也许，是来确认。" },
+      { speaker: "沉月", text: "那你可得找团长好好聊聊。她是个好人，是真心的好人。但好人有时候，也会把“为你好”这三个字，用得太用力。" }
+    ],
+    choices: [
+      { text: "记下沉月的提醒。", effects: [{ type: "change", key: "心防判定值", value: 3 }, { type: "event", value: "ch5_chenyue_warning_heard" }], nextScene: "ch5_004" },
+      { text: "追问马戏团过去。", effects: [{ type: "change", key: "世界观信息", value: 2 }, { type: "event", value: "ch5_chenyue_past_seed" }], nextScene: "chapter5_event_E503" }
+    ]
+  },
+  "ch5_004": {
+    chapter: 5,
+    background: "#32160e",
+    backgroundImage: ASSETS.backgrounds.ch5FloatingCircusCamp,
+    description: "夜里独自巡视时，一个身影从高处秋千架上轻巧落地。年轻演员小雀压低声音，像是怕惊醒整顶帐篷。",
+    systemPrompt: "ch5_004 小雀的秘密接触。建立小雀信任值。",
+    dialogues: [
+      { speaker: "小雀", text: "你们不是马戏团的人，也不像普通游客。我能……请你们帮个忙吗？" },
+      { speaker: "小雀", text: "我想离开这里，但不想用偷跑的方式伤团长的心。我需要一个，能让团长真正听进去的机会。" }
+    ],
+    choices: [
+      { text: "我们会帮你，但需要先了解更多情况。", effects: [{ type: "change", key: "小雀信任值", value: 10 }, { type: "event", value: "ch5_xiaoque_full_background_seed" }], nextScene: "ch5_005" },
+      { text: "你确定这是你真正想要的吗？", effects: [{ type: "change", key: "小雀信任值", value: 8 }, { type: "change", key: "心防判定值", value: 4 }, { type: "event", value: "ch5_xiaoque_freedom_monologue" }], nextScene: "ch5_005" },
+      { text: "借一段空中动作，试试把共鸣藏进节拍里。", effects: [{ type: "event", value: "ch5_performance_cover_started" }], nextScene: "chapter5_event_minigame_performance_cover" }
+    ]
+  },
+  "ch5_005": {
+    chapter: 5,
+    background: "#5b2010",
+    backgroundImage: ASSETS.backgrounds.ch5MainTentInterior,
+    description: "晚场演出散场后，一身华丽团长服饰的零一缓步走出。银紫色长发在暖光下泛着流动光泽，一只金色异色瞳格外醒目。",
+    systemPrompt: "ch5_005 零一登场：琉璃团长。暖色风格下的控制者正式出现。",
+    dialogues: [
+      { speaker: "零一", sprite: "default", text: "欢迎来到浮光马戏团。只要你们不把外面的风暴带进来，这里永远会给客人留一盏灯。" },
+      { speaker: "弥洛", sprite: "worried", text: "她就是零一。不是编号的感觉……反而更明显。" },
+      { speaker: "零一", sprite: "serious", text: "零四？" }
+    ],
+    choices: [
+      { text: "让零四先开口。", effects: [{ type: "change", key: "零四恢复进度", value: 5 }], nextScene: "ch5_006" }
+    ]
+  },
+  "ch5_006": {
+    chapter: 5,
+    background: "#5d2411",
+    backgroundImage: ASSETS.backgrounds.ch5MainTentInterior,
+    description: "零四怔怔地看着眼前这位前辈。暖橙灯光落在两人眼中，一边像家，一边像还没拆掉的枷锁。",
+    systemPrompt: "ch5_006 零四与零一的重逢。零四恢复进度是后续 Boss 关键变量。",
+    dialogues: [
+      { speaker: "零四", sprite: "worried", text: "零一……你，还记得自己的名字。你比我幸运。" },
+      { speaker: "零一", sprite: "worried", text: "幸运……大概吧。代价是，我用了很多年，才敢再相信“名字”这件事不会再被夺走。" },
+      { speaker: "零一", sprite: "serious", text: "你留下吧，零四。这里，没有人会再抢走你的名字。" }
+    ],
+    choices: [
+      { text: "让零四自己决定是否留下。", effects: [{ type: "change", key: "零四恢复进度", value: 10 }, { type: "change", key: "零四信任", value: 3 }, { type: "event", value: "ch5_sequence04_self_choice" }], nextScene: "ch5_007" },
+      { text: "委婉表示队伍还有其他事要做，暂不能久留。", effects: [{ type: "change", key: "心防判定值", value: -3 }, { type: "event", value: "ch5_liuli_alerted_by_departure" }], nextScene: "ch5_007" }
+    ]
+  },
+  "ch5_007": {
+    chapter: 5,
+    background: "#5d2411",
+    backgroundImage: ASSETS.backgrounds.ch5BackstagePropWorkshop,
+    description: "白天，小雀鼓起勇气，当着零一的面正式提出请求。整顶帐篷像忽然停下了呼吸。",
+    systemPrompt: "ch5_007 小雀的请求。小雀信任与心防判定开始交汇。",
+    dialogues: [
+      { speaker: "小雀", text: "团长，我想跟着这些旅人，出去看看外面的世界。不是不想回来——只是想自己确认，帐篷外面的月亮是不是真的和这里看到的不一样。" },
+      { speaker: "零一", sprite: "serious", text: "外面的世界，会把你当成什么，你知道吗？编号。战利品。可以随时被收走的东西。我不会同意。" }
+    ],
+    choices: [
+      { text: "先让小雀把话说完。", effects: [{ type: "change", key: "小雀信任值", value: 6 }, { type: "change", key: "心防判定值", value: 5 }], nextScene: "ch5_008" },
+      { text: "请零四选择一包糖炒栗子，缓和现场。", effects: [{ type: "change", key: "零四恢复进度", value: 5 }, { type: "event", value: "ch5_chestnut_choice_clear" }], nextScene: "chapter5_event_minigame_chestnut" }
+    ]
+  },
+  "ch5_008": {
+    chapter: 5,
+    background: "#3b110b",
+    backgroundImage: ASSETS.backgrounds.ch5MainTentInterior,
+    description: "零一的目光扫过主角一行，语气骤然锐利。暖灯仍然亮着，光却忽然有了边界。",
+    systemPrompt: "ch5_008 决裂：零一发现队伍的意图。下一节点进入零一 Boss 战。",
+    dialogues: [
+      { speaker: "零一", sprite: "serious", text: "你们从一开始，就在怂恿她离开，对吗？我以为你们只是路过的旅人。现在看来，我该谢谢你们，提前让我看清楚了这份善意的真面目。" },
+      { speaker: "零一", sprite: "special", text: "那就让我看看，你们这份尊重，扛不扛得住。" }
+    ],
+    choices: [
+      { text: "我们没有怂恿她，只是尊重她自己的想法。", effects: [{ type: "change", key: "心防判定值", value: 10 }], effect: () => startBattle("ch5_liuli_mindwall", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) },
+      { text: "如果她连尝试的权利都没有，这算不算另一种囚禁？", effects: [{ type: "change", key: "心防判定值", value: 15 }, { type: "event", value: "ch5_named_loving_cage" }], effect: () => startBattle("ch5_liuli_mindwall", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) },
+      { text: "沉默地站到小雀身边。", effects: [{ type: "change", key: "心防判定值", value: 8 }, { type: "event", value: "ch5_stood_with_xiaoque" }], effect: () => startBattle("ch5_liuli_mindwall", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) }
+    ]
+  },
+  "ch5_010": {
+    chapter: 5,
+    background: "#4a180d",
+    backgroundImage: ASSETS.backgrounds.ch5BackstagePropWorkshop,
+    description: "战斗后的主帐篷里，道具散落一地。零一跌坐在暖光边缘，第一次露出与外表年龄不符的疲惫。",
+    systemPrompt: "ch5_010 心防之后。根据心防判定值呈现零一是否真正动摇。",
+    dialogues: [
+      { speaker: "零一", sprite: "worried", text: "我一直告诉自己，只要护得够紧，就不会再有人受伤。可我好像，从来没有问过他们，愿不愿意被护得这么紧。" },
+      { speaker: "零四", sprite: "serious", text: "活下去，和被允许自己选，本来就该是同一件事。" },
+      { speaker: "零一", sprite: "worried", text: "你比我幸运。因为你身边这些人，教会了你这句话。而我，好像走了很多年弯路。" }
+    ],
+    choices: [
+      { text: "把选择还给小雀。", effects: [{ type: "event", value: "ch5_liuli_mindwall_broken" }], nextScene: "ch5_011" }
+    ]
+  },
+  "ch5_011": {
+    chapter: 5,
+    background: "#4f1d0e",
+    backgroundImage: ASSETS.backgrounds.ch5FloatingCircusCamp,
+    description: "浮光马戏团外围，零一深吸一口气，转向小雀。她的声音罕见地带着不确定。",
+    systemPrompt: "ch5_011 小雀的选择。决定小雀后续伏笔方向。",
+    dialogues: [
+      { speaker: "零一", sprite: "worried", text: "如果你还想去看看那轮月亮……这次，我不拦你了。只是答应我，累了、怕了，随时都可以回来。这里，永远给你留着一盏灯。" },
+      { speaker: "小雀", text: "我会回来的，团长。这次，是我自己选择要回来。" }
+    ],
+    choices: [
+      { text: "邀请小雀暂时同行。", effects: [{ type: "event", value: "小雀可选同行种子" }, { type: "change", key: "小雀信任值", value: 10 }], nextScene: "ch5_012" },
+      { text: "建议小雀先独自短途探索，日后再决定。", effects: [{ type: "event", value: "小雀独立探索种子" }, { type: "change", key: "小雀信任值", value: 6 }], nextScene: "ch5_012" }
+    ]
+  },
+  "ch5_012": {
+    chapter: 5,
+    background: "#31150d",
+    backgroundImage: ASSETS.backgrounds.ch5CircusRoofStarlight,
+    description: "深夜，零四与零一并肩坐在帐篷顶的横梁上，望着满天星光。主角一行没有打扰她们。",
+    systemPrompt: "ch5_012 两代“零”的对话。零四康复线里程碑。",
+    dialogues: [
+      { speaker: "零一", sprite: "serious", text: "零四，你接下来，打算做什么？" },
+      { speaker: "零四", sprite: "smile", text: "我还不知道。但现在，不知道这件事，好像也没那么可怕了。因为我知道，我可以，慢慢知道。" },
+      { speaker: "零一", sprite: "smile", text: "是啊。慢慢知道，也没什么不好。" }
+    ],
+    choices: [
+      { text: "等她们聊完，再启程。", effects: [{ type: "change", key: "零四恢复进度", value: 12 }, { type: "event", value: "ch5_two_zeroes_spoke" }], nextScene: "ch5_013" }
+    ]
+  },
+  "ch5_013": {
+    chapter: 5,
+    background: "#4c1f0f",
+    backgroundImage: ASSETS.backgrounds.ch5CircusFarewellMorning,
+    description: "清晨，队伍准备启程。沉月笑呵呵地塞给每人一包糖炒栗子，卓玛与风铃在人群后挥手。",
+    systemPrompt: "ch5_013 尾声：帐篷外的月亮。",
+    dialogues: [
+      { speaker: "沉月", text: "团长这些年，头一次松了这口气。你们这趟，算是帮了大忙。" },
+      { speaker: "卓玛", text: "路上小心！有空常回来看戏！" },
+      { speaker: "阿缇娅", sprite: "worried", text: "零一用了很多年才想明白的事，希望我们不用走那么久的弯路。" }
+    ],
+    choices: [
+      { text: "离开浮光马戏团。", nextScene: "ch5_014" }
+    ]
+  },
+  "ch5_014": {
+    chapter: 5,
+    background: "#2b170f",
+    backgroundImage: ASSETS.backgrounds.ch5CircusFarewellMorning,
+    description: "离开浮光马戏团的路上，暖橙色光点渐渐消失在地平线。零一没有变成第二个卡戎，却也差一点点，变成另一种意义上的牢笼。",
+    systemPrompt: "ch5_014 章末：新的思考。零一线告一段落，零二零三下落继续悬置。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "这个世界对保护这两个字的理解，好像永远不止一种版本。" },
+      { speaker: "弥洛", sprite: "serious", text: "零二、零三……如果她们也活着，会是哪一种版本？我们大概，还得继续找下去。" },
+      { speaker: "零四", sprite: "smile", text: "甜的。这次，是我自己选的。" },
+      { speaker: "系统", text: "【解锁角色种子：零一（琉璃）、小雀、卓玛、风铃、沉月】【世界观碎片：零二、零三仍未知的下落】" }
+    ],
+    choices: [
+      { text: "前往第六章：拾光缓响。", effects: [{ type: "event", value: "chapter5_complete" }, { type: "set", key: "chapterProgress", value: 6 }], nextScene: "chapter6_start" },
+      { text: "回到第五章章节入口。", effects: [{ type: "event", value: "chapter5_complete" }, { type: "set", key: "chapterProgress", value: 5 }], nextScene: "chapter5_start" }
+    ]
+  },
+  "chapter5_event_E501": {
+    chapter: 5,
+    background: "#3b160d",
+    backgroundImage: ASSETS.backgrounds.ch5CircusRoofStarlight,
+    description: "弥洛主动找到零一。两位“前辈”级别的实验体第一次坦诚相对。",
+    systemPrompt: "第五章支线 E501：弥洛与零一的私下对话。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "serious", text: "我以前，也差点走上和你一样的路。我很好奇，是什么让你，在保护和控制之间，选择了后者？" },
+      { speaker: "零一", sprite: "serious", text: "因为控制看得见效果，保护需要赌。我赌不起。至少那时候的我，赌不起。" }
+    ],
+    choices: [
+      { text: "记录两位前辈的对话。", effects: [{ type: "event", value: "E501_milo_liuli_private_talk" }, { type: "change", key: "弥洛共鸣", value: 3 }, { type: "change", key: "心防判定值", value: 5 }], nextScene: "ch5_007" }
+    ]
+  },
+  "chapter5_event_E502": {
+    chapter: 5,
+    background: "#552411",
+    backgroundImage: ASSETS.backgrounds.ch5FloatingCircusCamp,
+    description: "卓玛与风铃把“如何在团长规则里争取自主空间”说得像一门杂技课。",
+    systemPrompt: "第五章支线 E502：卓玛与风铃的谈判心得。",
+    dialogues: [
+      { speaker: "卓玛", text: "不是所有人都靠对抗才能喘口气。有时候，先把绳结系松一点，比一刀切断更管用。" },
+      { speaker: "风铃", text: "当然啦，能切的时候也别手软！" }
+    ],
+    choices: [
+      { text: "学会一种更轻的沟通方式。", effects: [{ type: "event", value: "E502_zhuoma_fengling_negotiation" }, { type: "change", key: "卓玛风铃好感", value: 6 }, { type: "change", key: "心防判定值", value: 4 }], nextScene: "ch5_007" }
+    ]
+  },
+  "chapter5_event_E503": {
+    chapter: 5,
+    background: "#4b1d0f",
+    backgroundImage: ASSETS.backgrounds.ch5BackstagePropWorkshop,
+    description: "沉月讲述浮光马戏团从两人到如今规模的完整创立历程。避难所如何变成家，家又如何差点变成王国。",
+    systemPrompt: "第五章支线 E503：沉月的马戏团往事。",
+    dialogues: [
+      { speaker: "沉月", text: "我陪着团长这么多年，看着她把这顶帐篷，从两个人撑起来的，撑成现在这么大一个家。" },
+      { speaker: "沉月", text: "她做的每一件事，出发点都是护着大家。可护着护着，有时候会忘记问一句——你自己，还想不想被护着？" }
+    ],
+    choices: [
+      { text: "把这段往事记入档案。", effects: [{ type: "event", value: "E503_circus_origin_recorded" }, { type: "change", key: "世界观信息", value: 2 }, { type: "change", key: "心防判定值", value: 4 }], nextScene: "ch5_003" }
+    ]
+  },
+  "chapter5_event_E504": {
+    chapter: 5,
+    background: "#32160e",
+    backgroundImage: ASSETS.backgrounds.ch5CircusFarewellMorning,
+    description: "小雀完成最后一次团内高空杂技表演。不是逃离，而是给自己一次体面道别。",
+    systemPrompt: "第五章支线 E504：小雀的训练秋千。",
+    dialogues: [
+      { speaker: "小雀", text: "如果我能把这套动作完整做完，也许团长会相信，我不是一时冲动。" },
+      { speaker: "系统", text: "【小游戏】高空秋千道别：跟随摆荡节拍，为小雀完成一场体面的告别演出。" }
+    ],
+    choices: [
+      { text: "开始一次告别演出。", effects: [{ type: "event", value: "E504_trapeze_minigame_started" }], nextScene: "chapter5_event_minigame_trapeze_farewell" }
+    ]
+  },
+  "chapter5_event_E505": {
+    chapter: 5,
+    background: "#4b1d0f",
+    backgroundImage: ASSETS.backgrounds.ch5FloatingCircusCamp,
+    description: "零四在短暂停留中与团内孤儿孩子们相处。她意外发现，被需要也可以是一种恢复方式。",
+    systemPrompt: "第五章支线 E505：零四与孩子们。",
+    dialogues: [
+      { speaker: "孩子们", text: "姐姐，这个绳结怎么解？" },
+      { speaker: "零四", sprite: "smile", text: "我……可以试试。" },
+      { speaker: "阿缇娅", sprite: "smile", text: "你看，你不是只能等命令的人。" }
+    ],
+    choices: [
+      { text: "记录零四的被需要感。", effects: [{ type: "event", value: "E505_sequence04_needed" }, { type: "change", key: "零四恢复进度", value: 12 }, { type: "change", key: "零四共鸣", value: 4 }], nextScene: "ch5_007" }
+    ]
+  },
+  "chapter5_event_minigame_chestnut": {
+    chapter: 5,
+    background: "#552411",
+    backgroundImage: ASSETS.backgrounds.ch5Sequence04ChestnutChoice,
+    presentation: "cinematic",
+    description: "糖炒栗子摊前，零四第一次认真比较“甜一点”和“焦一点”。这不是战术选择，却同样重要。",
+    systemPrompt: "第五章小游戏：糖炒栗子摊选择。用于推进零四恢复进度。",
+    dialogues: [
+      { speaker: "零四", sprite: "worried", text: "我可以……自己选？" },
+      { speaker: "安柠", sprite: "smile", text: "当然。选错了也没关系，最多我们再买一包。" }
+    ],
+    choices: [
+      { text: "让零四选甜一点的。", effects: [{ type: "event", value: "ch5_chestnut_sweet_choice" }, { type: "change", key: "零四恢复进度", value: 5 }], nextScene: "ch5_008" },
+      { text: "让零四选焦香一点的。", effects: [{ type: "event", value: "ch5_chestnut_roasted_choice" }, { type: "change", key: "零四恢复进度", value: 5 }], nextScene: "ch5_008" }
+    ]
+  },
+  "chapter5_event_minigame_performance_cover": {
+    chapter: 5,
+    backgroundImage: ASSETS.backgrounds.ch5TrapezeMoonStage,
+    description: "表演掩护挑战：把共鸣的起伏藏进空中动作的节拍里。重点不是炫技，而是不让台下的人察觉那一瞬的异常。",
+    choices: [
+      { text: "先稳住两拍停顿，再把共鸣压进转身。", effects: [{ type: "event", value: "ch5_performance_cover_clean" }, { type: "change", key: "心防判定值", value: 6 }, { type: "change", key: "小雀信任值", value: 4 }], nextScene: "ch5_005" },
+      { text: "直接把共鸣推上最高点，借欢呼遮掩。", effects: [{ type: "event", value: "ch5_performance_cover_bold" }, { type: "change", key: "心防判定值", value: 2 }, { type: "change", key: "小雀信任值", value: 2 }], nextScene: "ch5_005" }
+    ]
+  },
+  "chapter5_event_minigame_trapeze_farewell": {
+    chapter: 5,
+    backgroundImage: ASSETS.backgrounds.ch5TrapezeMoonStage,
+    description: "高空秋千道别：跟随小雀的摆荡节奏，给这场告别留出一个不仓促的落点。",
+    choices: [
+      { text: "等第三次摆荡的余音落定再放手。", effects: [{ type: "event", value: "E504_xiaoque_trapeze_farewell" }, { type: "change", key: "小雀信任值", value: 15 }, { type: "change", key: "心防判定值", value: 6 }], nextScene: "ch5_007" },
+      { text: "提前收束动作，优先保证安全。", effects: [{ type: "event", value: "E504_xiaoque_trapeze_safe_finish" }, { type: "change", key: "小雀信任值", value: 9 }, { type: "change", key: "心防判定值", value: 3 }], nextScene: "ch5_007" }
+    ]
+  },
+  "chapter6_start": {
+    chapter: 6,
+    background: "#7a5525",
+    backgroundImage: ASSETS.backgrounds.ch6MainKey,
+    description: "第六章《拾光缓响》入口。拾光村是远离主巡演线的疗愈地带，本章低战斗、高情感，收束零四康复、弥洛身世与阿缇娅自我认同线。",
+    systemPrompt: "chapter6_start 第六章入口：田园温泉治愈系。核心变量：安心值、屿好感、零四恢复闭环。",
+    dialogues: [
+      { speaker: "系统", text: "【第六章 · 拾光缓响】没有终战，也没有巨大的阴谋。你们抵达了一处允许人安静下来的地方。" },
+      { speaker: "零四", sprite: "smile", text: "这里的风铃……不是警报。" },
+      { speaker: "弥洛", sprite: "worried", text: "安静得让我有点不习惯。可也许，我们正需要不习惯一次。" }
+    ],
+    choices: [
+      { text: "开始第六章：拾光缓响。", effects: [{ type: "set", key: "安心值", value: 0 }, { type: "set", key: "屿好感", value: 0 }, { type: "set", key: "chapterProgress", value: 6 }, { type: "event", value: "chapter6_route_started" }], nextScene: "ch6_000" }
+    ]
+  },
+  "ch6_000": {
+    chapter: 6,
+    background: "#8a6227",
+    backgroundImage: ASSETS.backgrounds.ch6ShiguangVillageEstablishing,
+    description: "拾光村全景。金色梯田层层叠起，木屋、温泉、古树和风铃组成了一个不问来路的庇护地。",
+    systemPrompt: "ch6_000 抵达拾光村：建立疗愈地带世界观。",
+    dialogues: [
+      { speaker: "安柠", sprite: "smile", text: "这里不像据点，也不像避难所。更像……有人认真生活过的地方。" },
+      { speaker: "阿缇娅", sprite: "worried", text: "没有人要求我们证明自己为什么会来到这里。" },
+      { speaker: "澄芜", sprite: "default", text: "拾光村只有一个规矩：想留多久，都可以。" }
+    ],
+    choices: [
+      { text: "接受澄芜的引路。", effects: [{ type: "event", value: "ch6_chengwu_guided_entry" }, { type: "change", key: "安心值", value: 5 }], nextScene: "ch6_001" },
+      { text: "先在村口古树下停一停。", effects: [{ type: "event", value: "ch6_ancient_tree_first_pause" }, { type: "change", key: "安心值", value: 3 }], nextScene: "chapter6_event_E603" }
+    ]
+  },
+  "ch6_001": {
+    chapter: 6,
+    background: "#8f6831",
+    backgroundImage: ASSETS.backgrounds.ch6HotSpringTalk,
+    description: "温泉边，澄芜告诉零四：康复不是变成别人期待的样子，而是重新拥有“随便”的权利。",
+    systemPrompt: "ch6_001 澄芜与零四：康复主题正式点题。",
+    dialogues: [
+      { speaker: "澄芜", sprite: "smile", text: "孩子，你不需要在这里恢复成任何一个特定的样子。" },
+      { speaker: "零四", sprite: "worried", text: "如果我不知道自己想要什么呢？" },
+      { speaker: "澄芜", sprite: "default", text: "那就从很小的事开始。今天想不想下水，想不想说话，想不想一个人待着。" },
+      { speaker: "澄芜", sprite: "special", text: "康复这个词，说到底，就是重新拥有‘随便’的权利。" }
+    ],
+    choices: [
+      { text: "让零四自己决定要不要下水。", effects: [{ type: "change", key: "安心值", value: 8 }, { type: "change", key: "零四恢复进度", value: 10 }, { type: "event", value: "ch6_sequence04_small_choice" }], nextScene: "ch6_002" },
+      { text: "陪零四一起坐在池边，不催她。", effects: [{ type: "change", key: "安心值", value: 6 }, { type: "change", key: "零四信任", value: 3 }], nextScene: "ch6_002" }
+    ]
+  },
+  "ch6_002": {
+    chapter: 6,
+    background: "#795824",
+    backgroundImage: ASSETS.backgrounds.ch6AtyaAncientTreeMonologue,
+    description: "古树下，阿缇娅终于不为审查、不为辩护，只为自己认真回答“我是谁”。",
+    systemPrompt: "ch6_002 阿缇娅自我陈述：阶段性解答自我认同问题。",
+    dialogues: [
+      { speaker: "阿缇娅", sprite: "serious", text: "这些日子，我遇到过零一、零四、赤……每一个‘我们这种存在’，都在用不同方式回答‘我是谁’。" },
+      { speaker: "阿缇娅", sprite: "smile", text: "我想，也认真回答一次。只对自己回答。" },
+      { speaker: "阿缇娅", sprite: "special", text: "我是缇雅留下的思念，也是我自己。这两件事，本来就可以同时是真的。" }
+    ],
+    choices: [
+      { text: "我在旁边听着就好，不打扰你想。", effects: [{ type: "change", key: "阿缇娅共鸣", value: 8 }, { type: "event", value: "ch6_atya_full_self_monologue" }, { type: "change", key: "安心值", value: 8 }], nextScene: "ch6_003" },
+      { text: "需要我帮你一起想吗？", effects: [{ type: "change", key: "阿缇娅共鸣", value: 6 }, { type: "event", value: "ch6_atya_shared_self_dialogue" }, { type: "change", key: "安心值", value: 6 }], nextScene: "ch6_003" }
+    ]
+  },
+  "ch6_003": {
+    chapter: 6,
+    background: "#70511f",
+    backgroundImage: ASSETS.backgrounds.ch6YuSequence04TerraceTalk,
+    description: "梯田埂上，屿与零四谈起失去律者之后，指挥者该如何面对余生。",
+    systemPrompt: "ch6_003 屿登场：失去律者的指挥者心结。",
+    dialogues: [
+      { speaker: "屿", sprite: "worried", text: "她替我挡下最后一击的时候，眼睛里没有怨。这比任何指责，都更让我没办法原谅自己。" },
+      { speaker: "零四", sprite: "default", text: "如果她没有怨你，你是不是也可以……先试着不替她怨你？" },
+      { speaker: "屿", sprite: "shocked", text: "你说话的方式，真不像刚学会自己选择的人。" }
+    ],
+    choices: [
+      { text: "把话题交给他们两个。", effects: [{ type: "change", key: "屿好感", value: 8 }, { type: "change", key: "零四恢复进度", value: 8 }, { type: "event", value: "ch6_yu_sequence04_private_talk" }], nextScene: "ch6_004" },
+      { text: "提醒屿：她救下的是你的余生，不是你的刑期。", effects: [{ type: "change", key: "屿好感", value: 10 }, { type: "event", value: "ch6_yu_sentence_named" }], nextScene: "ch6_004" }
+    ]
+  },
+  "ch6_004": {
+    chapter: 6,
+    background: "#8b642c",
+    backgroundImage: ASSETS.backgrounds.ch6WaterwheelRepairShed,
+    description: "一天普通的梯田劳作。安柠修好水车，弥洛在村民口中听到与自己身世有关的残缺记录。",
+    systemPrompt: "ch6_004 梯田劳作与弥洛身世线索。",
+    dialogues: [
+      { speaker: "安柠", sprite: "smile", text: "这些天我修的每一样东西，都不用考虑‘这会不会影响战局’。它坏了，我修好，仅此而已。" },
+      { speaker: "弥洛", sprite: "worried", text: "我一直以为，是我自己运气好，侥幸逃出来的。" },
+      { speaker: "弥洛", sprite: "serious", text: "直到记录边缘那个几乎被涂掉的签名提醒我——原来，是有人主动把我放走的。" }
+    ],
+    choices: [
+      { text: "也许我们能一起查下去，找到这个人。", effects: [{ type: "change", key: "弥洛好感", value: 10 }, { type: "event", value: "ch6_milo_benefactor_hook_unlocked" }, { type: "change", key: "安心值", value: 8 }], nextScene: "ch6_005" },
+      { text: "有些恩情，记在心里，也是一种偿还。", effects: [{ type: "change", key: "弥洛好感", value: 8 }, { type: "event", value: "ch6_milo_gratitude_freedom_monologue" }, { type: "change", key: "安心值", value: 6 }], nextScene: "ch6_005" }
+    ]
+  },
+  "ch6_005": {
+    chapter: 6,
+    background: "#715326",
+    backgroundImage: ASSETS.backgrounds.ch6ChengwuSequence04HotSpringGuide,
+    description: "温泉边的日常选择练习。所有选项都没有惩罚，因为本章的重点是陪伴选择，而不是判断对错。",
+    systemPrompt: "ch6_005 日常选择小游戏：无惩罚地陪零四练习选择。",
+    dialogues: [
+      { speaker: "澄芜", sprite: "default", text: "先选一件小事吧。热一点的水，还是凉一点的石阶？" },
+      { speaker: "零四", sprite: "smile", text: "我想……先坐在石阶上。再把脚放进去。" },
+      { speaker: "阿缇娅", sprite: "smile", text: "这就是一个完整的决定。" }
+    ],
+    choices: [
+      { text: "称赞零四做出了自己的决定。", effects: [{ type: "change", key: "零四恢复进度", value: 12 }, { type: "change", key: "安心值", value: 10 }, { type: "event", value: "ch6_sequence04_choice_practice_done" }], nextScene: "ch6_006" },
+      { text: "什么也不评价，只陪她坐一会儿。", effects: [{ type: "change", key: "零四信任", value: 5 }, { type: "change", key: "安心值", value: 8 }, { type: "event", value: "ch6_silent_companionship_done" }], nextScene: "ch6_006" }
+    ]
+  },
+  "ch6_006": {
+    chapter: 6,
+    background: "#8a612b",
+    backgroundImage: ASSETS.backgrounds.ch6Sequence04LightBattle,
+    description: "村外出现低威胁噪响体。零四第一次不是因为命令，而是因为自己的选择主动请战。",
+    systemPrompt: "ch6_006 可选轻战斗：零四主动请战。",
+    dialogues: [
+      { speaker: "零四", sprite: "serious", text: "这一次，我想自己说：我可以上。" },
+      { speaker: "弥洛", sprite: "serious", text: "不是为了证明你能战斗。" },
+      { speaker: "零四", sprite: "special", text: "是为了证明，我可以选择保护什么。" }
+    ],
+    choices: [
+      { text: "接受零四的主动请战。", effects: [{ type: "event", value: "ch6_sequence04_requested_battle" }, { type: "change", key: "零四恢复进度", value: 8 }], effect: () => startBattle("ch6_field_dissonance", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) },
+      { text: "让大家一起轻处理，不把它变成试炼。", effects: [{ type: "event", value: "ch6_light_battle_skipped_by_teamwork" }, { type: "change", key: "安心值", value: 8 }], nextScene: "ch6_007" }
+    ]
+  },
+  "ch6_007": {
+    chapter: 6,
+    background: "#7b5624",
+    backgroundImage: ASSETS.backgrounds.ch6YuBatonRecovery,
+    description: "屿重新握起旧指挥棒。不是为了立刻签订新契约，而是为了不再害怕这件事本身。",
+    systemPrompt: "ch6_007 屿重新握起指挥棒。",
+    dialogues: [
+      { speaker: "屿", sprite: "special", text: "我还没决定，要不要真的再签订一份新的契约。" },
+      { speaker: "屿", sprite: "smile", text: "但至少，我不会再害怕指挥棒本身这件事了。" },
+      { speaker: "澄芜", sprite: "smile", text: "这已经是很大的一步。" }
+    ],
+    choices: [
+      { text: "把这一步记入拾光村的尾声。", effects: [{ type: "change", key: "屿好感", value: 15 }, { type: "event", value: "ch6_yu_baton_recovery_complete" }, { type: "change", key: "安心值", value: 10 }], nextScene: "ch6_008" }
+    ]
+  },
+  "ch6_008": {
+    chapter: 6,
+    background: "#8e6630",
+    backgroundImage: ASSETS.backgrounds.ch6ShiguangVillageFarewell,
+    description: "拾光村告别。安静的章节完成了重的收束：阿缇娅自我认同、弥洛身世、零四康复、屿的余生。",
+    systemPrompt: "ch6_008 第六章尾声：收束与展望。",
+    dialogues: [
+      { speaker: "系统", text: "【收束】零四康复线：正式完整闭环。" },
+      { speaker: "系统", text: "【收束】弥洛身世线：主要拼图完成，新钩子“恩人下落不明”保留。" },
+      { speaker: "系统", text: "【阶段性收束】阿缇娅自我认同：她不再必须在‘缇雅留下的思念’与‘自己’之间二选一。" },
+      { speaker: "零四", sprite: "smile", text: "风铃会不会响，只看风想不想吹。" },
+      { speaker: "阿缇娅", sprite: "smile", text: "安静，本身也可以是一种被允许的状态。" }
+    ],
+    choices: [
+      { text: "完成第六章，回到拾光村入口。", effects: [{ type: "event", value: "chapter6_complete" }, { type: "event", value: "sequence04_recovery_arc_closed" }, { type: "event", value: "milo_benefactor_hook_open" }, { type: "set", key: "chapterProgress", value: 6 }], nextScene: "chapter6_start" }
+    ]
+  },
+  "chapter6_event_E601": {
+    chapter: 6,
+    background: "#75582b",
+    backgroundImage: ASSETS.backgrounds.ch6HotSpringTalk,
+    description: "E601 · 温泉边的闲谈。村民只给片语，不要求玩家审判他们的来路。",
+    systemPrompt: "第六章支线 E601：疗愈地带不问来路。",
+    dialogues: [
+      { speaker: "村民", text: "我以前穿过静默署的制服。现在只负责看水温。" },
+      { speaker: "澄芜", sprite: "default", text: "真心想放下的人，先不必被迫把过去一件件摆出来。" }
+    ],
+    choices: [
+      { text: "记录疗愈地带的传统。", effects: [{ type: "event", value: "E601_healing_zone_tradition" }, { type: "change", key: "安心值", value: 8 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch6_004" },
+      { text: "陪村民泡一壶温泉茶。", effects: [{ type: "event", value: "E601_hot_spring_tea_started" }], nextScene: "chapter6_event_minigame_hot_spring_tea" }
+    ]
+  },
+  "chapter6_event_E602": {
+    chapter: 6,
+    background: "#84652f",
+    backgroundImage: ASSETS.backgrounds.ch6ShiguangVillageEstablishing,
+    description: "E602 · 梯田劳作体验。没有战斗、没有阴谋，只有修好坏掉的东西。",
+    systemPrompt: "第六章支线 E602：安柠日常修理与安心值。",
+    dialogues: [
+      { speaker: "安柠", sprite: "smile", text: "单纯就是——它坏了，我把它修好，仅此而已。好久没有这么纯粹地开心过了。" }
+    ],
+    choices: [
+      { text: "帮安柠递工具，修好水车。", effects: [{ type: "event", value: "E602_waterwheel_repair_started" }], nextScene: "chapter6_event_minigame_waterwheel_repair" }
+    ]
+  },
+  "chapter6_event_E603": {
+    chapter: 6,
+    background: "#765421",
+    backgroundImage: ASSETS.backgrounds.ch6ShiguangVillageEstablishing,
+    description: "E603 · 老树的往事。拾光村并非没有伤口，而是学会了不再互相伤害。",
+    systemPrompt: "第六章支线 E603：拾光村建立初期。",
+    dialogues: [
+      { speaker: "老人", text: "最早来这里的人，不是因为无处可去，而是因为再走下去，就会把痛转嫁给别人。" },
+      { speaker: "阿缇娅", sprite: "serious", text: "所以这里不是逃避。" },
+      { speaker: "老人", text: "是喘口气，再决定要不要继续走。" }
+    ],
+    choices: [
+      { text: "解锁世界观碎片：一群受伤的人如何决定不再互相伤害。", effects: [{ type: "event", value: "E603_old_tree_origin_recorded" }, { type: "change", key: "世界观信息", value: 3 }, { type: "change", key: "安心值", value: 8 }], nextScene: "ch6_001" }
+    ]
+  },
+  "chapter6_event_E604": {
+    chapter: 6,
+    background: "#77572a",
+    backgroundImage: ASSETS.backgrounds.ch6HotSpringTalk,
+    description: "E604 · 澄芜的过去。她也曾在“我是谁”这件事上挣扎很多年。",
+    systemPrompt: "第六章支线 E604：澄芜背景种子。",
+    dialogues: [
+      { speaker: "澄芜", sprite: "serious", text: "疗愈不是把伤口抹平，是学会带着伤口，依然能走得稳。" },
+      { speaker: "澄芜", sprite: "smile", text: "我建这个村子，不是想让所有人都留下。只是想给每个人一个喘口气再决定的地方。" }
+    ],
+    choices: [
+      { text: "记录澄芜完整觉醒背景的种子。", effects: [{ type: "event", value: "E604_chengwu_past_seed" }, { type: "change", key: "安心值", value: 10 }, { type: "change", key: "澄芜好感", value: 15 }], nextScene: "ch6_005" }
+    ]
+  },
+  "chapter6_event_E605": {
+    chapter: 6,
+    background: "#6f4d22",
+    backgroundImage: ASSETS.backgrounds.ch6YuBatonRecovery,
+    description: "E605 · 屿的旧居所。泛黄合影背后写着一句没有寄出的道歉。",
+    systemPrompt: "第六章支线 E605：屿与阿棠旧照。",
+    dialogues: [
+      { speaker: "屿", sprite: "worried", text: "我以为只要不再碰指挥棒，就能不再让任何人想起她。" },
+      { speaker: "零四", sprite: "default", text: "可是记得她，不一定等于困住你自己。" }
+    ],
+    choices: [
+      { text: "将阿棠的存在记入伏笔表。", effects: [{ type: "event", value: "E605_atang_photo_seed" }, { type: "change", key: "屿好感", value: 10 }, { type: "change", key: "安心值", value: 6 }], nextScene: "ch6_007" }
+    ]
+  },
+  "chapter6_event_minigame_waterwheel_repair": {
+    chapter: 6,
+    backgroundImage: ASSETS.backgrounds.ch6TerraceWaterwheelRepair,
+    description: "灌溉水车修理：先校准轴心，再固定叶片，最后试着让水流重新带动木轮。没有倒计时，也没有失败惩罚。",
+    choices: [
+      { text: "先校准轴心，再装回叶片。", effects: [{ type: "event", value: "E602_terrace_work_done" }, { type: "event", value: "ch6_waterwheel_repair_precise" }, { type: "change", key: "安心值", value: 10 }, { type: "change", key: "安柠好感", value: 4 }], nextScene: "ch6_004" },
+      { text: "先试水流方向，再慢慢调整叶片。", effects: [{ type: "event", value: "ch6_waterwheel_repair_patient" }, { type: "change", key: "安心值", value: 8 }, { type: "change", key: "安柠好感", value: 5 }], nextScene: "ch6_004" }
+    ]
+  },
+  "chapter6_event_minigame_hot_spring_tea": {
+    chapter: 6,
+    backgroundImage: ASSETS.backgrounds.ch6HotSpringTeaPause,
+    presentation: "cinematic",
+    description: "温泉泡茶时光：让水温慢下来，也让无人催促的沉默多停一会。成功与否都不会打断这段休息。",
+    choices: [
+      { text: "等水汽最轻时再落茶。", effects: [{ type: "event", value: "ch6_hot_spring_tea_gentle" }, { type: "change", key: "安心值", value: 7 }, { type: "change", key: "零四恢复进度", value: 3 }], nextScene: "ch6_004" },
+      { text: "先倒一小杯，邀请大家尝尝。", effects: [{ type: "event", value: "ch6_hot_spring_tea_shared" }, { type: "change", key: "安心值", value: 6 }, { type: "change", key: "安柠好感", value: 3 }], nextScene: "ch6_004" }
+    ]
+  },
+  "chapter7_start": {
+    title: "第七章 · 谱变余响",
+    chapter: 7,
+    location: "白谱院 · 行政大礼堂",
+    backgroundImage: ASSETS.backgrounds.ch7MainKey,
+    description: "第七章 · 谱变余响。白谱院召开院务全体表决大会前夕，保守派与革新派围绕登记制度改革正式决裂。",
+    systemPrompt: "第七章 · 谱变余响｜白谱院内部政变。新增机制：观察期存废倾向、临时看管权限倾向、历史责任公开倾向、老院监用印倾向。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "这次不是某个人的听证会。是整套制度，要被摆上桌面。" },
+      { speaker: "零四", sprite: "worried", text: "如果我说话……会有用吗？" }
+    ],
+    choices: [
+      { text: "开始第七章：谱变余响。", effects: [{ type: "set", key: "观察期存废倾向", value: 0 }, { type: "set", key: "临时看管权限倾向", value: 0 }, { type: "set", key: "历史责任公开倾向", value: 0 }, { type: "set", key: "老院监用印倾向", value: 0 }, { type: "set", key: "沈知微最终立场值", value: 0 }, { type: "event", value: "chapter7_route_started" }, { type: "set", key: "chapterProgress", value: 7 }], nextScene: "ch7_000" }
+    ]
+  },
+  "ch7_000": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7MainKey,
+    description: "队伍重返白谱院，公告栏前围着大量师生。三天后的登记制度改革表决即将改变所有未登记律者的处境。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "serious", text: "登记制度改革表决通知。三天后。我们撞上大事了。" },
+      { speaker: "零四", sprite: "worried", text: "这件事……和我有关吗？" }
+    ],
+    choices: [
+      { text: "有关。你愿意的话，可以参与进来。", effects: [{ type: "change", key: "零四恢复进度", value: 5 }, { type: "event", value: "ch7_sequence04_speech_seed" }], nextScene: "ch7_001" },
+      { text: "先慢慢了解情况。", nextScene: "ch7_001" }
+    ]
+  },
+  "ch7_001": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7HearingChamber,
+    description: "接待大厅里，观望派学生反复提到“临时看管”“历史责任”“三百人联署”。",
+    dialogues: [
+      { speaker: "系统", text: "【解锁三项子舆论值：观察期存废倾向 / 临时看管权限倾向 / 历史责任公开倾向】" },
+      { speaker: "安柠", sprite: "serious", text: "他们在讨论以后所有未登记律者该怎么活。" }
+    ],
+    choices: [
+      { text: "记录院内舆论温度。", effects: [{ type: "event", value: "ch7_student_murmurs_recorded" }, { type: "change", key: "观察期存废倾向", value: -3 }], nextScene: "ch7_002" }
+    ]
+  },
+  "ch7_002": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch3HearingChamber,
+    description: "沈知微主动召见主角，询问作为阿缇娅一案当事人的真实看法。",
+    dialogues: [
+      { speaker: "沈知微", text: "三天后的表决，你们大概也听说了。我想听听你的私下真实想法。" }
+    ],
+    choices: [
+      { text: "阿缇娅和零四，难道还不足以说明规则该改吗？", effects: [{ type: "change", key: "观察期存废倾向", value: -10 }, { type: "change", key: "沈知微好感", value: 8 }], nextScene: "ch7_003" },
+      { text: "个案的正义，不该被制度稳定绑架。", effects: [{ type: "change", key: "临时看管权限倾向", value: -8 }, { type: "change", key: "历史责任公开倾向", value: -5 }, { type: "event", value: "ch7_shen_silenced_by_argument" }], nextScene: "ch7_003" }
+    ]
+  },
+  "ch7_003": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7HearingChamber,
+    description: "崔敬发表保守派声明。莫言书将阿缇娅一案称为危险特例。",
+    dialogues: [
+      { speaker: "崔敬", text: "静默纪元的安定，不靠善意，靠每一条规则被不折不扣执行。" },
+      { speaker: "莫言书", text: "规则若因为几个特例松动，以后谁还把规则当回事？" }
+    ],
+    choices: [
+      { text: "阿缇娅不是特例，她是一个人。", effects: [{ type: "change", key: "临时看管权限倾向", value: -10 }, { type: "event", value: "ch7_atya_not_case_statement" }], nextScene: "ch7_004" },
+      { text: "先观察崔敬真正想守住什么。", effects: [{ type: "event", value: "ch7_cuijing_noticed_focus" }], nextScene: "ch7_004" }
+    ]
+  },
+  "ch7_004": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7OldPianoRoomNight,
+    description: "柏舟在旧琴房求助。革新派联署过两百人，但保守派正用流程问题拖延承认其有效性。",
+    dialogues: [
+      { speaker: "柏舟", text: "如果联署流程被拖垮，我们这几个月就白忙了。" }
+    ],
+    choices: [
+      { text: "我们这就去查。", effects: [{ type: "event", value: "E701_unlocked" }, { type: "change", key: "临时看管权限倾向", value: -5 }], nextScene: "ch7_005" },
+      { text: "先了解各方情况。", nextScene: "ch7_005" }
+    ]
+  },
+  "ch7_005": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7OldWoundPublicTestimony,
+    presentation: "cinematic",
+    description: "温别克拄着拐杖走上讲台，第一次公开承认零号奏者计划的旧伤不该继续被盖住。",
+    dialogues: [
+      { speaker: "温别克", text: "零号奏者计划那年，老朽装了一辈子的糊涂。这次，老朽想把话说明白。" },
+      { speaker: "崔敬", text: "温教授的资历我敬重。但资历不能代替论证。" }
+    ],
+    choices: [
+      { text: "记录温别克的公开表态。", effects: [{ type: "event", value: "ch7_wenbieke_public_statement" }, { type: "change", key: "历史责任公开倾向", value: -6 }], nextScene: "ch7_006" }
+    ]
+  },
+  "ch7_006": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    description: "青禾展示完整统计样本：临时看管的负面后果并非少数异常。",
+    dialogues: [
+      { speaker: "青禾", text: "保守派引用的是极端异常值。回到完整样本，结论恰好相反。" }
+    ],
+    choices: [
+      { text: "补充零四康复数据。", effects: [{ type: "change", key: "临时看管权限倾向", value: -12 }, { type: "event", value: "ch7_sequence04_data_consent" }], nextScene: "ch7_007" },
+      { text: "只倾听，不额外提供信息。", effects: [{ type: "change", key: "临时看管权限倾向", value: -5 }], nextScene: "ch7_007" }
+    ]
+  },
+  "ch7_007": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7HearingChamber,
+    description: "扶苏招呼学生签名联署，莫言书路过后双方爆发争吵。",
+    dialogues: [
+      { speaker: "扶苏", text: "我这是让大家自己看清楚事实自己决定！" },
+      { speaker: "莫言书", text: "复杂制度问题不是靠热血口号解决的。" }
+    ],
+    choices: [
+      { text: "帮扶苏说几句公道话。", effects: [{ type: "event", value: "E706_unlocked" }, { type: "change", key: "观察期存废倾向", value: -5 }], nextScene: "ch7_008" },
+      { text: "让两人都先冷静。", effects: [{ type: "event", value: "ch7_fusu_moyanshu_cooldown" }], nextScene: "ch7_008" }
+    ]
+  },
+  "ch7_008": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7LibraryDeepStacksNight,
+    description: "老纪带队伍进入图书馆深处，拿出第一批律者登记案的原始记录。",
+    dialogues: [
+      { speaker: "老纪", text: "这些典型问题案例，到底是真的问题，还是后来的人添油加醋，你们自己看。" }
+    ],
+    choices: [
+      { text: "核对原始记录。", effects: [{ type: "event", value: "ch7_exaggerated_risk_cases_known" }, { type: "change", key: "临时看管权限倾向", value: -8 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch7_009" }
+    ]
+  },
+  "ch7_009": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7DiningHallWarm,
+    description: "关婶给每人碗里多添一勺菜，提醒他们别饿着肚子讲道理。",
+    dialogues: [
+      { speaker: "关婶", text: "多吃点，别饿着肚子跟人讲道理，讲不赢的。" },
+      { speaker: "阿缇娅", sprite: "smile", text: "这条建议比很多正式意见都实用。" }
+    ],
+    choices: [
+      { text: "接受关婶的加菜。", effects: [{ type: "event", value: "E709_unlocked" }, { type: "change", key: "奏者健康", value: 3 }], nextScene: "ch7_010" }
+    ]
+  },
+  "ch7_010": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7LibraryDeepStacksNight,
+    description: "莫言书重新调阅弥洛“试制零零一”的旧档案，把它当作风险论据。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "worried", text: "他们把我的过去，当成了可以随意引用的案例编号。" }
+    ],
+    choices: [
+      { text: "去找莫言书理论。", effects: [{ type: "change", key: "历史责任公开倾向", value: -5 }, { type: "event", value: "ch7_milo_confrontation_ready" }], nextScene: "ch7_011" },
+      { text: "先让弥洛自己整理回应。", effects: [{ type: "change", key: "弥洛信任", value: 8 }, { type: "event", value: "ch7_milo_not_defined_by_archive" }], nextScene: "ch7_011" }
+    ]
+  },
+  "ch7_011": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7HearingChamber,
+    description: "弥洛要求莫言书引用完整档案：试制零零一不是风险案例，而是被信任后没有辜负信任的证明。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "serious", text: "你可以引用我的档案，但请引用完整档案。" },
+      { speaker: "莫言书", text: "……我承认，我之前引用得确实不够完整。" }
+    ],
+    choices: [
+      { text: "记录弥洛的完整回应。", effects: [{ type: "event", value: "ch7_milo_complete_archive_response" }, { type: "change", key: "历史责任公开倾向", value: -6 }], nextScene: "ch7_012" }
+    ]
+  },
+  "ch7_012": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7OldPianoRoomNight,
+    description: "零四主动召集大家，决定是否在表决大会上公开讲述自己的经历。",
+    dialogues: [
+      { speaker: "零四", sprite: "serious", text: "如果我的经历，能让哪怕一个未来的零四少走一点弯路，那这份经历就不只是伤痕了。" }
+    ],
+    choices: [
+      { text: "尊重并支持她的决定。", effects: [{ type: "change", key: "零四恢复进度", value: 10 }, { type: "event", value: "ch7_sequence04_will_speak" }], nextScene: "ch7_013" }
+    ]
+  },
+  "ch7_013": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7OldPianoRoomNight,
+    description: "阿缇娅也主动提出，希望在表决大会上亲口告诉众人自己是谁。",
+    dialogues: [
+      { speaker: "阿缇娅", sprite: "serious", text: "我是这场争论里，第一个被拿出来讨论的活案例。我想自己回答。" }
+    ],
+    choices: [
+      { text: "支持阿缇娅发言。", effects: [{ type: "change", key: "阿缇娅共鸣", value: 10 }, { type: "event", value: "ch7_atya_will_testify" }], nextScene: "ch7_014" }
+    ]
+  },
+  "ch7_014": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7HearingChamber,
+    description: "老院监询问队伍：他们想要的改革，究竟是修补制度，还是拆毁制度。",
+    dialogues: [
+      { speaker: "老院监", text: "我见过太多人用改变之名行破坏，也见过太多人用稳定之名掩盖惰性。" }
+    ],
+    choices: [
+      { text: "让规则重新服务于人，而不是替人作答。", effects: [{ type: "change", key: "老院监用印倾向", value: 18 }, { type: "event", value: "E704_old_dean_meeting_clear" }], nextScene: "ch7_015" },
+      { text: "制度若不承认错误，保护迟早会变成伤害。", effects: [{ type: "change", key: "老院监用印倾向", value: 15 }, { type: "change", key: "历史责任公开倾向", value: -5 }, { type: "event", value: "E704_old_dean_meeting_clear" }], nextScene: "ch7_015" }
+    ]
+  },
+  "ch7_015": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    description: "安柠截获内部调度：崔敬手下将以例行整理为由转移青禾关键统计资料。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "调度时间卡得太巧，正好是青禾那份资料存放的位置。" }
+    ],
+    choices: [
+      { text: "立刻前往档案室。", effects: [{ type: "event", value: "ch7_evidence_defense_direct" }], nextScene: "ch7_016" },
+      { text: "通知柏舟、青禾、扶苏一起行动。", effects: [{ type: "event", value: "ch7_reformists_notified" }, { type: "change", key: "临时看管权限倾向", value: -4 }], nextScene: "ch7_016" }
+    ]
+  },
+  "ch7_016": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    description: "夜间礼堂里，卫队奉命阻止“干扰正常档案管理程序”的行为，但命令本身已经露出裂缝。",
+    dialogues: [
+      { speaker: "礼堂卫队", text: "总监的命令是阻止销毁证据，不，等等，是阻止你们干扰正常档案管理程序。" }
+    ],
+    choices: [
+      { text: "护送青禾与证据撤离。", effects: [{ type: "event", value: "ch7_evidence_defense_started" }], effect: () => startBattle("ch7_evidence_defense", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) }
+    ]
+  },
+  "ch7_017": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    description: "战斗后，年轻队员拒绝继续执行可疑命令，监察队内部发生分裂。",
+    dialogues: [
+      { speaker: "年轻卫队员", text: "我们签的契约，是保护院内秩序，不是替某一派系销毁证据。" },
+      { speaker: "资深队员", text: "命令就是命令，我们没资格自己判断合不合理。" }
+    ],
+    choices: [
+      { text: "支持拒绝执行的一方。", effects: [{ type: "change", key: "观察期存废倾向", value: -5 }, { type: "event", value: "ch7_supported_refusing_guards" }], nextScene: "ch7_018" },
+      { text: "劝双方冷静。", effects: [{ type: "event", value: "ch7_guard_split_mediated" }], nextScene: "ch7_018" }
+    ]
+  },
+  "ch7_018": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    description: "珏衡开口，判断今晚的命令不属于秩序，而属于应被制止的越权。",
+    dialogues: [
+      { speaker: "珏衡", text: "我们的契约写的是守护院内秩序与安全，不是无条件执行任何一位总监的临时指令。" }
+    ],
+    choices: [
+      { text: "感谢珏衡做出判断。", effects: [{ type: "change", key: "珏衡好感", value: 12 }, { type: "event", value: "ch7_juheng_declared_position" }], nextScene: "ch7_019" }
+    ]
+  },
+  "ch7_019": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7PrivateStudyNight,
+    description: "沈知微得知崔敬试图销毁证据，第一次承认“坚持规则”与“害怕规则被检验”并非同一件事。",
+    dialogues: [
+      { speaker: "沈知微", text: "崔敬这么做，已经不是坚持规则，是害怕规则被检验。" }
+    ],
+    choices: [
+      { text: "所以，您会支持改革草案吗？", effects: [{ type: "change", key: "沈知微最终立场值", value: 20 }, { type: "event", value: "ch7_shen_final_reform_support" }], nextScene: "ch7_020" },
+      { text: "谢谢您愿意认真想这件事。", effects: [{ type: "change", key: "沈知微好感", value: 15 }, { type: "change", key: "沈知微最终立场值", value: 12 }], nextScene: "ch7_020" }
+    ]
+  },
+  "ch7_020": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    description: "大会前夜，白谱院灯火通明。所有人都在以自己的方式，与明天的自己提前打招呼。",
+    dialogues: [
+      { speaker: "阿缇娅", sprite: "serious", text: "这一次，我会自己回答。" },
+      { speaker: "零四", sprite: "serious", text: "我也是。" }
+    ],
+    choices: [
+      { text: "前往表决大会。", nextScene: "ch7_021" }
+    ]
+  },
+  "ch7_021": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7LivingCasesTestimony,
+    presentation: "cinematic",
+    description: "大礼堂座无虚席。阿缇娅与零四依次发言，白谱院第一次认真听见“活案例”自己的声音。",
+    dialogues: [
+      { speaker: "阿缇娅", sprite: "special", text: "我不是一个需要被分类的存在。如果规则容不下这样的答案，该被质疑的是规则的提问方式。" },
+      { speaker: "零四", sprite: "serious", text: "是耐心，不是禁锢，把我带回来了。请把这份耐心，也留给下一个我。" }
+    ],
+    choices: [
+      { text: "宣布表决结果。", effect: () => resolveChapter7VoteOutcome() }
+    ]
+  },
+  "ch7_022": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7MainKey,
+    description: "表决结束后，白谱院没有崩溃，只是第一次承认自己需要成长。",
+    dialogues: [
+      { speaker: "温别克", text: "老朽这把骨头，总算没白硬这一回。" },
+      { speaker: "珏衡", text: "谢谢你们，让我这份契约第一次觉得，守护的不只是秩序，还有秩序本该服务的人。" }
+    ],
+    choices: [
+      { text: "向白谱院众人告别。", nextScene: "ch7_023" }
+    ]
+  },
+  "ch7_023": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7MainKey,
+    description: "安柠望着渐远的白色学院。真正的终战是一场表决，没有 Boss，却比很多战斗都更让人揪心。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "没想到，这一次真正的终战，是一场表决。" },
+      { speaker: "弥洛", sprite: "serious", text: "崔敬没有被打败，他只是暂时输了这一局。这种人会换个战场再来。" },
+      { speaker: "系统", text: "【第七章完成】【白谱院登记制度改革进入新格局】" }
+    ],
+    choices: [
+      { text: "回到第七章章节入口。", effects: [{ type: "event", value: "chapter7_complete" }, { type: "set", key: "chapterProgress", value: 7 }], nextScene: "chapter7_start" }
+    ]
+  },
+  "chapter7_event_E701": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    description: "联署流程取证：核查名单合规性，排查保守派设置的程序陷阱。",
+    choices: [
+      { text: "完成流程核查。", effects: [{ type: "event", value: "E701_signature_process_verified" }, { type: "change", key: "临时看管权限倾向", value: -8 }], nextScene: "ch7_005" }
+    ]
+  },
+  "chapter7_event_E702": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7LibraryDeepStacksNight,
+    description: "崔敬的十七岁：旧报纸记录着四十年前的失控事件，解释他为何如此恐惧规则松动。",
+    choices: [
+      { text: "记录崔敬的恐惧源头。", effects: [{ type: "event", value: "E702_cuijing_young_disaster_known" }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch7_003" }
+    ]
+  },
+  "chapter7_event_E703": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7LibraryDeepStacksNight,
+    description: "莫言书的另一面：深夜偶遇加班的莫言书，得知他的激进来自家族旧伤。",
+    choices: [
+      { text: "理解但不认同他的立场。", effects: [{ type: "event", value: "E703_moyanshu_background_known" }, { type: "change", key: "历史责任公开倾向", value: -3 }], nextScene: "ch7_011" }
+    ]
+  },
+  "chapter7_event_E704": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7HearingChamber,
+    description: "求见老院监：通过老纪门路、珏衡引荐与柏舟侧面协助，争取会面资格。",
+    choices: [
+      { text: "完成礼节性拜访。", effects: [{ type: "event", value: "E704_unlocked" }, { type: "change", key: "老院监用印倾向", value: 8 }], nextScene: "ch7_014" }
+    ]
+  },
+  "chapter7_event_E705": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7LibraryDeepStacksNight,
+    description: "青禾的实验室：参观律者康复机制研究实验室，了解她投身该领域的私人动机。",
+    choices: [
+      { text: "开始筛选康复机制证据。", effects: [{ type: "event", value: "E705_case_analysis_started" }], nextScene: "chapter7_event_minigame_case_analysis" }
+    ]
+  },
+  "chapter7_event_E706": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    description: "扶苏的联署统计挑战：按学院、年级与签署日期整理最后一批联署表。",
+    choices: [
+      { text: "开始整理联署表。", effects: [{ type: "event", value: "E706_signature_sort_started" }], nextScene: "chapter7_event_minigame_signature_sort" }
+    ]
+  },
+  "chapter7_event_E707": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7HearingChamber,
+    description: "观望派学生的转变：学生们从看热闹转向认真讨论制度本身。",
+    choices: [
+      { text: "把讨论留给他们自己完成。", effects: [{ type: "event", value: "E707_students_shifted" }, { type: "change", key: "观察期存废倾向", value: -5 }], nextScene: "ch7_020" }
+    ]
+  },
+  "chapter7_event_E708": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7PrivateStudyNight,
+    description: "沈知微的私人书房：她私下记录着自阿缇娅案以来所有相关案例，说明动摇早已开始。",
+    choices: [
+      { text: "读完她的私人笔记。", effects: [{ type: "event", value: "E708_shen_private_notes_known" }, { type: "change", key: "沈知微好感", value: 15 }, { type: "change", key: "沈知微最终立场值", value: 8 }], nextScene: "ch7_019" }
+    ]
+  },
+  "chapter7_event_E709": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7DiningHallWarm,
+    description: "关婶的陈年往事：她年轻时也是登记制度边缘案例，补上普通人的证词。",
+    choices: [
+      { text: "记下普通人的证词。", effects: [{ type: "event", value: "E709_common_people_view" }, { type: "change", key: "历史责任公开倾向", value: -4 }], nextScene: "ch7_021" }
+    ]
+  },
+  "chapter7_event_E710": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7PrivateStudyNight,
+    description: "珏衡与年轻队员：表态后，珏衡与年轻监察队员讨论契约与良心的关系。",
+    choices: [
+      { text: "完成珏衡弧光收束。", effects: [{ type: "event", value: "E710_juheng_arc_complete" }, { type: "change", key: "珏衡好感", value: 12 }], nextScene: "ch7_020" }
+    ]
+  },
+  "chapter7_event_minigame_opinion_puzzle": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    description: "舆论风向拼图：将院内言论碎片按保守、革新、观望分类，帮助安柠校准三项舆论值。",
+    choices: [
+      { text: "完成一次模拟分类。", effects: [{ type: "event", value: "ch7_minigame_opinion_puzzle_clear" }, { type: "change", key: "观察期存废倾向", value: -4 }, { type: "change", key: "历史责任公开倾向", value: -4 }], nextScene: "ch7_020" }
+    ]
+  },
+  "chapter7_event_minigame_case_analysis": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7ArchiveSortingTable,
+    description: "案例数据分析：先保留可复核的连续记录，再排除被刻意放大的异常案例。真正重要的不是数字多，而是证据能站得住。",
+    choices: [
+      { text: "先剔除无法复核的异常案例。", effects: [{ type: "event", value: "E705_qinghe_lab_clear" }, { type: "event", value: "ch7_case_analysis_verified" }, { type: "change", key: "临时看管权限倾向", value: -6 }, { type: "change", key: "历史责任公开倾向", value: -3 }], nextScene: "ch7_006" },
+      { text: "保留边缘案例，注明证据等级。", effects: [{ type: "event", value: "ch7_case_analysis_cautious" }, { type: "change", key: "临时看管权限倾向", value: -4 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch7_006" }
+    ]
+  },
+  "chapter7_event_minigame_signature_sort": {
+    chapter: 7,
+    backgroundImage: ASSETS.backgrounds.ch7ArchiveSortingTable,
+    description: "联署统计挑战：按学院、年级与签署日期三重线索归档，让每一份支持都能被准确地看见。",
+    choices: [
+      { text: "先按学院分组，再核对日期。", effects: [{ type: "event", value: "E706_signature_sort_clear" }, { type: "event", value: "ch7_signature_sort_complete" }, { type: "change", key: "观察期存废倾向", value: -6 }, { type: "change", key: "临时看管权限倾向", value: -4 }], nextScene: "ch7_007" },
+      { text: "先按年级分层，补上缺失页码。", effects: [{ type: "event", value: "ch7_signature_sort_careful" }, { type: "change", key: "观察期存废倾向", value: -4 }, { type: "change", key: "历史责任公开倾向", value: -2 }], nextScene: "ch7_007" }
+    ]
+  },
+  "chapter8_start": {
+    title: "第八章 · 续弦入响",
+    chapter: 8,
+    location: "黑暗巡演号旧站点",
+    backgroundImage: ASSETS.backgrounds.ch8MainKey,
+    description: "第八章 · 续弦入响。屿循着旧谱来到黑暗巡演号坠落后的废站，赤仍在空座前独奏，新契约线正式展开。",
+    systemPrompt: "第八章 · 续弦入响｜赤与屿的新契约。新增机制：默契值、赤稳定度、屿赤契约进度、安柠零四友情值与隐性情愫值。",
+    dialogues: [
+      { speaker: "屿", text: "我听见她的旋律了。不是求救，更像是……还在等谁把下一拍接上。" },
+      { speaker: "赤", text: "他会回来听完这一段。所以我不能停。" }
+    ],
+    choices: [
+      { text: "开始第八章：续弦入响。", effects: [{ type: "set", key: "默契值", value: 0 }, { type: "set", key: "赤稳定度", value: 0 }, { type: "set", key: "屿赤契约进度", value: 0 }, { type: "set", key: "安柠零四友情值", value: 0 }, { type: "event", value: "chapter8_route_started" }, { type: "set", key: "chapterProgress", value: 8 }], nextScene: "ch8_000" }
+    ]
+  },
+  "ch8_000": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8FallenDarkTourStation,
+    description: "屿抵达旧站点。雨水从断裂的拱顶滴下，空站台像一座没人谢幕的剧场。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "serious", text: "赤的残响很近，但不稳定。她像是把自己锁在最后一次演出里。" },
+      { speaker: "屿", text: "如果她愿意，我想试着把那场演出续下去。" }
+    ],
+    choices: [
+      { text: "追踪赤留下的独奏残响。", effects: [{ type: "event", value: "E801_unlocked" }, { type: "change", key: "屿好感", value: 6 }], nextScene: "ch8_001" }
+    ]
+  },
+  "ch8_001": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8FallenDarkTourStation,
+    description: "队伍沿着断裂谱线进入旧站深处。每一道红线都像赤独自拉出的呼吸。",
+    dialogues: [
+      { speaker: "阿缇娅", sprite: "worried", text: "她不是在攻击我们。她在确认我们是不是会像其他听众一样突然消失。" }
+    ],
+    choices: [
+      { text: "慢慢靠近，不打断旋律。", effects: [{ type: "change", key: "赤稳定度", value: 8 }, { type: "event", value: "ch8_followed_chi_without_interrupting" }], nextScene: "ch8_002" },
+      { text: "让屿先判断她的调性。", effects: [{ type: "change", key: "默契值", value: 6 }, { type: "event", value: "ch8_yu_read_chi_tonality" }], nextScene: "ch8_002" }
+    ]
+  },
+  "ch8_002": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "入夜后，安柠与零四守着火堆。她们没有谈宏大的制度，只谈今天谁先把湿柴点着。",
+    dialogues: [
+      { speaker: "安柠", sprite: "smile", text: "你刚才递柴火的样子很熟练。" },
+      { speaker: "零四", sprite: "smile", text: "因为你前两次都差点把袖子烧了。" }
+    ],
+    choices: [
+      { text: "让她们继续聊家常。", effects: [{ type: "change", key: "安柠零四友情值", value: 10 }, { type: "event", value: "E805_unlocked" }], nextScene: "ch8_003" }
+    ]
+  },
+  "ch8_003": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "篝火旁的沉默没有尴尬。有人修怀表，有人擦枪，有人只是把视线移开又移回来。",
+    dialogues: [
+      { speaker: "系统", text: "【沉默与心跳】隐性情愫分支开启：选择不会立刻标记路线，但会记录陪伴方式。" }
+    ],
+    choices: [
+      { text: "坐到阿缇娅身边，替她挡住夜风。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 8 }, { type: "event", value: "ch8_atya_quiet_warmth" }], nextScene: "ch8_004" },
+      { text: "陪弥洛检查低频护具。", effects: [{ type: "change", key: "弥洛情愫值", value: 8 }, { type: "event", value: "ch8_milo_quiet_maintenance" }], nextScene: "ch8_004" },
+      { text: "帮屿整理赤的谱线记录。", effects: [{ type: "change", key: "默契值", value: 5 }, { type: "event", value: "ch8_yu_score_notes_sorted" }], nextScene: "ch8_004" }
+    ]
+  },
+  "ch8_004": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8MainKey,
+    description: "赤终于出现在月光下。她的琴弓没有指向任何人，只指向一张早已空掉的座位。",
+    dialogues: [
+      { speaker: "赤", text: "听众还没回来。你们不要坐错位置。" },
+      { speaker: "屿", text: "我不坐他的座位。我只是想站在台下，等你自己决定要不要停。" }
+    ],
+    choices: [
+      { text: "让屿独自向前一步。", effects: [{ type: "change", key: "默契值", value: 8 }, { type: "event", value: "ch8_yu_first_step_to_chi" }], nextScene: "ch8_005" },
+      { text: "让阿缇娅先安抚赤。", effects: [{ type: "change", key: "赤稳定度", value: 6 }, { type: "change", key: "阿缇娅共鸣", value: 4 }], nextScene: "ch8_005" }
+    ]
+  },
+  "ch8_005": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CollapsedWaitingHallRain,
+    description: "屿第一次尝试靠近失败。赤的弓弦震开所有人，却没有真正伤人。",
+    dialogues: [
+      { speaker: "屿", text: "她拒绝的不是我，是“再一次签订契约”这件事。" },
+      { speaker: "弥洛", sprite: "serious", text: "那就先别谈契约，先谈她还能不能选择。" }
+    ],
+    choices: [
+      { text: "暂时后退，尊重赤的距离。", effects: [{ type: "change", key: "赤稳定度", value: 10 }, { type: "event", value: "ch8_respected_chi_boundary" }], nextScene: "ch8_006" }
+    ]
+  },
+  "ch8_006": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8PocketWatchRepairShelter,
+    description: "安柠收到父亲旧友寄来的密信：那位父亲并非从未守护她，只是守护的方式迟到了太久。",
+    dialogues: [
+      { speaker: "安柠", sprite: "worried", text: "我以为他只留下沉默。原来有些沉默，是一直没能送到我手里的信。" }
+    ],
+    choices: [
+      { text: "陪安柠读完密信。", effects: [{ type: "event", value: "E803_unlocked" }, { type: "change", key: "安柠好感", value: 8 }], nextScene: "ch8_007" }
+    ]
+  },
+  "ch8_007": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8PocketWatchRepairShelter,
+    description: "阿棠的怀表从旧箱夹层里滑落。表盖内侧刻着屿从未真正读完的道歉。",
+    dialogues: [
+      { speaker: "屿", text: "这只表……我以为已经跟她一起留在那场事故里了。" },
+      { speaker: "阿棠", text: "如果你还在听，就不要把自己的余生也停在那一秒。" }
+    ],
+    choices: [
+      { text: "修复阿棠的怀表。", effects: [{ type: "event", value: "E804_unlocked" }, { type: "change", key: "屿好感", value: 8 }], nextScene: "chapter8_event_minigame_watch_repair" },
+      { text: "先把怀表交还给屿。", effects: [{ type: "event", value: "ch8_watch_returned_to_yu" }, { type: "change", key: "默契值", value: 4 }], nextScene: "ch8_008" }
+    ]
+  },
+  "ch8_008": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8Sequence04AnningOpenHeart,
+    presentation: "cinematic",
+    description: "零四对安柠敞开心扉：她不再只是“被救回的人”，也想成为能接住别人的人。",
+    dialogues: [
+      { speaker: "零四", sprite: "serious", text: "如果有一天你也撑不住，可以先把一小部分交给我。" },
+      { speaker: "安柠", sprite: "smile", text: "那我就先交给你一小部分。" }
+    ],
+    choices: [
+      { text: "见证这份友情。", effects: [{ type: "change", key: "安柠零四友情值", value: 12 }, { type: "event", value: "ch8_anning_sequence04_friendship_named" }], nextScene: "ch8_009" }
+    ]
+  },
+  "ch8_009": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CollapsedWaitingHallRain,
+    description: "主角想起第四章赤的独奏。那时她没有求救，只是用同一段旋律确认世界还会不会回应。",
+    dialogues: [
+      { speaker: "系统", text: "【迟来记忆】第四章赤支线与第八章主线接续。" }
+    ],
+    choices: [
+      { text: "告诉屿：赤一直在等“回应”，不是替代品。", effects: [{ type: "change", key: "默契值", value: 8 }, { type: "change", key: "赤稳定度", value: 6 }, { type: "event", value: "ch8_chi_memory_understood" }], nextScene: "ch8_010" }
+    ]
+  },
+  "ch8_010": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "卓玛与风铃赶来支援，带来旧站地形图和一包被雨淋湿的糖。",
+    dialogues: [
+      { speaker: "卓玛", text: "三年都等过来了，多等一晚不丢人。" },
+      { speaker: "风铃", text: "但糖再等就化了，先分。" }
+    ],
+    choices: [
+      { text: "收下她们的援助。", effects: [{ type: "event", value: "E808_unlocked" }, { type: "change", key: "卓玛风铃好感", value: 10 }, { type: "change", key: "粮药", value: 1 }], nextScene: "ch8_011" }
+    ]
+  },
+  "ch8_011": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8MainKey,
+    description: "指尖的温度与长枪的重量让队伍意识到：靠近赤不是单人英雄主义，而是一整支队伍的护送。",
+    dialogues: [
+      { speaker: "阿缇娅", sprite: "serious", text: "我会护住她失控时的第一拍。" },
+      { speaker: "弥洛", sprite: "serious", text: "我负责把余震压到最低。屿，你只管把该说的话说完。" }
+    ],
+    choices: [
+      { text: "部署护送队形。", effects: [{ type: "event", value: "ch8_contract_guard_formation" }, { type: "change", key: "赤稳定度", value: 6 }], nextScene: "ch8_012" }
+    ]
+  },
+  "ch8_012": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CollapsedWaitingHallRain,
+    description: "黑暗巡演残部在雨幕中出现。莫洛试图夺走赤，声称“独奏者必须回到巡演”。",
+    dialogues: [
+      { speaker: "莫洛", text: "赤不是你们可以带走的遗物。她属于未结束的巡演。" },
+      { speaker: "赤", text: "未结束……不能停……不能停。" }
+    ],
+    choices: [
+      { text: "保护赤与屿的新契约尝试。", effects: [{ type: "event", value: "ch8_dark_tour_remnants_attack" }], nextScene: "ch8_013" }
+    ]
+  },
+  "ch8_013": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8FallenDarkTourStation,
+    description: "战斗目标不是单纯击败敌人，而是在黑暗巡演残部干扰下稳住赤，让屿有机会喊出正确的调。",
+    dialogues: [
+      { speaker: "系统", text: "【战斗目标】保卫赤与屿的新生：击退残部，同时守住赤稳定度。" }
+    ],
+    choices: [
+      { text: "进入战斗：保卫赤与屿的新生。", effects: [{ type: "event", value: "ch8_contract_battle_started" }], effect: () => startBattle("ch8_dark_tour_remnants", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) }
+    ]
+  },
+  "ch8_014": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8TuningScoreRoom,
+    description: "残部退开后，赤的旋律仍在崩解。屿必须从旧谱里找出真正能接住她的调。",
+    dialogues: [
+      { speaker: "屿", text: "不是C小调，也不是她旧指挥者常用的A调……她现在需要的是能让弦线落地的那一拍。" }
+    ],
+    choices: [
+      { text: "调子记忆挑战：选择降B调。", effects: [{ type: "change", key: "默契值", value: 15 }, { type: "change", key: "赤稳定度", value: 12 }, { type: "event", value: "ch8_b_flat_called" }], nextScene: "ch8_015" },
+      { text: "选择C小调，先压住崩解。", effects: [{ type: "change", key: "赤稳定度", value: 5 }, { type: "event", value: "ch8_wrong_key_softened" }], nextScene: "ch8_015" }
+    ]
+  },
+  "ch8_015": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8MainKey,
+    description: "屿向赤伸出手，没有说“替代”，只说“如果你想继续，我会听”。",
+    dialogues: [
+      { speaker: "屿", text: "我不是回来占据谁的位置。我只是想成为你下一段旋律的第一个听众。" },
+      { speaker: "赤", text: "……下一段？" }
+    ],
+    choices: [
+      { text: "判定新契约是否成立。", effect: () => resolveChapter8ContractOutcome() }
+    ]
+  },
+  "ch8_016": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "零四注意到赤收起琴弓时的小动作，与缇雅曾经教她的“先确认自己安全”几乎一样。",
+    dialogues: [
+      { speaker: "零四", sprite: "smile", text: "她刚才先看了自己的手，再看了屿。那不是命令反应，是确认。" },
+      { speaker: "安柠", sprite: "smile", text: "看来你已经很会观察别人有没有真的回来了。" }
+    ],
+    choices: [
+      { text: "把这个细节记入零四的成长。", effects: [{ type: "change", key: "零四恢复进度", value: 8 }, { type: "change", key: "安柠零四友情值", value: 6 }], nextScene: "ch8_017" }
+    ]
+  },
+  "ch8_017": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8StationPlatformDawn,
+    description: "尾声的篝火安静燃烧。赤没有再对空座独奏，她把第一小节留给屿来听。",
+    dialogues: [
+      { speaker: "赤", text: "如果我停下来，你还会听吗？" },
+      { speaker: "屿", text: "会。你停下来的声音，我也听。" }
+    ],
+    choices: [
+      { text: "迎来章末路线分歧。", nextScene: "ch8_018" }
+    ]
+  },
+  "ch8_018": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8StationPlatformDawn,
+    description: "第八章结束。赤与屿的新契约成为自由篇章的核心转折，主角与阿缇娅/弥洛的隐性关系也进入下一阶段。",
+    dialogues: [
+      { speaker: "系统", text: "【第八章完成】【赤与屿新契约线接入】【隐性情愫路线记录完成】" }
+    ],
+    choices: [
+      { text: "回到第八章章节入口。", effects: [{ type: "event", value: "chapter8_complete" }, { type: "set", key: "chapterProgress", value: 8 }], nextScene: "chapter8_start" }
+    ]
+  },
+  "chapter8_event_E801": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CollapsedWaitingHallRain,
+    description: "E801 · 黑暗巡演号旧站点巡礼。调查旧站结构，确认赤一直避开会误伤旅人的区域。",
+    choices: [
+      { text: "完成旧站巡礼。", effects: [{ type: "event", value: "E801_old_station_survey_clear" }, { type: "change", key: "赤稳定度", value: 6 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch8_004" }
+    ]
+  },
+  "chapter8_event_E802": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "E802 · 屿与弥洛的对谈。弥洛提醒屿，不要把亏欠伪装成温柔。",
+    choices: [
+      { text: "让屿承认自己的恐惧。", effects: [{ type: "event", value: "E802_yu_milo_talk_clear" }, { type: "change", key: "屿好感", value: 8 }, { type: "change", key: "默契值", value: 6 }], nextScene: "ch8_011" }
+    ]
+  },
+  "chapter8_event_E803": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8PocketWatchRepairShelter,
+    description: "E803 · 安柠父亲的隐秘守护。旧信解释了父亲曾暗中保护安柠远离黑暗巡演的牵连。",
+    choices: [
+      { text: "收好这封迟到的信。", effects: [{ type: "event", value: "E803_father_hidden_guard_clear" }, { type: "change", key: "安柠好感", value: 10 }], nextScene: "ch8_008" }
+    ]
+  },
+  "chapter8_event_E804": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8PocketWatchRepairShelter,
+    description: "E804 · 阿棠怀表的修复。齿轮重新咬合时，屿终于听见阿棠留给他的最后一句话。",
+    choices: [
+      { text: "完成怀表支线。", effects: [{ type: "event", value: "E804_atang_watch_repaired" }, { type: "change", key: "屿好感", value: 12 }, { type: "change", key: "默契值", value: 6 }], nextScene: "ch8_008" }
+    ]
+  },
+  "chapter8_event_E805": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "E805 · 零四与安柠的手作时光。两人把旧站捡到的铜线做成小小护符。",
+    choices: [
+      { text: "完成手作时光。", effects: [{ type: "event", value: "E805_handcraft_clear" }, { type: "change", key: "安柠零四友情值", value: 12 }, { type: "change", key: "零四恢复进度", value: 4 }], nextScene: "ch8_003" }
+    ]
+  },
+  "chapter8_event_E806": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8FallenDarkTourStation,
+    description: "E806 · 赤的旧乐谱。旧谱上被反复划掉的不是演出失败记录，而是她练习“停下来”的痕迹。",
+    choices: [
+      { text: "读懂赤的旧乐谱。", effects: [{ type: "event", value: "E806_chi_old_score_known" }, { type: "change", key: "赤稳定度", value: 10 }, { type: "change", key: "默契值", value: 5 }], nextScene: "ch8_014" }
+    ]
+  },
+  "chapter8_event_E807": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CollapsedWaitingHallRain,
+    description: "E807 · 莫洛的过去。莫洛并非忠诚于巡演，而是害怕承认巡演早已没有观众。",
+    choices: [
+      { text: "记录莫洛的恐惧源头。", effects: [{ type: "event", value: "E807_molo_past_known" }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch8_012" }
+    ]
+  },
+  "chapter8_event_E808": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "E808 · 卓玛与风铃的“三年”。她们讲述这三年如何学会把等待变成生活，而不是刑期。",
+    choices: [
+      { text: "听完她们的三年。", effects: [{ type: "event", value: "E808_three_years_clear" }, { type: "change", key: "卓玛风铃好感", value: 10 }, { type: "change", key: "安心值", value: 6 }], nextScene: "ch8_011" }
+    ]
+  },
+  "chapter8_event_minigame_watch_repair": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8PocketWatchRepairShelter,
+    description: "怀表齿轮修复：按外圈、擒纵、游丝的顺序复位，让阿棠留下的时间重新走动。",
+    choices: [
+      { text: "按正确顺序复位齿轮。", effects: [{ type: "event", value: "ch8_minigame_watch_repair_clear" }, { type: "change", key: "默契值", value: 5 }], nextScene: "chapter8_event_E804" },
+      { text: "只做基础清洁，避免损坏旧物。", effects: [{ type: "event", value: "ch8_minigame_watch_repair_safe" }, { type: "change", key: "屿好感", value: 4 }], nextScene: "ch8_008" }
+    ]
+  },
+  "chapter8_event_minigame_handcraft": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "手作时光：安柠与零四把铜线、碎布和玫瑰枝编成小护符。",
+    choices: [
+      { text: "完成小护符。", effects: [{ type: "event", value: "ch8_minigame_handcraft_clear" }, { type: "change", key: "安柠零四友情值", value: 8 }], nextScene: "chapter8_event_E805" }
+    ]
+  },
+  "chapter8_event_minigame_heartbeat": {
+    chapter: 8,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "沉默与心跳：不通过告白推进关系，只通过陪伴、停顿与回避视线记录隐性路线倾向。",
+    choices: [
+      { text: "把热茶递给阿缇娅。", effects: [{ type: "event", value: "ch8_heartbeat_atya" }, { type: "change", key: "阿缇娅情愫值", value: 6 }], nextScene: "ch8_004" },
+      { text: "替弥洛收好工具。", effects: [{ type: "event", value: "ch8_heartbeat_milo" }, { type: "change", key: "弥洛情愫值", value: 6 }], nextScene: "ch8_004" }
+    ]
+  },
+  "chapter9_start": {
+    title: "第九章 · 暗音初响",
+    chapter: 9,
+    location: "禁曲派残部荒废据点",
+    backgroundImage: ASSETS.backgrounds.ch9LanFarewellKey,
+    description: "第九章 · 暗音初响。岐与岚的去留迎来悲剧性收束，初响会第一次真正露出一角。",
+    systemPrompt: "第九章 · 暗音初响｜更高层阴影初现。新增机制：威压值、撤退判定、岐好感值、岚离场分支值、初响会情报值。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "serious", text: "岐与岚从第四章后一直游离在残部边缘。她们迟早会走到必须选边站的时刻。" },
+      { speaker: "零四", sprite: "serious", text: "那我们就去找她们。至少，不要让她们也被留在原地。" }
+    ],
+    choices: [
+      { text: "开始第九章：暗音初响。", effects: [{ type: "set", key: "威压值", value: 0 }, { type: "set", key: "岐好感值", value: 0 }, { type: "set", key: "岚离场分支值", value: 0 }, { type: "set", key: "初响会情报值", value: 0 }, { type: "event", value: "chapter9_route_started" }, { type: "set", key: "chapterProgress", value: 9 }], nextScene: "ch9_000" }
+    ]
+  },
+  "ch9_000": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9TempCampStrategy,
+    presentation: "cinematic",
+    description: "临时营地里，弥洛整理莫洛残部动向。岐与岚的名字再次浮出水面。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "serious", text: "她们那句“动摇但没有脱离”，迟早会变成一道必须回答的问题。" },
+      { speaker: "阿缇娅", sprite: "worried", text: "那就别等问题替她们回答。" }
+    ],
+    choices: [
+      { text: "循着残部线索前往荒废据点。", effects: [{ type: "event", value: "ch9_qilan_search_started" }], nextScene: "ch9_001" }
+    ]
+  },
+  "ch9_001": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9AbandonedOutpostArchive,
+    description: "禁曲派残部旧据点里，岚第一反应是护在岐身前，随即露出疲惫的苦笑。",
+    dialogues: [
+      { speaker: "岚", text: "这个反应，是不是有点可笑。我们既怕你们，又好像一直在等你们来。" },
+      { speaker: "岐", text: "我们不是在等救援。我们只是……想在被清算前，至少做对一件事。" }
+    ],
+    choices: [
+      { text: "听她们说明旧档案的事。", effects: [{ type: "change", key: "岐好感值", value: 8 }, { type: "event", value: "E901_unlocked" }], nextScene: "ch9_002" }
+    ]
+  },
+  "ch9_002": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9AbandonedOutpostArchive,
+    description: "众人协助岐与岚筛出会牵连无辜者的旧档案，焚毁真正危险的名单。",
+    dialogues: [
+      { speaker: "岐", text: "哪怕接下来会发生什么，至少这件事，我们做对了。" },
+      { speaker: "系统", text: "【小游戏】档案焚毁挑战：区分敏感名单与无辜记录。" }
+    ],
+    choices: [
+      { text: "谨慎筛选，只销毁危险名单。", effects: [{ type: "event", value: "ch9_archive_burn_careful" }, { type: "change", key: "岐好感值", value: 10 }, { type: "change", key: "初响会情报值", value: 2 }], nextScene: "ch9_003" },
+      { text: "快速处理，优先避免追兵赶到。", effects: [{ type: "event", value: "ch9_archive_burn_fast" }, { type: "change", key: "威压值", value: 4 }], nextScene: "ch9_003" }
+    ]
+  },
+  "ch9_003": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "暴风雨前的宁静里，主角与阿缇娅/弥洛的隐性关系又向前一步。",
+    dialogues: [
+      { speaker: "系统", text: "【暗线】面对更大的恐惧时，真正先被确认的名字，会悄悄改变关系的重量。" }
+    ],
+    choices: [
+      { text: "告诉阿缇娅：你已经保护得很好了。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 12 }, { type: "event", value: "ch9_atya_fear_talk" }], nextScene: "ch9_004" },
+      { text: "什么都不说，只握住阿缇娅的手。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 15 }, { type: "event", value: "ch9_atya_hand_held" }], nextScene: "ch9_004" },
+      { text: "问弥洛：你第一个想确认安全的人是谁？", effects: [{ type: "change", key: "弥洛情愫值", value: 15 }, { type: "event", value: "ch9_milo_name_unspoken" }], nextScene: "ch9_004" },
+      { text: "只是轻轻靠近弥洛一点。", effects: [{ type: "change", key: "弥洛情愫值", value: 12 }, { type: "event", value: "ch9_milo_quiet_closer" }], nextScene: "ch9_004" }
+    ]
+  },
+  "ch9_004": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9UnmailedLetterCamp,
+    description: "零四建议安柠写一封不会寄出的家书。亲情的旧伤在友情的陪伴里慢慢松动。",
+    dialogues: [
+      { speaker: "零四", sprite: "smile", text: "有些话，写出来，好像就没那么堵在心里了。" },
+      { speaker: "安柠", sprite: "worried", text: "那我试试。就当写给一个终于能被我理解一点点的人。" }
+    ],
+    choices: [
+      { text: "开始拼出家书的第一段。", effects: [{ type: "event", value: "ch9_unmailed_family_letter_started" }], nextScene: "chapter9_event_minigame_unmailed_letter" }
+    ]
+  },
+  "ch9_005": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9OutpostEntranceStillNight,
+    description: "夜空毫无征兆地安静下来。玄鸦与辞照站在据点入口，仿佛一直都在那里，只是此刻才被允许看见。",
+    dialogues: [
+      { speaker: "岚", text: "是……初响会的人。我们只在最高层的只言片语里听过这个名字。" },
+      { speaker: "玄鸦", text: "卡戎和他的黑暗巡演，只是我们众多区域实验里反馈数据比较有趣的一支。" }
+    ],
+    choices: [
+      { text: "尝试判断双方实力差距。", effects: [{ type: "change", key: "威压值", value: 20 }, { type: "change", key: "初响会情报值", value: 8 }, { type: "event", value: "ch9_first_resonance_appeared" }], nextScene: "ch9_006" }
+    ]
+  },
+  "ch9_006": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9OutpostEntranceStillNight,
+    description: "辞照以近乎排练过千百次的优雅动作展开战斗姿态。队伍第一次面对“无法力敌”的存在。",
+    dialogues: [
+      { speaker: "辞照", text: "你们和你们的律者之间，那种……羁绊，很有意思。我的存在，不需要那种东西。" },
+      { speaker: "阿缇娅", sprite: "shocked", text: "他不是在压制我们。是根本没把我们当成需要认真应对的对象。" }
+    ],
+    choices: [
+      { text: "进入威压感知战：只求撑住并撤退。", effects: [{ type: "event", value: "ch9_cizhao_pressure_started" }], effect: () => startBattle("ch9_cizhao_pressure", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) }
+    ]
+  },
+  "ch9_007": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9OutpostEntranceStillNight,
+    description: "玄鸦没有下令赶尽杀绝，而是提出冷静到残忍的交易：带走岚，放过岐。",
+    dialogues: [
+      { speaker: "玄鸦", text: "岐，我们不需要。她的动摇太明显，回收成本太高。" },
+      { speaker: "玄鸦", text: "岚，你还有价值。跟我们走，我保证岐的安全。" }
+    ],
+    choices: [
+      { text: "质问这不是交易，是胁迫。", effects: [{ type: "change", key: "威压值", value: 6 }, { type: "event", value: "ch9_called_out_xuanya_coercion" }], nextScene: "ch9_008" },
+      { text: "先看岚自己的反应。", effects: [{ type: "change", key: "岚离场分支值", value: 4 }], nextScene: "ch9_008" }
+    ]
+  },
+  "ch9_008": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9LanFarewellKey,
+    description: "漫长沉默后，岚做出选择。她不是投降，而是在此刻用唯一能换来的条件保护岐。",
+    dialogues: [
+      { speaker: "岚", text: "岐，对不起。这次，换我来做那个，留在原地不甘心的人。" },
+      { speaker: "岐", text: "姐！不行——" }
+    ],
+    choices: [
+      { text: "尝试出手阻拦。", effects: [{ type: "change", key: "岚离场分支值", value: 8 }, { type: "change", key: "威压值", value: 8 }, { type: "event", value: "ch9_tried_to_stop_lan" }], nextScene: "ch9_009" },
+      { text: "尊重岚的选择，不做无谓强拦。", effects: [{ type: "change", key: "岐好感值", value: 10 }, { type: "event", value: "ch9_respected_lan_choice" }], nextScene: "ch9_009" }
+    ]
+  },
+  "ch9_009": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9LanFarewellKey,
+    description: "岚离开前回头笑了一下。那不是绝望，而是把最后一点自由用在了选择上。",
+    dialogues: [
+      { speaker: "岚", text: "谢谢你们，愿意在最后，还想拦一下。" },
+      { speaker: "辞照", text: "这不属于你们能干涉的交易。不过……她选择的方式，至少比很多“资产”体面。" }
+    ],
+    choices: [
+      { text: "目送岚被带走。", effects: [{ type: "event", value: "ch9_lan_taken_by_first_resonance" }], nextScene: "ch9_010" }
+    ]
+  },
+  "ch9_010": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9AbandonedOutpostArchive,
+    description: "岐压抑的哭声终于崩溃。阿缇娅抱住她，零四握住她的手。",
+    dialogues: [
+      { speaker: "阿缇娅", sprite: "worried", text: "哭出来吧。这不是你的错，也不是她的错。" },
+      { speaker: "零四", sprite: "serious", text: "如果有一天我们能找到办法救回岚——我们不会停下。" }
+    ],
+    choices: [
+      { text: "让岐先把崩溃哭完。", effects: [{ type: "change", key: "岐好感值", value: 12 }, { type: "event", value: "ch9_qi_comforted" }], nextScene: "ch9_011" }
+    ]
+  },
+  "ch9_011": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9MotherInvitationClue,
+    presentation: "cinematic",
+    description: "玄鸦离场前，向主角抛下母亲线索：母亲曾拒绝过初响会一次邀请。",
+    dialogues: [
+      { speaker: "玄鸦", text: "你母亲当年，其实拒绝过我们一次邀请。这在记录里，是极少数的“反常数据”。" },
+      { speaker: "系统", text: "【世界观碎片】母亲的“反常数据”线索已更新。" }
+    ],
+    choices: [
+      { text: "记住这个名字：初响会。", effects: [{ type: "change", key: "初响会情报值", value: 15 }, { type: "event", value: "ch9_mother_anomaly_data_known" }], nextScene: "ch9_012" }
+    ]
+  },
+  "ch9_012": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9OutpostDawnAfterFarewell,
+    description: "翌日清晨，岐擦干眼泪。她没有被留下，而是决定带着找回岚的念头继续活下去。",
+    dialogues: [
+      { speaker: "岐", text: "岚说要我好好活下去，那我就好好活下去——带着找回她的念头，好好活下去。" }
+    ],
+    choices: [
+      { text: "当然可以，我们一起想办法。", effects: [{ type: "event", value: "ch9_qi_joined_party" }, { type: "change", key: "岐好感值", value: 15 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch9_013" },
+      { text: "你先休息，想清楚了随时来找我们。", effects: [{ type: "event", value: "ch9_qi_future_branch_reserved" }, { type: "change", key: "岐好感值", value: 8 }], nextScene: "ch9_013" }
+    ]
+  },
+  "ch9_013": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9OutpostDawnAfterFarewell,
+    description: "第九章结束。初响会、培育律者、母亲的反常数据与岚的下落，成为新的核心悬念。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "我们救回来的人和没能留住的人，好像越来越多了。但至少，没有一个名字是真的被遗忘了。" },
+      { speaker: "系统", text: "【第九章完成】【初响会正式登场】【岐与岚去留收束】" }
+    ],
+    choices: [
+      { text: "观看安娜远景伏笔。", effects: [{ type: "event", value: "ch9_anna_teaser_unlocked" }], nextScene: "ch9_014" },
+      { text: "回到第九章章节入口。", effects: [{ type: "event", value: "chapter9_complete" }, { type: "set", key: "chapterProgress", value: 9 }], nextScene: "chapter9_start" }
+    ]
+  },
+  "ch9_014": {
+    chapter: 9,
+    location: "永寂城·水晶大厅",
+    backgroundImage: ASSETS.backgrounds.ch9YongjiCrystalHall,
+    description: "同一夜的另一端，永寂城的水晶大厅沉在蓝紫色的寂静里。冰层下压着零散的玫瑰花瓣，像一段尚未被人翻开的乐谱。",
+    dialogues: [
+      { speaker: "侍从", text: "城外的观测回报已送达。荒废据点出现了新的共鸣反应。" },
+      { speaker: "系统", text: "【远景伏笔】一份并未送往主角一行的记录，正被永寂城悄然收下。" }
+    ],
+    choices: [
+      { text: "循着大厅深处的琴音望去。", effects: [{ type: "event", value: "ch9_yongji_hall_seen" }], nextScene: "ch9_015" }
+    ]
+  },
+  "ch9_015": {
+    chapter: 9,
+    location: "永寂城·水晶大厅",
+    backgroundImage: ASSETS.backgrounds.ch9AnnaTransformationTeaserKey,
+    description: "深赤长发在寒光里铺开，仿佛被星轨牵引。她的冰蓝眼眸微抬，右眼下那颗泪痣像一枚极小、却绝不容忽视的落点。",
+    dialogues: [
+      { speaker: "安娜", sprite: "herrscher", text: "命运。又有谁，自作主张，想替我谱写吗？" },
+      { speaker: "侍从", text: "大人，需要我们追查那支队伍吗？" },
+      { speaker: "安娜", sprite: "herrscher", text: "不必。先让他们走到自己以为的终点。" }
+    ],
+    choices: [
+      { text: "看见一段不属于此刻的旧日影像。", effects: [{ type: "event", value: "ch9_anna_transformed_seen" }], nextScene: "ch9_016" }
+    ]
+  },
+  "ch9_016": {
+    chapter: 9,
+    location: "旧日列车档案室",
+    backgroundImage: ASSETS.backgrounds.ch9AnnaDailyArchiveStory,
+    description: "影像短暂闪回：还未变身的安娜坐在列车档案室，橙红高马尾、蓝眼与圆环耳饰都带着寻常旅人的暖意。右眼下那颗泪痣仍在，仿佛早已替她记住所有未说出口的告别。",
+    dialogues: [
+      { speaker: "安娜", sprite: "daily", text: "车票会过期，档案会蒙尘。可有些人，总会在下一站等到该等的答案。" },
+      { speaker: "系统", text: "【第九章余响】安娜的日常与变身身份已留下可追溯的双重线索。" }
+    ],
+    choices: [
+      { text: "将这段余响收进记录。", effects: [{ type: "event", value: "ch9_anna_daily_identity_seen" }, { type: "event", value: "chapter9_complete" }, { type: "set", key: "chapterProgress", value: 9 }], nextScene: "chapter9_start" }
+    ]
+  },
+  "chapter9_event_E901": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9AbandonedOutpostArchive,
+    description: "E901 · 据点旧物探索。残留物资拼凑出残部瓦解后的混乱状态。",
+    choices: [
+      { text: "完成据点探索。", effects: [{ type: "event", value: "E901_outpost_old_items_clear" }, { type: "change", key: "初响会情报值", value: 3 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch9_002" }
+    ]
+  },
+  "chapter9_event_E902": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9AbandonedOutpostArchive,
+    description: "E902 · 岐的心结。岐谈起自己与岚从小相依为命的成长经历。",
+    choices: [
+      { text: "听完岐的背景独白。", effects: [{ type: "event", value: "E902_qi_background_clear" }, { type: "change", key: "岐好感值", value: 15 }], nextScene: "ch9_012" }
+    ]
+  },
+  "chapter9_event_E903": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9AbandonedOutpostArchive,
+    description: "E903 · 辞照的只言片语。细品他展示实力时说漏的半句话，埋下培育律者是否能长出自我的伏笔。",
+    choices: [
+      { text: "记录辞照的裂缝。", effects: [{ type: "event", value: "E903_cizhao_half_sentence_known" }, { type: "change", key: "初响会情报值", value: 6 }], nextScene: "ch9_011" }
+    ]
+  },
+  "chapter9_event_E904": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9AbandonedOutpostArchive,
+    description: "E904 · 玄鸦调查笔记残页。疑似记录着主角母亲离开零号奏者计划后的第一步。",
+    choices: [
+      { text: "收起残页。", effects: [{ type: "event", value: "E904_xuanya_note_fragment" }, { type: "change", key: "初响会情报值", value: 8 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch9_011" }
+    ]
+  },
+  "chapter9_event_E905": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    description: "E905 · 弥洛与辞照的对照沉思。弥洛谈起“完整的自我是否比破碎的自我更幸运”。",
+    choices: [
+      { text: "陪弥洛把话说完。", effects: [{ type: "event", value: "E905_milo_cizhao_reflection" }, { type: "change", key: "弥洛信任", value: 8 }, { type: "change", key: "弥洛情愫值", value: 4 }], nextScene: "ch9_012" }
+    ]
+  },
+  "chapter9_event_minigame_unmailed_letter": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9UnmailedLetterCamp,
+    description: "家书书写：从没能当面说出口的词句里，拼出安柠愿意留给父亲的一段话。没有唯一正确答案。",
+    choices: [
+      { text: "写下“我终于懂了一点，你为什么一直没有回来”。", effects: [{ type: "event", value: "ch9_unmailed_family_letter" }, { type: "event", value: "ch9_letter_understanding" }, { type: "change", key: "安柠零四友情值", value: 10 }, { type: "change", key: "安柠好感", value: 6 }], nextScene: "ch9_005" },
+      { text: "写下“我还是会想你，但我会先把今天过好”。", effects: [{ type: "event", value: "ch9_unmailed_family_letter" }, { type: "event", value: "ch9_letter_moving_forward" }, { type: "change", key: "安柠零四友情值", value: 8 }, { type: "change", key: "安柠好感", value: 8 }], nextScene: "ch9_005" },
+      { text: "先把信纸折好，留给下一个能继续写下去的夜晚。", effects: [{ type: "event", value: "ch9_letter_paused_with_care" }, { type: "change", key: "安柠零四友情值", value: 7 }, { type: "change", key: "安柠好感", value: 5 }], nextScene: "ch9_005" }
+    ]
+  },
+  "chapter9_event_minigame_pressure_reading": {
+    chapter: 9,
+    backgroundImage: ASSETS.backgrounds.ch9OutpostEntranceStillNight,
+    description: "威压感知训练：玩家不追求胜利，只判断何时该退、如何让队伍少受伤。",
+    choices: [
+      { text: "识别撤退窗口。", effects: [{ type: "event", value: "ch9_minigame_pressure_reading_clear" }, { type: "change", key: "威压值", value: -6 }], nextScene: "ch9_007" }
+    ]
+  },
+  "chapter10_start": {
+    title: "第十章 · 白霜远响",
+    chapter: 10,
+    location: "母亲旧居",
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceKey,
+    description: "第十章 · 白霜远响。三条新线索将母亲旧居、白谱院密档与老纪旧访客登记串到一起，队伍开始追寻北方古老聚落的影子。",
+    systemPrompt: "第十章 · 白霜远响｜沉淀调查章。本章不新增独立数值系统，沿用岐好感、情愫值、友情值、世界观信息等既有字段。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "三条线索，指向三个不同方向。但拼起来看……它们可能会汇成同一条路。" },
+      { speaker: "弥洛", sprite: "serious", text: "如果是这样，那这条路的尽头，恐怕不会太简单。" }
+    ],
+    choices: [
+      { text: "开始第十章：白霜远响。", effects: [{ type: "event", value: "chapter10_route_started" }, { type: "set", key: "chapterProgress", value: 10 }], nextScene: "ch10_000" }
+    ]
+  },
+  "ch10_000": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthboundTransitCamp,
+    description: "临时营地里，玄鸦遗落笔记、白谱院密档补充记录与老纪旧访客登记被并排铺开。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "先从最近的老宅查起，至少能验证母亲离开零号奏者计划后的第一步。" },
+      { speaker: "阿缇娅", sprite: "serious", text: "那就别让线索冷下去。" }
+    ],
+    choices: [
+      { text: "先从最近的老宅查起。", effects: [{ type: "event", value: "ch10_old_residence_priority" }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch10_001" },
+      { text: "分头验证每一条线索。", effects: [{ type: "event", value: "E1001_unlocked" }, { type: "event", value: "E1002_unlocked" }, { type: "change", key: "世界观信息", value: 3 }], nextScene: "ch10_001" }
+    ]
+  },
+  "ch10_001": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthboundTransitCamp,
+    description: "出发前，零四主动承担起物资清点。她的动作熟练得不像是几个月前那个连选择都要人引导的存在。",
+    dialogues: [
+      { speaker: "零四", sprite: "smile", text: "物资都准备好了。这次，我想承担更多——不是因为必须，是我自己想做。" }
+    ],
+    choices: [
+      { text: "认可零四的主动选择。", effects: [{ type: "change", key: "零四恢复进度", value: 6 }, { type: "event", value: "ch10_sequence04_supplies_ready" }], nextScene: "ch10_002" }
+    ]
+  },
+  "ch10_002": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthboundTransitCamp,
+    description: "岐看到安柠与零四并肩说笑，忽然停住。那一瞬，她想起以前的自己和岚。",
+    dialogues: [
+      { speaker: "岐", text: "抱歉，我只是……看到你们这样，会想起以前我和岚。你们不用管我，我很快就好。" }
+    ],
+    choices: [
+      { text: "让零四先陪她坐一会儿。", effects: [{ type: "event", value: "ch10_qi_grief_noticed" }], nextScene: "ch10_003" }
+    ]
+  },
+  "ch10_003": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthboundTransitCamp,
+    description: "零四没有急着安慰，也没有要求岐立刻振作，只把热水递过去，安静坐在旁边。",
+    dialogues: [
+      { speaker: "零四", sprite: "serious", text: "你不用“很快就好”。我花了很久，才学会不逼自己立刻好起来。你可以，按你自己的节奏来。" }
+    ],
+    choices: [
+      { text: "零四说得对，慢慢来就好。", effects: [{ type: "change", key: "岐好感值", value: 10 }, { type: "change", key: "零四恢复进度", value: 4 }, { type: "event", value: "ch10_sequence04_companion_role" }], nextScene: "ch10_004" },
+      { text: "陪岐坐着，什么都不说。", effects: [{ type: "change", key: "岐好感值", value: 8 }, { type: "event", value: "ch10_silent_company_monologue" }], nextScene: "ch10_004" }
+    ]
+  },
+  "ch10_004": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthboundTransitCamp,
+    description: "赶路途中的夜晚，主角与阿缇娅/弥洛在篝火旁确认一种越来越自然的默契。",
+    dialogues: [
+      { speaker: "系统", text: "【暗线】根据你选择的陪伴对象推进阿缇娅或弥洛的隐性情愫路线。" }
+    ],
+    choices: [
+      { text: "对阿缇娅说：这种默契，我很喜欢。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 15 }, { type: "event", value: "ch10_atya_understands_next_step" }], nextScene: "ch10_005" },
+      { text: "对阿缇娅说：希望这种默契一直保持。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 18 }, { type: "event", value: "ch10_atya_mutual_tacit_wish" }], nextScene: "ch10_005" },
+      { text: "对弥洛说：这种默契，我很喜欢。", effects: [{ type: "change", key: "弥洛情愫值", value: 15 }, { type: "event", value: "ch10_milo_prepared_map" }], nextScene: "ch10_005" },
+      { text: "对弥洛说：希望这种默契一直保持。", effects: [{ type: "change", key: "弥洛情愫值", value: 18 }, { type: "event", value: "ch10_milo_mutual_tacit_wish" }], nextScene: "ch10_005" }
+    ]
+  },
+  "ch10_005": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceKey,
+    description: "爬满藤蔓的老宅出现在眼前。主角脚步慢了下来：这是母亲离开零号奏者计划圈子后的第一个落脚点。",
+    dialogues: [
+      { speaker: "主角", text: "她曾经，在这扇门里，度过了一段我完全不知道的日子。" }
+    ],
+    choices: [
+      { text: "进入母亲旧居。", effects: [{ type: "event", value: "ch10_arrived_mother_old_residence" }], nextScene: "ch10_006" }
+    ]
+  },
+  "ch10_006": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10MotherOldStudy,
+    description: "旧书房积尘已久，声波草图、泛黄笔记与一处半开的暗格，拼出母亲曾经独自研究的方向。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "这些笔记的研究方向，已经完全偏离了零号奏者计划的官方课题范畴。" }
+    ],
+    choices: [
+      { text: "辨读旧笔记关键词。", effects: [{ type: "event", value: "ch10_old_notes_reading_started" }], nextScene: "chapter10_event_minigame_old_notes" },
+      { text: "探索老宅阁楼。", conditions: [{ operator: "notIncludes", value: "E1001_mother_hairpin_found", label: "阁楼旧物已收好" }], nextScene: "chapter10_event_E1001" },
+      { text: "先检查书桌暗格。", effects: [{ type: "event", value: "ch10_hidden_drawer_found" }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch10_007" }
+    ]
+  },
+  "ch10_007": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceBattleRoom,
+    description: "旧宅深处的残留噬响体从纸页、藤蔓与破损音叉之间浮起。它们威胁不高，却足够检验队伍新协同。",
+    dialogues: [
+      { speaker: "岐", text: "岚，看着。我不会让自己，变成需要你回来救的样子。" },
+      { speaker: "系统", text: "【常规遭遇战】残留噬响体：低威胁、重协同，岐加入后的实战融入测试。" }
+    ],
+    choices: [
+      { text: "进入战斗：清除残留噬响体。", effects: [{ type: "event", value: "ch10_residual_dissonance_started" }], effect: () => startBattle("ch10_residual_dissonance", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) }
+    ]
+  },
+  "ch10_008": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceBattleRoom,
+    description: "战斗结束后，岐望着自己的双手，露出一个疲惫却真实的笑容。",
+    dialogues: [
+      { speaker: "岐", text: "这是我加入你们之后，第一次觉得，自己不只是在“被照顾”，也能“照顾别人”了。" }
+    ],
+    choices: [
+      { text: "把这场实战记作岐的融入。", effects: [{ type: "change", key: "岐好感值", value: 10 }, { type: "event", value: "ch10_qi_first_integration_battle" }], nextScene: "ch10_009" }
+    ]
+  },
+  "ch10_009": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10UnsentMotherLetter,
+    presentation: "cinematic",
+    description: "暗格里找到一封母亲亲笔写下、却似乎从未寄出的信件草稿。",
+    dialogues: [
+      { speaker: "系统", text: "【信件草稿】如果零号奏者计划注定走向失控，那我必须找到一条完全独立于它的备用解法。" },
+      { speaker: "主角", text: "母亲当年，是这样孤身一人，走上了这条谁都不知道的路。" }
+    ],
+    choices: [
+      { text: "记录“北方古老聚落”的线索。", effects: [{ type: "change", key: "世界观信息", value: 5 }, { type: "event", value: "ch10_mother_northern_settlement_clue" }], nextScene: "ch10_010" }
+    ]
+  },
+  "ch10_010": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10MotherOldStudy,
+    description: "安柠将老宅发现与温别克提供的白谱院密档补充记录对照，“另有所寻”四个字终于有了注解。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "“另有所寻”……她要找的，就是信里提到的那处北方古老聚落。" }
+    ],
+    choices: [
+      { text: "将密档与信件合并归档。", effects: [{ type: "event", value: "ch10_white_score_file_matched" }, { type: "change", key: "白谱院声望值", value: 2 }], nextScene: "ch10_011" }
+    ]
+  },
+  "ch10_011": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10MotherOldStudy,
+    description: "结合第八、九章线索，安柠终于拼出父亲完整行动轨迹：十余年秘密维护边缘设施，不为名利，也无人知晓。",
+    dialogues: [
+      { speaker: "安柠", sprite: "worried", text: "他把所有该说的话，都变成了这些，没人看见的行动。" }
+    ],
+    choices: [
+      { text: "他一定为你感到骄傲。", effects: [{ type: "change", key: "安柠好感", value: 15 }, { type: "event", value: "ch10_anning_father_arc_comfort" }], nextScene: "ch10_012" },
+      { text: "你想不想也去看看他维护过的地方？", effects: [{ type: "change", key: "安柠好感", value: 12 }, { type: "event", value: "E1002_unlocked" }], nextScene: "ch10_012" },
+      { text: "沿着维护记录前往那处边缘设施。", conditions: [{ operator: "notIncludes", value: "ch10_minigame_maintenance_log_clear", label: "维护日志已整理" }], nextScene: "chapter10_event_E1002" }
+    ]
+  },
+  "ch10_012": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceDoorstepDusk,
+    description: "午后，安柠独自坐在老宅门槛上，第一次以平静而不是赌气的口吻谈起父亲。",
+    dialogues: [
+      { speaker: "安柠", sprite: "smile", text: "爸，我不生你的气了。你没告诉我的事，我现在自己一点点查出来了。" }
+    ],
+    choices: [
+      { text: "陪安柠把话说完。", effects: [{ type: "change", key: "安柠好感", value: 8 }, { type: "event", value: "ch10_anning_released_father_grief" }], nextScene: "ch10_013" }
+    ]
+  },
+  "ch10_013": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10MotherOldStudy,
+    description: "老纪托人捎来书信，附上关键旧访客登记记录，也顺手问了句白谱院革新派近况。",
+    dialogues: [
+      { speaker: "老纪", text: "老朽这把年纪，能帮上忙的地方不多了。这份登记记录，希望能帮你们把路走得更顺一点。" }
+    ],
+    choices: [
+      { text: "回信感谢老纪。", effects: [{ type: "event", value: "ch10_old_ji_visitor_log_received" }, { type: "change", key: "白谱院声望值", value: 3 }], nextScene: "ch10_014" }
+    ]
+  },
+  "ch10_014": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10MotherOldStudy,
+    description: "老纪意外发现与弥洛恩人相关的旁证：那位课题负责人曾自愿下放至边缘观测点，具体地点已模糊不可考。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "serious", text: "边缘观测点……如果线索是真的，那个人会不会也和你母亲一样，去了某个我们还没找到的地方？" }
+    ],
+    choices: [
+      { text: "暂不点破，只把线索标在地图边缘。", effects: [{ type: "event", value: "ch10_milo_benefactor_observatory_clue" }, { type: "change", key: "弥洛信任", value: 6 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch10_015" },
+      { text: "与弥洛推演边缘观测点范围。", conditions: [{ operator: "notIncludes", value: "E1004_milo_observatory_guess", label: "观测点范围已标注" }], nextScene: "chapter10_event_E1004" }
+    ]
+  },
+  "ch10_015": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceDoorstepDusk,
+    description: "夜晚，弥洛望着星空，坦白自己既期待找到恩人，又害怕发现自己没活成对方希望的样子。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "worried", text: "我既盼着这一天，又有点怕。怕见到他之后，发现自己这些年，其实并没有活成他当初希望看到的样子。" }
+    ],
+    choices: [
+      { text: "你已经活得很好了，他一定会为你骄傲。", effects: [{ type: "change", key: "弥洛好感", value: 15 }, { type: "change", key: "弥洛情愫值", value: 6 }, { type: "event", value: "ch10_milo_benefactor_comfort" }], nextScene: "ch10_016" },
+      { text: "不管他怎么想，你自己觉得满意就足够了。", effects: [{ type: "change", key: "弥洛好感", value: 12 }, { type: "event", value: "ch10_milo_self_approval_monologue" }], nextScene: "ch10_016" }
+    ]
+  },
+  "ch10_016": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthernClueMapTable,
+    description: "三条线索被并排摊开：母亲北方古老聚落、父亲边缘设施守护、弥洛恩人边缘观测点，地理指向开始微妙重合。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "三条完全不同的线，好像都在往同一个、比我们想象中更远的地方汇拢。" }
+    ],
+    choices: [
+      { text: "进行线索拼图挑战。", effects: [{ type: "event", value: "ch10_clue_puzzle_started" }], nextScene: "chapter10_event_minigame_clue_puzzle" },
+      { text: "先保守记录为“北方重合区”。", effects: [{ type: "event", value: "ch10_northern_overlap_area_marked" }, { type: "change", key: "世界观信息", value: 3 }], nextScene: "ch10_017" }
+    ]
+  },
+  "ch10_017": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthboundTransitCamp,
+    description: "夜里，主角与阿缇娅/弥洛的默契进一步加深。不是告白，却已经越过“只是同伴”的边界。",
+    dialogues: [
+      { speaker: "系统", text: "【茶歇个人线】完成本节点后可解锁阿缇娅/弥洛“默契之后”专属互动。" }
+    ],
+    choices: [
+      { text: "我也一样，你不是一个人在不知所措。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 18 }, { type: "event", value: "ch10_atya_after_tacit_unlock" }], nextScene: "ch10_018" },
+      { text: "我也是，一样在意你。", effects: [{ type: "change", key: "弥洛情愫值", value: 18 }, { type: "event", value: "ch10_milo_after_tacit_unlock" }], nextScene: "ch10_018" }
+    ]
+  },
+  "ch10_018": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceDoorstepDusk,
+    description: "岐主动向零四道谢。她终于能在想起岚时，不只剩下难过，也能想起一起笑过的日子。",
+    dialogues: [
+      { speaker: "岐", text: "谢谢你，这些天一直陪着我。我好像，终于能带着那些笑过的日子继续走了。" },
+      { speaker: "零四", sprite: "smile", text: "这就是“带着思念继续往前走”的样子。我也是这样，慢慢学会的。" }
+    ],
+    choices: [
+      { text: "听岐讲她与岚共同保存的旧物。", conditions: [{ operator: "notIncludes", value: "E1003_qi_lan_half_charm", label: "旧物约定已听完" }], nextScene: "chapter10_event_E1003" },
+      { text: "听零四整理她认为最重要的成长瞬间。", conditions: [{ operator: "notIncludes", value: "E1005_sequence04_growth_record", label: "成长记录已整理" }], nextScene: "chapter10_event_E1005" },
+      { text: "见证岐的进一步恢复。", effects: [{ type: "change", key: "岐好感值", value: 10 }, { type: "change", key: "零四恢复进度", value: 5 }, { type: "event", value: "ch10_qi_grief_forward_step" }], nextScene: "ch10_019" }
+    ]
+  },
+  "ch10_019": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceDoorstepDusk,
+    description: "队伍收拾好全部线索与行装，望向北方——越来越多线索共同指向，却依旧遥远而模糊的方向。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "serious", text: "这一路，恐怕比我们此前走过的任何一段，都要漫长。" },
+      { speaker: "阿缇娅", sprite: "serious", text: "不管多远，我们都会陪着你走到底。" }
+    ],
+    choices: [
+      { text: "展开北方方向图。", effects: [{ type: "event", value: "ch10_party_ready_to_go_north" }], nextScene: "ch10_020" }
+    ]
+  },
+  "ch10_020": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthernClueMapTable,
+    description: "岔路口前，安柠在地图北方标出一个模糊的大致方向。母亲、弥洛恩人、安柠父亲的秘密，开始汇向共同答案。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "具体路线还需要继续摸索。但至少，我们现在知道，该往哪个方向走了。" },
+      { speaker: "系统", text: "【阶段性推进】母亲踪迹：确认大致方向（北方古老聚落）。【收束】安柠父亲隐秘守护完整轨迹。" }
+    ],
+    choices: [
+      { text: "观看章末别处场景：永寂城。", effects: [{ type: "event", value: "chapter10_main_route_complete" }, { type: "set", key: "chapterProgress", value: 10 }], nextScene: "ch10_021" }
+    ]
+  },
+  "ch10_021": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10AnnaIceBladeTeaser,
+    description: "世界极北，苦寒之地。终年不化的冰雪覆盖着孤悬绝壁之上的永寂城；水晶大厅里，冰棱与深红蔷薇在静止般的寒冷中彼此缠绕。",
+    dialogues: [
+      { speaker: "侍从", text: "城外的麻烦已经处理完毕。只是……那支追查北方线索的队伍，似乎比预计更早行动了。" },
+      { speaker: "安娜", sprite: "herrscher", text: "命运。又有谁，自作主张，想替我谱写吗？" },
+      { speaker: "系统", text: "晶蓝色光刃在她指尖熄灭。她没有再看侍从一眼，只望向窗外无边雪原。" },
+      { speaker: "系统", text: "【独立伏笔】永寂城与安娜远景登场；与主线具体关联留待后续章节展开。" }
+    ],
+    choices: [
+      { text: "回到第十章章节入口。", effects: [{ type: "event", value: "chapter10_complete" }, { type: "set", key: "chapterProgress", value: 10 }], nextScene: "chapter10_start" }
+    ]
+  },
+  "chapter10_event_E1001": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10MotherOldStudy,
+    description: "E1001 · 老宅阁楼。找到母亲年轻时期的一件私人物品：一枚与主角吊坠花纹相似的旧发簪。",
+    choices: [
+      { text: "收好旧发簪，回到书房继续调查。", effects: [{ type: "event", value: "E1001_mother_hairpin_found" }, { type: "change", key: "世界观信息", value: 3 }], nextScene: "ch10_006" }
+    ]
+  },
+  "chapter10_event_E1002": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10FatherMaintenanceFacility,
+    description: "E1002 · 父亲维护过的边缘设施。维护日志按年份排列，安柠父亲十余年的沉默终于有了形状。",
+    choices: [
+      { text: "按时间整理维护日志。", effects: [{ type: "event", value: "E1002_maintenance_log_started" }], nextScene: "chapter10_event_minigame_maintenance_log" }
+    ]
+  },
+  "chapter10_event_E1003": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthboundTransitCamp,
+    description: "E1003 · 岐的旧物。岐取出与岚共同保存的手工饰品：一人一半，不管发生什么都要找到对方那一半。",
+    choices: [
+      { text: "听岐讲完旧物的约定。", effects: [{ type: "event", value: "E1003_qi_lan_half_charm" }, { type: "change", key: "岐好感值", value: 15 }], nextScene: "ch10_018" }
+    ]
+  },
+  "chapter10_event_E1004": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10MotherOldStudy,
+    description: "E1004 · 弥洛的猜想。弥洛与主角推演边缘观测点可能范围，确认它与北方重合区存在微弱关联。",
+    choices: [
+      { text: "标注弥洛的推演范围。", effects: [{ type: "event", value: "E1004_milo_observatory_guess" }, { type: "change", key: "弥洛好感", value: 8 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch10_014" }
+    ]
+  },
+  "chapter10_event_E1005": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthboundTransitCamp,
+    description: "E1005 · 零四的成长印记。零四整理这一路的成长记录，第一次主动说出自己认为重要的瞬间。",
+    choices: [
+      { text: "听零四整理自己的成长。", effects: [{ type: "event", value: "E1005_sequence04_growth_record" }, { type: "change", key: "零四恢复进度", value: 10 }, { type: "change", key: "安柠零四友情值", value: 6 }], nextScene: "ch10_018" }
+    ]
+  },
+  "chapter10_event_minigame_clue_puzzle": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthernClueMapTable,
+    description: "线索拼图挑战：将母亲旧居、边缘设施与边缘观测点的地理碎片拼到同一张地图上。",
+    choices: [
+      { text: "拼出北方重合区域。", effects: [{ type: "event", value: "ch10_minigame_clue_puzzle_clear" }, { type: "change", key: "世界观信息", value: 4 }], nextScene: "ch10_017" },
+      { text: "保留不确定标记，避免过度推断。", effects: [{ type: "event", value: "ch10_minigame_clue_puzzle_cautious" }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch10_017" }
+    ]
+  },
+  "chapter10_event_minigame_old_notes": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10MotherOldStudy,
+    description: "旧笔记辨读：从母亲潦草的手稿中辨认“备用解法”“北方聚落”“不需要濒死就能共鸣”等关键词。",
+    choices: [
+      { text: "辨认出关键句。", effects: [{ type: "event", value: "ch10_minigame_old_notes_clear" }, { type: "change", key: "世界观信息", value: 3 }], nextScene: "ch10_007" }
+    ]
+  },
+  "chapter10_event_minigame_maintenance_log": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10FatherMaintenanceFacility,
+    description: "维护日志整理：按时间顺序排列安柠父亲留下的残页，拼出十余年无人知晓的坚持。",
+    choices: [
+      { text: "完成维护日志排序。", effects: [{ type: "event", value: "ch10_minigame_maintenance_log_clear" }, { type: "change", key: "安柠好感", value: 15 }, { type: "change", key: "世界观信息", value: 2 }], nextScene: "ch10_012" }
+    ]
+  },
+  "chapter11_start": {
+    title: "第十一章 · 霜隘启响",
+    chapter: 11,
+    location: "霜隘镇",
+    backgroundImage: ASSETS.backgrounds.ch11FrostpassTownKey,
+    description: "第十一章 · 霜隘启响。队伍北上抵达文明边界最后的补给聚落，在真正踏入北境前学会把活下去当作最务实的准备。",
+    systemPrompt: "第十一章 · 霜隘启响｜新增补给完备度、保暖装备、干粮储备、向导雇佣、地图情报与霜隘镇NPC好感。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "再往北，地图就是空白。我们得先确保所有人都能活着走到答案面前。" },
+      { speaker: "零四", sprite: "serious", text: "那就把空白，一点点标回来。" }
+    ],
+    choices: [
+      { text: "开始第十一章：霜隘启响。", effects: [{ type: "set", key: "补给完备度", value: 0 }, { type: "set", key: "保暖装备完备度", value: 0 }, { type: "set", key: "干粮储备完备度", value: 0 }, { type: "set", key: "向导雇佣状态", value: 0 }, { type: "set", key: "地图情报完整度", value: 0 }, { type: "event", value: "chapter11_route_started" }, { type: "set", key: "chapterProgress", value: 11 }], nextScene: "ch11_000" }
+    ]
+  },
+  "ch11_000": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch10NorthernClueMapTable,
+    description: "母亲旧居外，安柠将霜隘镇与北方空白区标在地图上。",
+    dialogues: [
+      { speaker: "安柠", sprite: "serious", text: "往北大约十天脚程，会经过一处叫霜隘镇的聚落。再往北，地图上基本是空白。" },
+      { speaker: "弥洛", sprite: "serious", text: "空白，往往意味着没人活着回来标注过。" },
+      { speaker: "零四", sprite: "smile", text: "那我们就是第一批回来标注的人。" }
+    ],
+    choices: [{ text: "收好地图，正式北上。", effects: [{ type: "event", value: "ch11_northbound_departure" }], nextScene: "ch11_001" }]
+  },
+  "ch11_001": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceKey,
+    description: "队伍最后回望母亲旧居。它保存了秘密，也成为另一段追寻的起点。",
+    dialogues: [{ speaker: "岐", text: "这地方也是个重新开始的地方。希望北境，也能是。" }],
+    choices: [{ text: "离开老宅。", effects: [{ type: "event", value: "ch11_left_mother_residence" }], nextScene: "ch11_002" }]
+  },
+  "ch11_002": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11FrozenTravelExpanse,
+    description: "丘陵田野逐渐退成针叶林，最后只剩一望无际的雪原。寒冷开始成为真正的敌人。",
+    dialogues: [{ speaker: "安柠", sprite: "worried", text: "气温掉得比预想还快。到了霜隘镇，我们必须全副武装。" }],
+    choices: [{ text: "解锁严寒适应与补给筹备。", effects: [{ type: "event", value: "ch11_supply_system_unlocked" }], nextScene: "ch11_003" }]
+  },
+  "ch11_003": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11FrostpassTownKey,
+    description: "低矮结实的木石屋舍出现在雪原尽头。厚雪、炊烟和窗内灯火组成文明边界最后的家。",
+    dialogues: [{ speaker: "阿缇娅", sprite: "serious", text: "这里的家很朴素，却很扎实。" }],
+    choices: [
+      { text: "前往中央商栈。", effects: [{ type: "event", value: "ch11_arrived_frostpass" }], nextScene: "ch11_004" },
+      { text: "先听孩子们讲雪原传说。", conditions: [{ operator: "notIncludes", value: "E1108_children_snow_tales", label: "雪原故事已听完" }], nextScene: "chapter11_event_E1108" }
+    ]
+  },
+  "ch11_004": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TradingPostInterior,
+    description: "苏婆的商栈堆满皮毛、干粮和药材。这里没有多余装饰，每一样东西都与生存有关。",
+    dialogues: [{ speaker: "苏婆", text: "外地来的？想北上？行，先把家底填满再说。我的东西贵，但童叟无欺。" }],
+    choices: [
+      { text: "优先采购保暖装备。", effects: [{ type: "change", key: "保暖装备完备度", value: 20 }, { type: "change", key: "苏婆好感值", value: 3 }], nextScene: "ch11_005" },
+      { text: "优先采购干粮储备。", effects: [{ type: "change", key: "干粮储备完备度", value: 20 }, { type: "change", key: "苏婆好感值", value: 3 }], nextScene: "ch11_005" },
+      { text: "均衡采购两类物资。", effects: [{ type: "change", key: "保暖装备完备度", value: 10 }, { type: "change", key: "干粮储备完备度", value: 10 }, { type: "change", key: "苏婆好感值", value: 5 }], nextScene: "ch11_005" },
+      { text: "听苏婆讲霜隘镇的镇史。", conditions: [{ operator: "notIncludes", value: "E1105_frostpass_history", label: "镇史已记录" }], nextScene: "chapter11_event_E1105" }
+    ]
+  },
+  "ch11_005": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11GuideStationInterior,
+    description: "向导驿站里，满脸风霜的老雪用异常明亮的眼睛审视队伍。左手旧冻伤没有妨碍他的动作。",
+    dialogues: [{ speaker: "老雪", text: "带着律者往北境去，图谋不小。北境不在乎你们是谁，只在乎你们懂不懂低头。" }],
+    choices: [
+      { text: "坦诚说明母亲与古老聚落的线索。", effects: [{ type: "change", key: "老雪好感值", value: 10 }, { type: "event", value: "ch11_oldxue_truth_told" }], nextScene: "ch11_006" },
+      { text: "只说想雇一名向导。", effects: [{ type: "change", key: "老雪好感值", value: 3 }, { type: "event", value: "ch11_oldxue_half_truth" }], nextScene: "ch11_006" },
+      { text: "查看老雪保存的旧地图。", conditions: [{ operator: "notIncludes", value: "E1106_oldxue_edge_map", label: "旧地图已记录" }], nextScene: "chapter11_event_E1106" },
+      { text: "让弥洛和老雪谈谈未知与危险。", conditions: [{ operator: "notIncludes", value: "E1109_milo_oldxue_talk", label: "攀谈已完成" }], nextScene: "chapter11_event_E1109" }
+    ]
+  },
+  "ch11_006": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "外围猎场里，猎户双子阿雁与阿霜带来雪原游荡者活动范围扩大的警告。",
+    dialogues: [
+      { speaker: "阿雁", text: "以前他们只在远处晃，现在都快摸到镇边了。" },
+      { speaker: "阿霜", text: "他们不是普通劫匪。有人在背后给他们补给。" },
+      { speaker: "安柠", sprite: "serious", text: "看来我们得先解决麻烦，才能安心北上。" }
+    ],
+    choices: [
+      { text: "先去检查镇上的装备与药剂。", nextScene: "ch11_007" },
+      { text: "接受阿雁的狩猎邀请。", conditions: [{ operator: "notIncludes", value: "ch11_hunt_clear", label: "狩猎已完成" }], nextScene: "chapter11_event_E1103" },
+      { text: "陪阿霜巡视边境。", conditions: [{ operator: "notIncludes", value: "ch11_patrol_clear", label: "巡视已完成" }], nextScene: "chapter11_event_E1104" },
+      { text: "让岐和猎户双子多相处一会儿。", conditions: [{ operator: "notIncludes", value: "E1111_qi_hunter_twins", label: "姐妹支线已完成" }], nextScene: "chapter11_event_E1111" }
+    ]
+  },
+  "ch11_007": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SmithyApothecaryLane,
+    description: "老锔的铁匠铺与阿柳的药铺紧挨着。一个管装备能不能撑住，一个管人能不能撑住。",
+    dialogues: [
+      { speaker: "老锔", text: "你们外地的家伙什，中看不中用。北境边上，装备得听我的。" },
+      { speaker: "阿柳", text: "抗寒药一天两次，谁敢偷懒，我就追到雪地里灌。" }
+    ],
+    choices: [
+      { text: "购置老锔打造的专业装备。", effects: [{ type: "change", key: "保暖装备完备度", value: 15 }], nextScene: "ch11_008" },
+      { text: "购置阿柳的强化抗寒药剂。", effects: [{ type: "change", key: "干粮储备完备度", value: 10 }, { type: "event", value: "ch11_cold_adaptation_bonus" }], nextScene: "ch11_008" },
+      { text: "帮老锔寻找稀有材料。", conditions: [{ operator: "notIncludes", value: "E1101_custom_winter_gear", label: "定制装备已完成" }], nextScene: "chapter11_event_E1101" },
+      { text: "帮阿柳采集抗寒草药。", conditions: [{ operator: "notIncludes", value: "E1102_frost_herbs", label: "草药已采集" }], nextScene: "chapter11_event_E1102" }
+    ]
+  },
+  "ch11_008": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11GuideStationInterior,
+    description: "夜里，老雪讲起三次深入北境，以及最后一次失去两位挚友的经历。",
+    dialogues: [{ speaker: "老雪", text: "北境夺走他们时，没有预兆，也没有道理。所以它不是用来挑战的，是用来敬畏的。" }],
+    choices: [
+      { text: "我们会牢记这份教训。", effects: [{ type: "change", key: "老雪好感值", value: 15 }], nextScene: "ch11_009" },
+      { text: "能说说他们叫什么名字吗？", effects: [{ type: "change", key: "老雪好感值", value: 18 }, { type: "event", value: "ch11_oldxue_friends_names_known" }], nextScene: "ch11_009" }
+    ]
+  },
+  "ch11_009": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TradingPostInterior,
+    description: "补给车队迟迟未归，两名受伤镇民带回了遭袭消息。",
+    dialogues: [
+      { speaker: "阿雁", text: "车队被劫了！这次游荡者真的把手伸到镇边了。" },
+      { speaker: "苏婆", text: "镇上人手转不过来。几位，能不能帮衬一把？" }
+    ],
+    choices: [
+      { text: "我们立刻追查车队。", effects: [{ type: "change", key: "苏婆好感值", value: 15 }, { type: "event", value: "ch11_convoy_rescue_started" }], nextScene: "ch11_010" },
+      { text: "先让阿柳确认伤员情况。", effects: [{ type: "change", key: "苏婆好感值", value: 10 }, { type: "event", value: "ch11_injured_treated_first" }], nextScene: "ch11_010" }
+    ]
+  },
+  "ch11_010": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11AmbushTracksAnalysis,
+    presentation: "cinematic",
+    description: "阿霜在伏击点读出专业的地形利用、诱饵车辙和撤退路线。这不是普通流民临时起意。",
+    dialogues: [{ speaker: "阿霜", text: "埋伏位置很专业。背后一定有人指点。" }],
+    choices: [{ text: "沿车辙继续追踪。", effects: [{ type: "change", key: "地图情报完整度", value: 10 }, { type: "event", value: "ch11_raider_backer_suspicion" }], nextScene: "ch11_011" }]
+  },
+  "ch11_011": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "雪原游荡者杂兵从岩脊后围出。他们是拿着武器的普通人，也是被绝境推到这里的人。",
+    dialogues: [{ speaker: "零四", sprite: "serious", text: "他们和噬响体不一样。我们下手，是不是该有分寸？" }],
+    choices: [
+      { text: "尽量制服，不做无谓伤害。", effects: [{ type: "event", value: "ch11_skirmish_restraint_order" }, { type: "change", key: "零四恢复进度", value: 4 }], effect: () => startBattle("ch11_raider_skirmish", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) },
+      { text: "先确保己方安全。", effects: [{ type: "event", value: "ch11_skirmish_safety_first" }], effect: () => startBattle("ch11_raider_skirmish", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) }
+    ]
+  },
+  "ch11_012": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "队伍沿溃退路线找到游荡者临时营地。一个身影正在雪脊上重新布置防线。",
+    dialogues: [{ speaker: "阿雁", text: "那就是破。最近把游荡者拧成一股绳的人。" }],
+    choices: [{ text: "接近雪脊伏击点。", effects: [{ type: "event", value: "ch11_po_tracked" }], nextScene: "ch11_013" }]
+  },
+  "ch11_013": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "破站在风口，拼凑武器压在肩上。他的眼神没有胜券在握，只有退无可退。",
+    dialogues: [{ speaker: "破", text: "镇上的正经人能占着物资，我们这些冻死冻怕的，就活该在雪里啃冰？" }],
+    choices: [{ text: "进入Boss战：击退破并控制伤亡。", effects: [{ type: "event", value: "ch11_po_boss_started" }], effect: () => startBattle("ch11_po_boss", { selectedMusicarts: ["阿缇娅", "弥洛", "零四"] }) }]
+  },
+  "ch11_014": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "破的武器垂了下来。胜负已定，真正的问题变成如何结束这场冲突。",
+    dialogues: [{ speaker: "破", text: "够了……算你们赢了。我们不是非要拼命，是真的没别的活路。" }],
+    choices: [
+      { text: "放过破与残部，条件是不再袭扰镇子。", effects: [{ type: "event", value: "ch11_po_spared" }, { type: "change", key: "霜隘镇好感度", value: 6 }], nextScene: "ch11_015" },
+      { text: "交由苏婆与镇民自行裁决。", effects: [{ type: "event", value: "ch11_po_handed_to_town" }, { type: "change", key: "苏婆好感值", value: 8 }], nextScene: "ch11_015" },
+      { text: "彻底驱散游荡者团伙。", effects: [{ type: "event", value: "ch11_po_group_dispersed" }, { type: "change", key: "霜隘镇好感度", value: 10 }], nextScene: "ch11_015" }
+    ]
+  },
+  "ch11_015": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TradingPostInterior,
+    description: "苏婆接受结果，却提醒队伍：仁慈的代价最终仍要由镇民承担与检验。",
+    dialogues: [{ speaker: "苏婆", text: "放过是仁慈，但我不能替全镇打包票。往后，还得靠我们自己盯着。" }],
+    choices: [
+      { text: "接受这份现实的提醒。", nextScene: "ch11_016" },
+      { text: "听听游荡者残部各自的故事。", conditions: [{ operator: "notIncludes", value: "E1107_raider_survivors_heard", label: "残部故事已听完" }], nextScene: "chapter11_event_E1107" }
+    ]
+  },
+  "ch11_016": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11GuideStationInterior,
+    description: "经过数日相处，老雪终于同意带路，但明确只走到体力与经验允许的地方。",
+    dialogues: [{ speaker: "老雪", text: "你们处理破的方式，让我看见了当年那两个人身上的东西。行，这趟我陪你们走一段。" }],
+    choices: [{ text: "郑重接受老雪同行。", effects: [{ type: "set", key: "向导雇佣状态", value: 100 }, { type: "change", key: "老雪好感值", value: 15 }, { type: "event", value: "ch11_oldxue_hired" }], nextScene: "ch11_017" }]
+  },
+  "ch11_017": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11GuideStationInterior,
+    description: "出发前夜，窗外风雪压低了所有声音。阿缇娅或弥洛把陪伴说得比以往更清楚。",
+    dialogues: [{ speaker: "系统", text: "【隐性情愫路线】选择想在北境前夜确认的人。" }],
+    choices: [
+      { text: "告诉阿缇娅：有你在，我什么都不怕。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 20 }, { type: "event", value: "ch11_atya_departure_eve_unlock" }], nextScene: "ch11_018" },
+      { text: "轻轻碰阿缇娅的脸颊。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 22 }, { type: "event", value: "ch11_atya_departure_eve_unlock" }, { type: "event", value: "ch11_atya_cheek_touch" }], nextScene: "ch11_018" },
+      { text: "告诉弥洛：有你在，我什么都不怕。", effects: [{ type: "change", key: "弥洛情愫值", value: 20 }, { type: "event", value: "ch11_milo_departure_eve_unlock" }], nextScene: "ch11_018" },
+      { text: "轻轻碰弥洛的脸颊。", effects: [{ type: "change", key: "弥洛情愫值", value: 22 }, { type: "event", value: "ch11_milo_departure_eve_unlock" }, { type: "event", value: "ch11_milo_cheek_touch" }], nextScene: "ch11_018" }
+    ]
+  },
+  "ch11_018": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "岐站在镇外飞雪中，想起小时候和岚挤在一起取暖的冬天。",
+    dialogues: [
+      { speaker: "岐", text: "如果她也在这里就好了。" },
+      { speaker: "零四", sprite: "smile", text: "她会知道的。你走的每一步，她都会知道。" }
+    ],
+    choices: [
+      { text: "陪她们回到镇里。", nextScene: "ch11_019" },
+      { text: "和孩子们打一场没有输赢的雪仗。", conditions: [{ operator: "notIncludes", value: "ch11_snowball_clear", label: "雪仗已完成" }], nextScene: "chapter11_event_E1112" }
+    ]
+  },
+  "ch11_019": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11FrostpassTownKey,
+    description: "零四主动谈起杂兵战中的犹豫。那不是命令冲突，而是她第一次形成自己的价值判断。",
+    dialogues: [{ speaker: "零四", sprite: "serious", text: "以前是别人教我怎么想。今天，我是在自己判断该不该手下留情。原来这就是独立。" }],
+    choices: [
+      { text: "告诉她：犹豫也是判断的一部分。", effects: [{ type: "change", key: "零四恢复进度", value: 10 }, { type: "event", value: "ch11_sequence04_independent_judgment" }], nextScene: "ch11_020" },
+      { text: "请安柠帮镇上修理取暖设备。", conditions: [{ operator: "notIncludes", value: "ch11_heating_repair_clear", label: "取暖设备已修复" }], nextScene: "chapter11_event_E1110" }
+    ]
+  },
+  "ch11_020": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TradingPostInterior,
+    description: "出发前一日，苏婆和老雪一起核对车载空间、保暖装备、干粮与紧急药品。",
+    dialogues: [{ speaker: "苏婆", text: "帮了镇子这么大的忙，这些友情赠品别跟我客气。" }],
+    choices: [{ text: "进行最终补给核对。", effects: [{ type: "event", value: "ch11_supply_check_started" }], nextScene: "chapter11_event_minigame_supply_check" }]
+  },
+  "ch11_021": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TownGateFarewell,
+    description: "出发当天，镇民们自发聚到入口。朴素的送别比任何仪式都更沉。",
+    dialogues: [
+      { speaker: "阿雁", text: "一定要活着回来串门啊！" },
+      { speaker: "阿霜", text: "……我们等你们。" }
+    ],
+    choices: [{ text: "向霜隘镇告别。", effects: [{ type: "event", value: "ch11_frostpass_farewell" }], nextScene: "ch11_022" }]
+  },
+  "ch11_022": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TownGateFarewell,
+    description: "队伍站在雪原与真正北境的分界线上。再往前一步，地图再无标注。",
+    dialogues: [
+      { speaker: "老雪", text: "从这里开始，就没有回头路的说法了。都准备好了吗？" },
+      { speaker: "【内心】", text: "母亲曾独自跨过这条线。这一次，我们带着许多人的牵挂一起跨过去。" }
+    ],
+    choices: [{ text: "结算补给，正式踏入北境。", effect: () => finalizeChapter11SupplyReadiness() }]
+  },
+  "chapter11_event_E1101": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SmithyApothecaryLane,
+    description: "E1101 · 老锔的绝活。收集韧皮、旧铆钉与耐寒金属，完成适合北境的定制装备。",
+    choices: [{ text: "完成定制装备。", effects: [{ type: "event", value: "E1101_custom_winter_gear" }, { type: "change", key: "保暖装备完备度", value: 10 }], nextScene: "ch11_007" }]
+  },
+  "chapter11_event_E1102": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SmithyApothecaryLane,
+    description: "E1102 · 阿柳的药方。在背风坡采集耐寒草药，制成强化抗寒药剂。",
+    choices: [{ text: "把草药交给阿柳。", effects: [{ type: "event", value: "E1102_frost_herbs" }, { type: "change", key: "干粮储备完备度", value: 10 }], nextScene: "ch11_007" }]
+  },
+  "chapter11_event_E1103": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "E1103 · 阿雁的狩猎邀请。雪上的足迹比地图更诚实。",
+    choices: [{ text: "开始雪原狩猎。", nextScene: "chapter11_event_minigame_hunt" }]
+  },
+  "chapter11_event_E1104": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "E1104 · 阿霜的沉默观察。她用最少的话指出边境最容易被突破的地方。",
+    choices: [{ text: "开始边境巡视。", nextScene: "chapter11_event_minigame_patrol" }]
+  },
+  "chapter11_event_E1105": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TradingPostInterior,
+    description: "E1105 · 苏婆的镇史。霜隘镇不是被谁建成，而是被几代人一点点撑住。",
+    choices: [{ text: "记录霜隘镇扎根的历史。", effects: [{ type: "event", value: "E1105_frostpass_history" }, { type: "change", key: "世界观信息", value: 3 }, { type: "change", key: "苏婆好感值", value: 8 }], nextScene: "ch11_004" }]
+  },
+  "chapter11_event_E1106": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11GuideStationInterior,
+    description: "E1106 · 老雪的旧地图。仅存的安全落脚点以铅笔和多年修订的痕迹保留下来。",
+    choices: [{ text: "誊录北境边缘安全点。", effects: [{ type: "event", value: "E1106_oldxue_edge_map" }, { type: "change", key: "地图情报完整度", value: 25 }, { type: "change", key: "老雪好感值", value: 8 }], nextScene: "ch11_005" }]
+  },
+  "chapter11_event_E1107": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11FrostpassTownKey,
+    description: "E1107 · 破的手下。每个人都能说出自己如何被饥饿和严寒推到持械掠夺的那一天。",
+    choices: [{ text: "听完这些不体面的求生故事。", effects: [{ type: "event", value: "E1107_raider_survivors_heard" }, { type: "change", key: "世界观信息", value: 3 }], nextScene: "ch11_015" }]
+  },
+  "chapter11_event_E1108": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TownSquareSnowPlay,
+    description: "E1108 · 镇上孩子的雪原故事。以讹传讹的怪物传说里，藏着几条大人忽略的真实路线。",
+    choices: [{ text: "把故事和真实地形分别记下。", effects: [{ type: "event", value: "E1108_children_snow_tales" }, { type: "change", key: "地图情报完整度", value: 5 }], nextScene: "ch11_003" }]
+  },
+  "chapter11_event_E1109": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11GuideStationInterior,
+    description: "E1109 · 弥洛与老雪谈如何与未知共处：不假装无所畏惧，也不让恐惧替自己决定。",
+    choices: [{ text: "听完他们的低声攀谈。", effects: [{ type: "event", value: "E1109_milo_oldxue_talk" }, { type: "change", key: "弥洛好感", value: 10 }, { type: "change", key: "老雪好感值", value: 8 }], nextScene: "ch11_005" }]
+  },
+  "chapter11_event_E1110": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SmithyApothecaryLane,
+    description: "E1110 · 安柠的技术援助。严寒冻裂了镇上最大的取暖设备，零件必须在温度继续下降前复位。",
+    choices: [{ text: "开始设备维修。", nextScene: "chapter11_event_minigame_repair" }]
+  },
+  "chapter11_event_E1111": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11HunterTwinsWarmMemory,
+    presentation: "cinematic",
+    description: "E1111 · 岐与猎户双子。另一种姐妹默契让思念第一次带上温暖，而不只有疼痛。",
+    choices: [{ text: "让岐收下双子送的雪羽。", effects: [{ type: "event", value: "E1111_qi_hunter_twins" }, { type: "change", key: "岐好感值", value: 10 }, { type: "change", key: "阿雁好感值", value: 6 }, { type: "change", key: "阿霜好感值", value: 6 }], nextScene: "ch11_006" }]
+  },
+  "chapter11_event_E1112": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TownSquareSnowPlay,
+    description: "E1112 · 零四的雪原初体验。孩子们把一团松雪塞进她手里，然后笑着四散逃开。",
+    choices: [{ text: "开始一场没有失败的雪仗。", nextScene: "chapter11_event_minigame_snowball" }]
+  },
+  "chapter11_event_minigame_hunt": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "雪原狩猎：判断足迹新旧、风向与背风坡，不把饥饿误认成鲁莽。",
+    choices: [{ text: "沿新鲜足迹绕到下风口。", effects: [{ type: "event", value: "ch11_hunt_clear" }, { type: "change", key: "干粮储备完备度", value: 15 }, { type: "change", key: "阿雁好感值", value: 12 }], nextScene: "ch11_006" }]
+  },
+  "chapter11_event_minigame_patrol": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    description: "边境巡视：在地形图上标出断绳、假车辙与观察哨盲区。",
+    choices: [{ text: "完成可疑痕迹标记。", effects: [{ type: "event", value: "ch11_patrol_clear" }, { type: "change", key: "地图情报完整度", value: 15 }, { type: "change", key: "阿霜好感值", value: 12 }], nextScene: "ch11_006" }]
+  },
+  "chapter11_event_minigame_repair": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SmithyApothecaryLane,
+    description: "设备维修：依次复位导热片、压力阀和旧式点火轮，让商栈重新亮起暖光。",
+    choices: [{ text: "按热传导顺序完成复位。", effects: [{ type: "event", value: "ch11_heating_repair_clear" }, { type: "change", key: "霜隘镇好感度", value: 15 }, { type: "change", key: "安柠好感", value: 8 }], nextScene: "ch11_019" }]
+  },
+  "chapter11_event_minigame_snowball": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TownSquareSnowPlay,
+    description: "打雪仗：没有失败条件。唯一目标是让零四第一次笑到停不下来。",
+    choices: [{ text: "把最后一团雪轻轻抛向零四。", effects: [{ type: "event", value: "ch11_snowball_clear" }, { type: "change", key: "零四恢复进度", value: 12 }], nextScene: "ch11_018" }]
+  },
+  "chapter11_event_minigame_supply_check": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TradingPostInterior,
+    description: "补给核对：在有限车载空间里平衡保暖装备、干粮、药剂与地图工具。",
+    choices: [
+      { text: "均衡分配四类物资。", effects: [{ type: "change", key: "保暖装备完备度", value: 10 }, { type: "change", key: "干粮储备完备度", value: 10 }, { type: "change", key: "地图情报完整度", value: 5 }, { type: "event", value: "ch11_supply_balanced" }], nextScene: "ch11_021" },
+      { text: "优先保暖与紧急药品。", effects: [{ type: "change", key: "保暖装备完备度", value: 20 }, { type: "change", key: "干粮储备完备度", value: 5 }, { type: "event", value: "ch11_supply_cold_priority" }], nextScene: "ch11_021" },
+      { text: "优先长途干粮与路线工具。", effects: [{ type: "change", key: "干粮储备完备度", value: 15 }, { type: "change", key: "地图情报完整度", value: 10 }, { type: "event", value: "ch11_supply_range_priority" }], nextScene: "ch11_021" }
     ]
   },
   "chapter4_event_E401": {
@@ -2915,7 +5323,7 @@ const SCENES = {
   "chapter4_event_E403": {
     chapter: 4,
     background: "#1e080c",
-    backgroundImage: ASSETS.backgrounds.ch4NightlessTrainCorridor,
+    backgroundImage: ASSETS.backgrounds.ch4AltarCarriage,
     description: "E403 · 墨昭与芸苓的车厢。两名巡演派成员守着损坏的广播线，争吵比交火更早爆发。",
     systemPrompt: "第四章地图事件：墨昭与芸苓。目标：巡演派内部裂隙、真相值支线。",
     dialogues: [
@@ -2962,12 +5370,14 @@ const SCENES = {
     background: "#230b10",
     backgroundImage: ASSETS.backgrounds.ch4AudienceCar,
     description: "小游戏 · 观众席辨认挑战。根据节拍延迟、眼部残光和手腕刻痕判断谁仍保有反应。",
-    systemPrompt: "小游戏占位：观众席辨认挑战。后续接入限时筛选 UI。",
+    systemPrompt: "第四章小游戏：观众席辨认挑战。根据反应细节区分仍可救援的静默序列。",
     dialogues: [
-      { speaker: "系统", text: "正式版本：玩家在多名静默序列中筛选仍可救援对象；误判会降低救赎值，连对会追加编号线索。" }
+      { speaker: "系统", text: "别只看谁最像在哭。真正还留着自主反应的人，会在假掌声落下前慢半拍收紧手指。" }
     ],
     choices: [
-      { text: "完成一次模拟辨认。", effects: [{ type: "change", key: "救赎值", value: 5 }, { type: "event", value: "ch4_minigame_audience_identify_clear" }], nextScene: "ch4_003" }
+      { text: "锁定节拍慢半拍、手腕刻痕仍在发亮的序列。", effects: [{ type: "change", key: "救赎值", value: 7 }, { type: "change", key: "真相值", value: 2 }, { type: "event", value: "ch4_minigame_audience_identify_clear" }], nextScene: "ch4_003" },
+      { text: "先带走表情最明显恐惧的序列。", effects: [{ type: "change", key: "救赎值", value: 3 }, { type: "event", value: "ch4_minigame_audience_identify_uncertain" }], nextScene: "ch4_003" },
+      { text: "优先记录所有编号，等待下一次确认。", effects: [{ type: "change", key: "真相值", value: 4 }, { type: "event", value: "ch4_minigame_audience_identify_logged" }], nextScene: "ch4_003" }
     ]
   },
   "chapter4_event_minigame_resonance_wakeup": {
@@ -2975,12 +5385,14 @@ const SCENES = {
     background: "#2b0d14",
     backgroundImage: ASSETS.backgrounds.ch4AudienceCar,
     description: "小游戏 · 节拍共鸣唤醒。不是强行命令，而是用极轻的节拍把零四从假掌声中带出来。",
-    systemPrompt: "小游戏占位：节拍共鸣唤醒。后续接入轻点击/回退判定。",
+    systemPrompt: "第四章小游戏：节拍共鸣唤醒。用克制的节拍牵引零四脱离假掌声。",
     dialogues: [
-      { speaker: "系统", text: "正式版本：玩家跟随微弱残响点击；连续过快会让零四重新锁死，稳定完成会提高救赎值。" }
+      { speaker: "系统", text: "先听见她自己的残响，再落下第一拍。节奏太急会把她推回命令里，太慢则会被假掌声吞没。" }
     ],
     choices: [
-      { text: "完成一次模拟唤醒。", effects: [{ type: "change", key: "救赎值", value: 8 }, { type: "event", value: "ch4_minigame_resonance_wakeup_clear" }], nextScene: "ch4_006" }
+      { text: "等假掌声停顿，再送入一记极轻的回应。", effects: [{ type: "change", key: "救赎值", value: 10 }, { type: "change", key: "零四恢复进度", value: 4 }, { type: "event", value: "ch4_minigame_resonance_wakeup_clear" }], nextScene: "ch4_006" },
+      { text: "让阿缇娅维持低鸣，给零四留出回声。", effects: [{ type: "change", key: "救赎值", value: 7 }, { type: "change", key: "阿缇娅共鸣", value: 3 }, { type: "event", value: "ch4_minigame_resonance_wakeup_supported" }], nextScene: "ch4_006" },
+      { text: "连续加快节拍，强行压过假掌声。", effects: [{ type: "change", key: "救赎值", value: 3 }, { type: "change", key: "世界失谐度", value: 2 }, { type: "event", value: "ch4_minigame_resonance_wakeup_rushed" }], nextScene: "ch4_006" }
     ]
   },
   "chapter4_event_minigame_three_side_dispatch": {
@@ -2988,12 +5400,14 @@ const SCENES = {
     background: "#1e080c",
     backgroundImage: ASSETS.backgrounds.ch4NightlessTrainCorridor,
     description: "小游戏 · 三方混战调度。主角队伍、巡演派残部、静默署稽查队同时挤在狭窄车厢。",
-    systemPrompt: "小游戏占位：三方混战调度。后续接入队伍调度与误伤判定。",
+    systemPrompt: "第四章小游戏：三方混战调度。在狭窄车厢中保护静默序列、牵制巡演派并避开稽查队误伤。",
     dialogues: [
-      { speaker: "系统", text: "正式版本：玩家选择每回合优先目标；保护静默序列、说服巡演派、压制静默署会影响三条数值。" }
+      { speaker: "系统", text: "车厢太窄，任何一个命令都会挤占另一方的退路。先选你愿意承担的优先级。" }
     ],
     choices: [
-      { text: "完成一次模拟调度。", effects: [{ type: "change", key: "真相值", value: 5 }, { type: "change", key: "伊莱娜隐藏好感值", value: 3 }, { type: "event", value: "ch4_minigame_three_side_dispatch_clear" }], nextScene: "ch4_009" }
+      { text: "让阿缇娅牵制稽查队，弥洛护送静默序列撤离。", effects: [{ type: "change", key: "救赎值", value: 6 }, { type: "change", key: "真相值", value: 4 }, { type: "event", value: "ch4_minigame_three_side_dispatch_rescue" }], nextScene: "ch4_009" },
+      { text: "向巡演派喊话，争取一次共同退路。", effects: [{ type: "change", key: "伊莱娜隐藏好感值", value: 6 }, { type: "change", key: "真相值", value: 5 }, { type: "event", value: "ch4_minigame_three_side_dispatch_negotiated" }], nextScene: "ch4_009" },
+      { text: "先封住车厢中央，避免混战外溢。", effects: [{ type: "change", key: "真相值", value: 3 }, { type: "change", key: "世界失谐度", value: -2 }, { type: "event", value: "ch4_minigame_three_side_dispatch_contained" }], nextScene: "ch4_009" }
     ]
   },
   "chapter4_event_minigame_organ_dodge": {
@@ -3001,13 +5415,14 @@ const SCENES = {
     background: "#0e0407",
     backgroundImage: ASSETS.backgrounds.ch4CoreOrganChamber,
     description: "小游戏 · 管风琴节奏躲避。黑色音管按拍落下冲击，只有半拍裂口能穿过。",
-    systemPrompt: "小游戏占位：管风琴节奏躲避。后续接入节奏闪避 UI。",
+    systemPrompt: "第四章小游戏：管风琴节奏躲避。读取音束拍点，沿核心裂口穿过黑色音管阵列。",
     dialogues: [
-      { speaker: "系统", text: "正式版本：玩家按管风琴音束节奏闪避；若提前获得 E405 情报，将显示第七组音管的半拍裂口。" }
+      { speaker: "系统", text: "第七组音管的延迟比其他地方高半拍。若你已掌握这条情报，就不要浪费它。" }
     ],
     choices: [
-      { text: "沿第七组音管裂口突入。", conditions: [{ operator: "includes", value: "E405_organ_weakpoint_known" }], effects: [{ type: "change", key: "真相值", value: 8 }, { type: "event", value: "ch4_minigame_organ_dodge_perfect" }], nextScene: "ch4_014" },
-      { text: "凭反应穿过音束。", effects: [{ type: "change", key: "真相值", value: 4 }, { type: "event", value: "ch4_minigame_organ_dodge_clear" }], nextScene: "ch4_014" }
+      { text: "沿第七组音管的半拍裂口突入。", conditions: [{ operator: "includes", value: "E405_organ_weakpoint_known" }], effects: [{ type: "change", key: "真相值", value: 8 }, { type: "change", key: "救赎值", value: 3 }, { type: "event", value: "ch4_minigame_organ_dodge_perfect" }], nextScene: "ch4_014" },
+      { text: "跟着最低音的余震穿过音束。", effects: [{ type: "change", key: "真相值", value: 5 }, { type: "event", value: "ch4_minigame_organ_dodge_clear" }], nextScene: "ch4_014" },
+      { text: "暂时收束共鸣，等下一轮音束间隙。", effects: [{ type: "change", key: "世界失谐度", value: -2 }, { type: "event", value: "ch4_minigame_organ_dodge_patient" }], nextScene: "ch4_014" }
     ]
   },
   "relationship_mainline_sample": {
@@ -3280,6 +5695,113 @@ const SCENES = {
       }
     ]
   },
+  "story_atya_02": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10AtyaAfterTacit,
+    presentation: "cinematic",
+    conditions: [{ operator: "includes", value: "ch10_atya_after_tacit_unlock", fallbackScene: "tea_break_hub" }],
+    description: "夜色压低了篝火的光。阿缇娅罕见地主动靠近，欲言又止，像在练习一段比战斗更难说出口的旋律。",
+    systemPrompt: "第十章个人故事：阿缇娅「默契之后」。保持克制、平等与身份边界，不替缇雅发言。",
+    dialogues: [
+      { speaker: "阿缇娅", sprite: "worried", text: "我发现自己越来越会读懂你了。这种感觉，既让我安心，又让我……有点不知所措。" },
+      { speaker: "阿缇娅", sprite: "smile", text: "因为我从没想过，懂一个人，可以这么让人在意。" }
+    ],
+    choices: [
+      { text: "我也一样，你不是一个人在不知所措。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 18 }, { type: "event", value: "story_seen:atya_02" }], effect: () => finishPersonalStory() },
+      { text: "轻轻拥抱她。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 20 }, { type: "event", value: "story_seen:atya_02" }, { type: "event", value: "ch10_atya_tacit_embrace" }], effect: () => finishPersonalStory() }
+    ]
+  },
+  "story_milo_02": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10MiloAfterTacit,
+    presentation: "cinematic",
+    conditions: [{ operator: "includes", value: "ch10_milo_after_tacit_unlock", fallbackScene: "tea_break_hub" }],
+    description: "篝火快要熄灭时，弥洛罕见地主动开口。他的视线没有落在你身上，却没有再躲开这段沉默。",
+    systemPrompt: "第十章个人故事：弥洛「默契之后」。以克制低声的表达呈现心意，不抢占主角决定。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "worried", text: "我以前觉得，自己这辈子大概学不会，去在意一个人到这种程度。" },
+      { speaker: "弥洛", sprite: "serious", text: "现在发现，好像早就已经，在意到这种程度了。" }
+    ],
+    choices: [
+      { text: "我也是，一样在意你。", effects: [{ type: "change", key: "弥洛情愫值", value: 18 }, { type: "event", value: "story_seen:milo_02" }], effect: () => finishPersonalStory() },
+      { text: "轻轻靠在他肩上。", effects: [{ type: "change", key: "弥洛情愫值", value: 20 }, { type: "event", value: "story_seen:milo_02" }, { type: "event", value: "ch10_milo_tacit_shoulder" }], effect: () => finishPersonalStory() }
+    ]
+  },
+  "story_qi_01": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch8CampfireNight,
+    conditions: [{ operator: "includes", value: "E1003_qi_lan_half_charm", fallbackScene: "tea_break_hub" }],
+    description: "岐把那枚手工饰品放在掌心。火光从饰品断面擦过，像在替另一半仍未抵达的人留一盏灯。",
+    systemPrompt: "第十章个人故事：岐「新的笑容」。不催促她走出哀伤，强调带着思念继续前进。",
+    dialogues: [
+      { speaker: "岐", text: "这个饰品，一人一半，是我们小时候约定：不管发生什么，都要找到对方那一半。" },
+      { speaker: "岐", text: "我现在更确定了——我一定会找到岚，把这一半还给她。" }
+    ],
+    choices: [
+      { text: "那就把这份约定一起带着。", effects: [{ type: "change", key: "岐好感值", value: 6 }, { type: "event", value: "story_seen:qi_01" }], effect: () => finishPersonalStory() },
+      { text: "等她回来，你们自己把它合上。", effects: [{ type: "change", key: "岐好感值", value: 8 }, { type: "event", value: "story_seen:qi_01" }, { type: "event", value: "ch10_qi_half_charm_return_promise" }], effect: () => finishPersonalStory() }
+    ]
+  },
+  "story_milo_03": {
+    chapter: 10,
+    backgroundImage: ASSETS.backgrounds.ch10NorthernClueMapTable,
+    conditions: [{ operator: "includes", value: "E1004_milo_observatory_guess", fallbackScene: "tea_break_hub" }],
+    description: "地图上北方的标记模糊得几乎要融进纸纤维。弥洛的手指停在那片空白附近，像在试着触碰一段迟到了多年的答案。",
+    systemPrompt: "第十章个人故事：弥洛「北方的猜想」。维持不确定性，不揭示恩人的真实下落。",
+    dialogues: [
+      { speaker: "弥洛", sprite: "serious", text: "如果他真的在那里……这么多年过去，不知道他还记不记得，自己当年放走的那个孩子。" }
+    ],
+    choices: [
+      { text: "他会看见你已经走了多远。", effects: [{ type: "change", key: "弥洛好感", value: 6 }, { type: "event", value: "story_seen:milo_03" }], effect: () => finishPersonalStory() },
+      { text: "不管答案是什么，我们都会一起去确认。", effects: [{ type: "change", key: "弥洛信任", value: 6 }, { type: "event", value: "story_seen:milo_03" }, { type: "event", value: "ch10_milo_northward_promise" }], effect: () => finishPersonalStory() }
+    ]
+  },
+  "story_atya_03": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11FrostpassTownKey,
+    conditions: [{ operator: "includes", value: "ch11_atya_departure_eve_unlock", fallbackScene: "tea_break_hub" }],
+    description: "出发前最后一晚，窗棂被风雪轻轻敲响。阿缇娅承认紧张，却不再把紧张误认为软弱。",
+    dialogues: [{ speaker: "阿缇娅", sprite: "worried", text: "明天的路连老雪都没完全走过。说不紧张是假的，但只要你在身边，这份紧张也可以承受。" }],
+    choices: [
+      { text: "我们一起害怕，也一起往前。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 12 }, { type: "event", value: "story_seen:atya_03" }], effect: () => finishPersonalStory() },
+      { text: "握住她的手，直到风声变小。", effects: [{ type: "change", key: "阿缇娅情愫值", value: 15 }, { type: "event", value: "story_seen:atya_03" }, { type: "event", value: "ch11_atya_northbound_handheld" }], effect: () => finishPersonalStory() }
+    ]
+  },
+  "story_milo_04": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11FrostpassTownKey,
+    conditions: [{ operator: "includes", value: "ch11_milo_departure_eve_unlock", fallbackScene: "tea_break_hub" }],
+    description: "出发前最后一晚，弥洛把所有撤离路线检查了一遍，最后承认仍有地图无法回答的紧张。",
+    dialogues: [{ speaker: "弥洛", sprite: "worried", text: "明天的路连老雪都没完全走过。说不紧张是假的，但只要你在身边，这份紧张也可以承受。" }],
+    choices: [
+      { text: "未知不会把我们拆开。", effects: [{ type: "change", key: "弥洛情愫值", value: 12 }, { type: "event", value: "story_seen:milo_04" }], effect: () => finishPersonalStory() },
+      { text: "靠近他，一起看完窗外的雪。", effects: [{ type: "change", key: "弥洛情愫值", value: 15 }, { type: "event", value: "story_seen:milo_04" }, { type: "event", value: "ch11_milo_northbound_closeness" }], effect: () => finishPersonalStory() }
+    ]
+  },
+  "story_anning_01": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11FrostpassTownKey,
+    conditions: [{ operator: "includes", value: "ch11_heating_repair_clear", fallbackScene: "tea_break_hub" }],
+    description: "修好的取暖设备在墙后低鸣，安柠看着镇民把第一壶热水分给受伤的人。",
+    dialogues: [{ speaker: "安柠", sprite: "smile", text: "这里的人日子比谁都苦，却比谁都愿意掏心窝子。爸当年的沉默守护，大概也懂这种边境人情。" }],
+    choices: [{ text: "把这份理解带去更北的地方。", effects: [{ type: "change", key: "安柠好感", value: 10 }, { type: "event", value: "story_seen:anning_01" }], effect: () => finishPersonalStory() }]
+  },
+  "story_qi_02": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    conditions: [{ operator: "includes", value: "E1111_qi_hunter_twins", fallbackScene: "tea_break_hub" }],
+    description: "道别前，岐把阿雁与阿霜送的雪羽系在旧饰品旁边。两种姐妹情谊不再互相替代，而是彼此照亮。",
+    dialogues: [{ speaker: "岐", text: "看着她们，会想起我和岚小时候。谢谢她们，让我想起岚时多了一点温暖，不只是难过。" }],
+    choices: [{ text: "温暖不会削弱你找回她的决心。", effects: [{ type: "change", key: "岐好感值", value: 10 }, { type: "event", value: "story_seen:qi_02" }], effect: () => finishPersonalStory() }]
+  },
+  "story_sequence04_01": {
+    chapter: 11,
+    backgroundImage: ASSETS.backgrounds.ch11TownSquareSnowPlay,
+    conditions: [{ operator: "includes", value: "ch11_snowball_clear", fallbackScene: "tea_break_hub" }],
+    description: "雪仗结束后，零四仍在笑。她第一次知道，快乐可以没有任务、目的或恢复指标。",
+    dialogues: [{ speaker: "零四", sprite: "smile", text: "原来什么都不为，单纯玩闹，也可以这么开心。我第一次笑到肚子疼。" }],
+    choices: [{ text: "把这一天记成只属于你的快乐。", effects: [{ type: "change", key: "零四恢复进度", value: 10 }, { type: "event", value: "story_seen:sequence04_01" }, { type: "event", value: "ch11_sequence04_pure_joy" }], effect: () => finishPersonalStory() }]
+  },
   /* ═══ 茶歇场景 ═══ */
   "tea_break_hub": {
     background: "#101820",
@@ -3549,7 +6071,7 @@ const SCENES = {
     ],
     choices: [
       { text: "保存进度", effect: () => saveGame() },
-      { text: "返回新第一章占位入口", nextScene: "chapter1_start" },
+      { text: "返回第一章入口", nextScene: "chapter1_start" },
       { text: "进入第三章旧案合辑", nextScene: "chapter3_archive_start" }
     ]
   },
@@ -3774,7 +6296,8 @@ const SCENES = {
   },
   "ch1_006_b": {
     background: "#FAF6EF",
-    backgroundImage: ASSETS.backgrounds.qixianPlaza,
+    backgroundImage: ASSETS.backgrounds.ch1ChoirOvertoneDetection,
+    presentation: "cinematic",
     description: "合唱团长努力回忆每一个细节。她说，领唱第一次失控，正好是在钟楼慢半拍之后。那一瞬间，所有人都以为只是自己听错了。",
     dialogues: [
       { speaker: "合唱团长", text: "如果那时候有人说话，也许我们就不会继续排练下去了。" },
@@ -3786,7 +6309,8 @@ const SCENES = {
   },
   "ch1_006_minigame": {
     background: "#FAF6EF",
-    backgroundImage: ASSETS.backgrounds.qixianPlaza,
+    backgroundImage: ASSETS.backgrounds.ch1ChoirOvertoneDetection,
+    presentation: "cinematic",
     description: "领唱女孩的声音确实在持续，但每隔几秒会出现一个“不该存在”的泛音，像是有另一个声部悄悄叠加了进来。",
     systemPrompt: "迷你游戏：音色辨识。选择你认为真正异常的位置。",
     dialogues: [
@@ -4912,6 +7436,7 @@ const BATTLES = {
     narrativeReason: "雾茧站外围出现禁曲派踩点痕迹，弥洛建议先清理巡逻路线。",
     aftermath: "胜利后获得【禁曲派巡逻日志残页】，印证钟先生情报。",
     avoidable: true,
+    battleVariant: "skirmish",
     bossPerformanceDescription: "回声巡查员的靴声在铁轨上分成两拍，雾啸者则藏在信号灯照不到的白雾里。",
     availableMusicarts: ["阿缇娅", "弥洛"],
     defaultMusicarts: ["阿缇娅", "弥洛"],
@@ -4986,6 +7511,7 @@ const BATTLES = {
     narrativeReason: "静默序列-零四奉命回收尤娜，主角第一次直面禁曲派强制律者化体系。",
     aftermath: "零四撤离后掉落手写乐谱碎片，指向三十年前的黑暗巡演。",
     avoidable: false,
+    battleVariant: "boss",
     bossPerformanceDescription: "她的眼睛里没有恨，也没有杀意；只有命令被执行时的空白。",
     availableMusicarts: ["阿缇娅", "弥洛"],
     defaultMusicarts: ["阿缇娅", "弥洛"],
@@ -5075,6 +7601,7 @@ const BATTLES = {
     narrativeReason: "瑟萝弥以“验收”之名试图夺走尤娜的选择权。",
     aftermath: "战斗结果决定尤娜暂缓收编、带伤守住，或埋下静默序列-零七伏笔。",
     avoidable: false,
+    battleVariant: "boss",
     bossPerformanceDescription: "她不像零四那样空白。她每一次出枪都带着怜悯，而怜悯比杀意更难抵挡。",
     availableMusicarts: ["阿缇娅", "弥洛"],
     defaultMusicarts: ["阿缇娅", "弥洛"],
@@ -5181,6 +7708,7 @@ const BATTLES = {
     narrativeReason: "冻谱观测塔核心舱前的自动守卫被唤醒，未完工原型律者外壳被嵌在晶体核心里。",
     aftermath: "击破谱心监守者后，宁溯会在核心舱门前正式拦截队伍。",
     avoidable: false,
+    battleVariant: "boss",
     bossPerformanceDescription: "谱心监守者像一座漂浮的冰晶管风琴，所有攻击都先变成共振，再变成伤害。",
     availableMusicarts: ["阿缇娅", "弥洛"],
     defaultMusicarts: ["阿缇娅", "弥洛"],
@@ -5313,6 +7841,7 @@ const BATTLES = {
     narrativeReason: "若队伍选择强攻，宁溯会启动守谱人防御协议。她几乎不主动进攻，每次护盾破裂都会暴露一段自责。",
     aftermath: "战斗不会让宁溯成为反派，只会把对峙锁定为被迫突破结局。",
     avoidable: false,
+    battleVariant: "boss",
     bossPerformanceDescription: "宁溯站在核心舱门前，护盾碎片像冻结的道歉一样层层剥落。",
     availableMusicarts: ["阿缇娅", "弥洛"],
     defaultMusicarts: ["阿缇娅", "弥洛"],
@@ -5390,6 +7919,7 @@ const BATTLES = {
     narrativeReason: "听证会决裂后，珏衡奉命执行临时看管转移程序。她不是敌人，而是自愿站在制度内的律者。",
     aftermath: "战斗以珏衡主动停手并提交现场观察报告结束，不存在击杀或消散演出。",
     avoidable: true,
+    battleVariant: "boss",
     bossPerformanceDescription: "珏衡的审谱杖像一把会发光的戒尺，每一击都带着规程、预兆和克制。",
     availableMusicarts: ["阿缇娅", "弥洛"],
     defaultMusicarts: ["阿缇娅", "弥洛"],
@@ -5517,12 +8047,1391 @@ const BATTLES = {
       showScene("ch3_white_011");
     }
   },
+  "ch4_qilan_duo": {
+    id: "ch4_qilan_duo",
+    name: "第四章｜岐岚组合战",
+    narrativeReason: "岐与岚拦在不夜巡演号祭坛车厢前，仍相信卡戎的巡演能夺回所有人的音乐。",
+    aftermath: "突破后队伍抵达伊莱娜强袭节点；若先行说服，真相线会保留她们动摇的证据。",
+    avoidable: true,
+    battleVariant: "skirmish",
+    avoidText: "可通过说服路线绕开正面对决，但会少一次战斗压制奖励。",
+    bossPerformanceDescription: "岐的刺击像尖锐军令，岚的弦阵像被训练得过分整齐的合唱；两人共享同一个错误节拍。",
+    availableMusicarts: ["阿缇娅", "弥洛"],
+    defaultMusicarts: ["阿缇娅", "弥洛"],
+    resonanceMax: 3,
+    enemy: "岐与岚",
+    backgroundImage: ASSETS.backgrounds.ch4NightlessTrainCorridor,
+    enemyImages: [
+      { src: ASSETS.enemies.ch4QilanDuo, label: "岐与岚", className: "boss" }
+    ],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" }
+    ],
+    maxRounds: 4,
+    goal: "击破共振拦截阵，尽量不伤及岐与岚本人",
+    goalType: "defeat",
+    defeatTarget: 7,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能",
+        skillName: "暮星断弦",
+        actionPointCost: 1,
+        effectSummary: "切断岐的刺击命令线。",
+        text: "阿缇娅没有斩向岐的手腕，而是斩断她背后那条绯金命令线。",
+        musicart: "阿缇娅",
+        healthCost: 7,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 2;
+          state.mercy = (state.mercy || 0) + 1;
+        }
+      },
+      和声: {
+        displayLabel: "弥洛技能",
+        skillName: "低频拆阵",
+        actionPointCost: 1,
+        effectSummary: "压低岚的弦阵，减少本轮反击。",
+        text: "弥洛把低鸣压进列车地板，岚的弦阵像被迫慢下来的车轮。",
+        musicart: "弥洛",
+        healthCost: 6,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.enemyDamage = (state.enemyDamage || 0) + 1;
+        }
+      },
+      节奏: {
+        displayLabel: "双律者合奏",
+        skillName: "暮弦错拍",
+        actionPointCost: 2,
+        effectSummary: "利用两人共享节拍制造破绽。",
+        text: "暮星与低鸣交叠成一个故意错开的半拍。岐与岚同时回头，第一次发现自己听见的命令并不相同。",
+        musicart: "阿缇娅",
+        healthCost: 11,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 3;
+          state.enemyDelayed = true;
+          addTriggeredEvent("岐岚共享节拍被打断");
+          GameState.真相值 += 4;
+        }
+      },
+      指挥: {
+        displayLabel: "奏者能力",
+        skillName: "喊出观众席真相",
+        actionPointCost: 0,
+        effectSummary: "若已辨认观众席，追加动摇。",
+        text: "你没有下攻击命令，只把观众席上那些鼓掌姿态说给她们听。车厢广播的假掌声短暂失真。",
+        isConductorAction: true,
+        healthCost: 2,
+        requiresEvent: ["E401_audience_identified"],
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 2;
+          state.mercy = (state.mercy || 0) + 1;
+          GameState.真相值 += 3;
+        }
+      }
+    },
+    enemyIntents: {
+      1: "第1回合：岐先手刺击，岚展开弦阵封路。",
+      2: "第2回合：两人共享命令线，准备夹击阿缇娅。",
+      3: "第3回合：广播假掌声开始为她们校准节拍。",
+      4: "第4回合：岐岚尝试以自损方式完成卡戎命令。"
+    },
+    enemyAction: (round, state) => {
+      if (state.enemyDelayed) {
+        state.enemyDelayed = false;
+        return "共享节拍被打断，岐与岚的夹击错开半拍。";
+      }
+      if (state.protectedThisRound) {
+        return "弥洛稳住地板低频，弦阵没有完全成形。";
+      }
+      if (round >= 3) {
+        GameState.奏者健康 -= 2;
+        return "车厢广播的假掌声替她们校准节拍，未鸣被迫承受回震，奏者健康额外-2。";
+      }
+      return "岐与岚从左右两侧压近，金色刺线与暗红弦阵交错成笼。";
+    },
+    winCondition: (state) => (state.enemyDamage || 0) + (state.mercy || 0) >= 7,
+    onWin: () => {
+      addTriggeredEvent("岐岚组合战完成");
+      if ((GameState.真相值 || 0) >= 25 || GameState.已触发事件.includes("岐岚动摇但未倒戈")) {
+        addTriggeredEvent("岐岚战后动摇");
+      }
+      showScene("ch4_008");
+    },
+    onLose: () => {
+      addTriggeredEvent("岐岚强行突破");
+      GameState.奏者健康 -= 4;
+      showScene("ch4_008");
+    }
+  },
+  "ch4_seluomi_final": {
+    id: "ch4_seluomi_final",
+    name: "第四章｜瑟萝弥最终战",
+    narrativeReason: "瑟萝弥要求队伍用战斗证明另一种可能不是软弱。",
+    aftermath: "胜利后瑟萝弥会撤往核心车厢，若真相值与动摇事件足够，将转为倒戈支援。",
+    avoidable: false,
+    battleVariant: "boss",
+    bossPerformanceDescription: "她的圣咏领域仍然锋利，但每一次十字裁定都慢了半拍。",
+    availableMusicarts: ["阿缇娅", "弥洛"],
+    defaultMusicarts: ["阿缇娅", "弥洛"],
+    resonanceMax: 4,
+    enemy: "瑟萝弥 · 崩解的信仰",
+    backgroundImage: ASSETS.backgrounds.ch4NightlessTrainCorridor,
+    enemyImages: [
+      { src: ASSETS.enemies.ch4SeluomiFinal, label: "瑟萝弥", className: "boss" }
+    ],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" }
+    ],
+    maxRounds: 5,
+    goal: "击破圣咏领域，并让瑟萝弥亲眼确认替代方案",
+    goalType: "defeat",
+    defeatTarget: 11,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能",
+        skillName: "暮星问罪",
+        actionPointCost: 1,
+        effectSummary: "攻击圣咏领域裂缝。",
+        text: "阿缇娅的暮星光轨没有避开瑟萝弥的目光。那不是复仇，是一句必须回答的问题。",
+        musicart: "阿缇娅",
+        healthCost: 8,
+        effect: (state) => { state.enemyDamage = (state.enemyDamage || 0) + 2; }
+      },
+      和声: {
+        displayLabel: "弥洛技能",
+        skillName: "低频止裁",
+        actionPointCost: 1,
+        effectSummary: "压住十字裁定终式。",
+        text: "弥洛把低频线缠住十字枪尾端，瑟萝弥的裁定第一次没有落在命令指定的位置。",
+        musicart: "弥洛",
+        healthCost: 7,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.enemyDamage = (state.enemyDamage || 0) + 1;
+        }
+      },
+      节奏: {
+        displayLabel: "双律者合奏",
+        skillName: "暮弦双鸣·终证",
+        actionPointCost: 2,
+        effectSummary: "重创领域并触发倒戈判定。",
+        text: "暮星与低鸣从两个方向同时抵达。瑟萝弥听见的不是胜利宣告，而是“你也可以停下”。",
+        musicart: "阿缇娅",
+        healthCost: 13,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 4;
+          addTriggeredEvent("瑟萝弥倒戈支援");
+          GameState.真相值 += 8;
+        }
+      },
+      音色: {
+        displayLabel: "真相陈述",
+        skillName: "说出雪岭替代方案",
+        actionPointCost: 0,
+        effectSummary: "若战前动摇已触发，直接扩大领域裂缝。",
+        text: "你把雪岭、宁溯、未完工原型的证据一件件说出。瑟萝弥握枪的手终于开始发抖。",
+        isConductorAction: true,
+        healthCost: 0,
+        requiresEvent: ["瑟萝弥战前动摇"],
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 2;
+          state.enemyDelayed = true;
+          GameState.真相值 += 4;
+        }
+      },
+      静默: {
+        displayLabel: "奏者能力",
+        skillName: "压住悲悯终章",
+        actionPointCost: 1,
+        effectSummary: "高代价中断终式，防止她自损。",
+        text: "你用未鸣压住她准备自损的终章。右腕刻痕被圣咏反噬，疼得像被白光割开。",
+        isConductorAction: true,
+        healthCost: 12,
+        warning: true,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 3;
+          state.enemyDelayed = true;
+        }
+      }
+    },
+    enemyIntents: {
+      1: "P1 圣咏领域：她仍以规训方式保护自己的信仰。",
+      2: "P2 十字裁定·终：她试图证明温柔无法抵达战场。",
+      3: "P3 崩解的信仰：真相值越高，她越迟疑。",
+      4: "P4 悲悯终章：她准备以自损完成最后裁定。",
+      5: "终段：瑟萝弥等待你们给出不可回避的答案。"
+    },
+    enemyAction: (round, state) => {
+      if (state.enemyDelayed) {
+        state.enemyDelayed = false;
+        return "瑟萝弥的圣咏终式被压住，白色光环像迟疑一样断开。";
+      }
+      if (state.protectedThisRound) {
+        return "弥洛压低裁定节拍，十字枪锋擦过地面，没有逼出自损。";
+      }
+      if ((GameState.真相值 || 0) >= 45) {
+        state.enemyDamage = (state.enemyDamage || 0) + 1;
+        return "真相让瑟萝弥慢了半拍，圣咏领域自行裂开一线。";
+      }
+      GameState.奏者健康 -= 2;
+      return "圣咏领域反压未鸣，奏者健康额外-2。";
+    },
+    winCondition: (state) => (state.enemyDamage || 0) >= 11,
+    onWin: () => {
+      const persuaded = GameState.已触发事件.includes("瑟萝弥战前动摇") || GameState.真相值 >= 50;
+      addTriggeredEvent(persuaded ? "瑟萝弥倒戈支援" : "瑟萝弥撤往核心车厢");
+      if (persuaded) {
+        GameState.真相值 += 10;
+      }
+      showScene("ch4_011");
+    },
+    onLose: () => {
+      addTriggeredEvent("瑟萝弥撤往核心车厢");
+      GameState.奏者健康 -= 5;
+      showScene("ch4_011");
+    }
+  },
+  "ch4_charon_final": {
+    id: "ch4_charon_final",
+    name: "第四章｜卡戎终战",
+    narrativeReason: "卡戎将不夜巡演号、假掌声、管风琴核心与所有静默序列命运绑成最后一场演出。",
+    aftermath: "终战结果进入第四章崩解结算，真相值、救赎值与终战选择共同决定卡戎处置。",
+    avoidable: false,
+    battleVariant: "finale",
+    bossPerformanceDescription: "卡戎不是单独站在舞台上；整列列车都在替他打拍，假掌声像永不停止的军鼓。",
+    availableMusicarts: ["阿缇娅", "弥洛"],
+    defaultMusicarts: ["阿缇娅", "弥洛"],
+    resonanceMax: 5,
+    enemy: "卡戎 · 不夜管风琴指挥家",
+    backgroundImage: ASSETS.backgrounds.ch4CoreOrganChamber,
+    enemyImages: [
+      { src: ASSETS.enemies.ch4CharonOrganConductor, label: "卡戎", className: "boss" }
+    ],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" }
+    ],
+    maxRounds: 6,
+    goal: "击破管风琴共鸣体，并在列车崩解前救下仍有反应的静默序列",
+    goalType: "defeat",
+    defeatTarget: 15,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能",
+        skillName: "暮星贯奏",
+        actionPointCost: 1,
+        effectSummary: "贯穿管风琴共鸣体外壳。",
+        text: "阿缇娅把暮星光轨钉入管风琴外壳。假掌声第一次出现破音。",
+        musicart: "阿缇娅",
+        healthCost: 9,
+        effect: (state) => { state.enemyDamage = (state.enemyDamage || 0) + 2; }
+      },
+      和声: {
+        displayLabel: "弥洛技能",
+        skillName: "低频停轮",
+        actionPointCost: 1,
+        effectSummary: "稳住车轮节拍，降低崩解反噬。",
+        text: "弥洛把低频压入车轮轴心，整列车的震动被迫降到同一条低音线上。",
+        musicart: "弥洛",
+        healthCost: 7,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.enemyDamage = (state.enemyDamage || 0) + 1;
+        }
+      },
+      节奏: {
+        displayLabel: "双律者合奏",
+        skillName: "暮弦双鸣·终止演出",
+        actionPointCost: 2,
+        effectSummary: "终战核心输出，推进真相与救赎。",
+        text: "暮星与低鸣同时抵达管风琴心脏。卡戎举起指挥棒，却发现这一次，列车没有完全听他的。",
+        musicart: "阿缇娅",
+        healthCost: 14,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 4;
+          state.enemyDelayed = true;
+          GameState.真相值 += 5;
+          GameState.救赎值 += 5;
+        }
+      },
+      指挥: {
+        displayLabel: "救援指令",
+        skillName: "先救仍有反应的人",
+        actionPointCost: 0,
+        effectSummary: "降低伤害但提高救赎值。",
+        text: "你没有把所有拍子都给攻击。你把一部分节拍留给仍能呼吸的人。",
+        isConductorAction: true,
+        healthCost: 3,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 1;
+          state.protectedThisRound = true;
+          GameState.救赎值 += 6;
+          addTriggeredEvent("终战优先救人");
+        }
+      },
+      音色: {
+        displayLabel: "支援证据",
+        skillName: "让瑟萝弥切断圣咏回路",
+        actionPointCost: 0,
+        effectSummary: "若她已倒戈，削弱卡戎管风琴护盾。",
+        text: "瑟萝弥的十字枪从侧翼落下，切断了卡戎预留给圣咏系统的回路。",
+        isConductorAction: true,
+        healthCost: 0,
+        requiresEvent: ["瑟萝弥倒戈支援"],
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 3;
+          state.enemyDelayed = true;
+        }
+      },
+      静默: {
+        displayLabel: "奏者能力",
+        skillName: "强停不夜巡演号",
+        actionPointCost: 1,
+        effectSummary: "高代价强制停拍，快速推进终战。",
+        text: "你用未鸣强行按下列车总拍。金色谱线从右腕一路烧到肩侧，像要把你也钉进这场演出。",
+        isConductorAction: true,
+        healthCost: 15,
+        warning: true,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 4;
+          GameState.世界失谐度 += 6;
+        }
+      }
+    },
+    enemyIntents: {
+      1: "P1 巡演指挥家：假掌声为卡戎校准全场节拍。",
+      2: "P2 管风琴共鸣体：所有攻击先转化为列车回震。",
+      3: "P3 静默序列合唱：观众席个体被迫补上和声。",
+      4: "P4 黑暗巡演终章：卡戎尝试把列车开进无终点循环。",
+      5: "P5 卸下指挥棒的人：真相值越高，卡戎动作越迟疑。",
+      6: "终段：不夜巡演号开始脱轨崩解。"
+    },
+    enemyAction: (round, state) => {
+      if (state.enemyDelayed) {
+        state.enemyDelayed = false;
+        return "管风琴回路被打断，卡戎的指挥棒停在半空。";
+      }
+      if (state.protectedThisRound) {
+        return "救援节拍稳住观众席，静默序列没有被迫补上合唱。";
+      }
+      if ((GameState.真相值 || 0) >= 70 && round >= 5) {
+        state.enemyDamage = (state.enemyDamage || 0) + 1;
+        return "卡戎听见了自己曾经相信过的方向，动作慢了半拍。";
+      }
+      const penalty = round >= 4 ? 4 : 2;
+      GameState.奏者健康 -= penalty;
+      return `管风琴共鸣沿未鸣回震，奏者健康额外-${penalty}。`;
+    },
+    winCondition: (state) => (state.enemyDamage || 0) >= 15,
+    onWin: () => {
+      addTriggeredEvent("卡戎终战完成");
+      if ((GameState.真相值 || 0) >= 70) {
+        addTriggeredEvent("卡戎被迫直面真相");
+      }
+      showScene("ch4_015");
+    },
+    onLose: () => {
+      addTriggeredEvent("卡戎终战完成");
+      addTriggeredEvent("不夜巡演号高损崩解");
+      GameState.奏者健康 -= 8;
+      showScene("ch4_015");
+    }
+  },
+  "ch5_liuli_mindwall": {
+    id: "ch5_liuli_mindwall",
+    name: "第五章｜零一心防战",
+    narrativeReason: "零一以浮光马戏团为堡垒，拒绝小雀离开，也拒绝承认保护可能变成另一种囚禁。",
+    aftermath: "战斗不是击倒零一，而是让她的心防出现足够裂缝，把选择权还给小雀。",
+    avoidable: false,
+    battleVariant: "boss",
+    minMusicarts: 3,
+    maxMusicarts: 3,
+    teamSize: 3,
+    bossPerformanceDescription: "帐篷暖灯没有熄灭，红金丝带却像命令线一样拉紧；零一站在圆形舞台中央，像一位把家变成笼子的团长。",
+    availableMusicarts: ["阿缇娅", "弥洛", "零四"],
+    defaultMusicarts: ["阿缇娅", "弥洛", "零四"],
+    resonanceMax: 4,
+    enemy: "零一 · 琉璃",
+    backgroundImage: ASSETS.backgrounds.ch5MainTentInterior,
+    enemyImages: [
+      { src: ASSETS.enemies.ch5LiuliZeroOne, label: "零一", className: "boss" },
+      { src: ASSETS.enemies.ch5CircusGuard, label: "马戏团守卫", className: "swarm" }
+    ],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" },
+      { src: ASSETS.characters["零四"].battle, label: "零四" }
+    ],
+    maxRounds: 6,
+    goal: "打破零一心防，让她主动停手",
+    goalType: "defeat",
+    defeatTarget: 12,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能",
+        skillName: "暮星破笼",
+        actionPointCost: 1,
+        effectSummary: "切开舞台命令线，推进心防判定。",
+        text: "阿缇娅的暮星光轨没有斩向零一，而是斩断她身后拉紧的红金丝带。",
+        musicart: "阿缇娅",
+        healthCost: 8,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 2;
+          GameState.心防判定值 += 3;
+        }
+      },
+      和声: {
+        displayLabel: "弥洛技能",
+        skillName: "低频护场",
+        actionPointCost: 1,
+        effectSummary: "稳住小雀所在区域，减少本轮反击。",
+        text: "弥洛把低频压进圆形舞台边缘，灯串和吊索同时慢下来，为小雀留出退路。",
+        musicart: "弥洛",
+        healthCost: 7,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.enemyDamage = (state.enemyDamage || 0) + 1;
+          GameState.心防判定值 += 2;
+        }
+      },
+      静默: {
+        displayLabel: "零四技能",
+        skillName: "断拍回声",
+        actionPointCost: 1,
+        effectSummary: "用同类记忆触碰零一，显著推进心防。",
+        text: "零四没有叫她编号。她只轻声说：零一，我也怕过。那一瞬间，团长的指尖松了半寸。",
+        musicart: "零四",
+        healthCost: 5,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 1;
+          state.enemyDelayed = true;
+          GameState.心防判定值 += 6;
+          GameState.零四恢复进度 += 3;
+          GameState.零四共鸣 += 2;
+        }
+      },
+      节奏: {
+        displayLabel: "三律者合奏",
+        skillName: "暮弦断拍",
+        actionPointCost: 2,
+        effectSummary: "三人合奏重击心防，是本战核心破局手段。",
+        text: "暮星、低鸣与零四断拍在帐篷中央汇合。零一第一次听见这不是夺走，而是有人把门从里面推开。",
+        musicart: "阿缇娅",
+        healthCost: 12,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 4;
+          state.enemyDelayed = true;
+          addTriggeredEvent("ch5_triple_musicart_ensemble");
+          GameState.心防判定值 += 10;
+          GameState.阿缇娅共鸣 += 2;
+          GameState.弥洛共鸣 += 2;
+          GameState.零四共鸣 += 3;
+        }
+      },
+      指挥: {
+        displayLabel: "奏者判断",
+        skillName: "把选择还给小雀",
+        actionPointCost: 0,
+        effectSummary: "低代价推进心防，并提高小雀信任。",
+        text: "你没有替小雀回答。你把指挥棒压低，把沉默留给她自己开口。",
+        isConductorAction: true,
+        healthCost: 4,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.mercy = (state.mercy || 0) + 1;
+          GameState.心防判定值 += 5;
+          GameState.小雀信任值 += 3;
+        }
+      }
+    },
+    enemyIntents: {
+      1: "P1 浮光团长：零一用暖灯与掌声稳住全场。",
+      2: "P2 丝带封场：她试图把小雀重新护回安全范围。",
+      3: "P3 旧编号回声：零四的存在让零一开始失控。",
+      4: "P4 爱的牢笼：心防越高，她越难继续把保护说成命令。",
+      5: "P5 团长谢幕：零一准备以自损方式维持马戏团秩序。",
+      6: "终段：帐篷所有灯光都指向小雀自己的选择。"
+    },
+    enemyAction: (round, state) => {
+      if (state.enemyDelayed) {
+        state.enemyDelayed = false;
+        return "零四的断拍让零一停住，红金丝带没有及时收紧。";
+      }
+      if (state.protectedThisRound) {
+        return "弥洛稳住舞台边缘，小雀没有被重新推回安全圈。";
+      }
+      if ((GameState.心防判定值 || 0) >= 35 && round >= 4) {
+        state.enemyDamage = (state.enemyDamage || 0) + 1;
+        return "零一听见了自己话里的裂缝，心防自行松动了一线。";
+      }
+      const penalty = round >= 5 ? 4 : 2;
+      GameState.奏者健康 -= penalty;
+      return `浮光丝带沿未鸣回震，奏者健康额外-${penalty}。`;
+    },
+    winCondition: (state) => (state.enemyDamage || 0) + (state.mercy || 0) >= 12 || (GameState.心防判定值 || 0) >= 45,
+    onWin: () => {
+      addTriggeredEvent("chapter5_liuli_battle_cleared");
+      if ((GameState.心防判定值 || 0) >= 45 || GameState.已触发事件.includes("ch5_named_loving_cage")) {
+        addTriggeredEvent("ch5_liuli_mindwall_broken");
+      }
+      showScene("ch5_010");
+    },
+    onLose: () => {
+      addTriggeredEvent("chapter5_liuli_battle_cleared");
+      addTriggeredEvent("ch5_liuli_forced_pause");
+      GameState.奏者健康 -= 5;
+      showScene("ch5_010");
+    }
+  },
+  "ch6_field_dissonance": {
+    id: "ch6_field_dissonance",
+    name: "第六章｜村外轻度噪响体",
+    narrativeReason: "拾光村外出现低威胁噪响体。零四第一次不是因为命令，而是主动选择保护眼前的日常。",
+    aftermath: "这不是试炼，也不是终战；它确认零四已经能以自己的意愿参与战斗。",
+    avoidable: true,
+    battleVariant: "skirmish",
+    minMusicarts: 3,
+    maxMusicarts: 3,
+    teamSize: 3,
+    bossPerformanceDescription: "金色梯田边缘，细碎的断谱声像误入风中的杂音。它很弱，却足够让零四认真说出“我想上”。",
+    availableMusicarts: ["阿缇娅", "弥洛", "零四"],
+    defaultMusicarts: ["阿缇娅", "弥洛", "零四"],
+    resonanceMax: 3,
+    enemy: "田埂噪响体",
+    backgroundImage: ASSETS.backgrounds.ch6Sequence04LightBattle,
+    enemyImages: [
+      { src: ASSETS.enemies.ch6FieldDissonance, label: "田埂噪响体", className: "swarm" }
+    ],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" },
+      { src: ASSETS.characters["零四"].battle, label: "零四" }
+    ],
+    maxRounds: 4,
+    goal: "轻处理村外噪响体，并让零四完成一次主动选择",
+    goalType: "defeat",
+    defeatTarget: 7,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能",
+        skillName: "暮星轻引",
+        actionPointCost: 1,
+        effectSummary: "切开断谱外壳，避免波及梯田。",
+        text: "阿缇娅把暮星光轨压低，只切断噪响体外壳，不让余波扫过稻穗。",
+        musicart: "阿缇娅",
+        healthCost: 4,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 2;
+          GameState.安心值 += 1;
+        }
+      },
+      和声: {
+        displayLabel: "弥洛技能",
+        skillName: "低频稳场",
+        actionPointCost: 1,
+        effectSummary: "降低反击，保护村民退路。",
+        text: "弥洛的低频像一层温和屏障，替村民和田埂留出退开的距离。",
+        musicart: "弥洛",
+        healthCost: 4,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.enemyDamage = (state.enemyDamage || 0) + 1;
+        }
+      },
+      独奏: {
+        displayLabel: "零四技能",
+        skillName: "自选小节",
+        actionPointCost: 1,
+        effectSummary: "零四主动出手，推进康复闭环。",
+        text: "零四没有等待命令。她先看向自己想保护的田野，然后才让金色音轨落下。",
+        musicart: "零四",
+        healthCost: 3,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 3;
+          GameState.零四恢复进度 += 5;
+          state.sequence04Choice = true;
+        }
+      },
+      守势: {
+        displayLabel: "稳住节奏",
+        skillName: "不把它变成试炼",
+        actionPointCost: 1,
+        effectSummary: "降低压力，增加安心值。",
+        text: "队伍没有把这场战斗变成测试。每个人都只做刚好足够的事。",
+        healthCost: 0,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          GameState.安心值 += 2;
+        }
+      }
+    },
+    enemyTurn: (state, round) => {
+      if (state.protectedThisRound) {
+        state.protectedThisRound = false;
+        return "噪响体撞上低频护场，断谱声很快散进风里。";
+      }
+      const penalty = round >= 3 ? 2 : 1;
+      GameState.奏者健康 -= penalty;
+      return `细碎噪响扫过田埂，奏者健康-${penalty}。`;
+    },
+    winCondition: (state) => (state.enemyDamage || 0) >= 7 || state.sequence04Choice,
+    onWin: () => {
+      addTriggeredEvent("chapter6_field_dissonance_cleared");
+      addTriggeredEvent("sequence04_voluntary_battle_done");
+      GameState.安心值 += 6;
+      showScene("ch6_007");
+    },
+    onLose: () => {
+      addTriggeredEvent("chapter6_field_dissonance_cleared");
+      addTriggeredEvent("chapter6_team_handled_light_battle");
+      GameState.奏者健康 -= 2;
+      showScene("ch6_007");
+    }
+  },
+  "ch7_evidence_defense": {
+    id: "ch7_evidence_defense",
+    name: "第七章｜礼堂之夜证据保卫战",
+    narrativeReason: "崔敬一方试图在表决前夕转移青禾关键案例统计资料，队伍必须护送证据离开夜间礼堂。",
+    aftermath: "战斗结果影响证据完整度与监察队分裂节点，但不会中断主线表决。",
+    avoidable: false,
+    battleVariant: "skirmish",
+    minMusicarts: 3,
+    maxMusicarts: 3,
+    teamSize: 3,
+    bossPerformanceDescription: "白金制服的卫队站在夜间大理石走廊里，武器没有完全举稳；他们也在怀疑自己执行的命令。",
+    availableMusicarts: ["阿缇娅", "弥洛", "零四"],
+    defaultMusicarts: ["阿缇娅", "弥洛", "零四"],
+    resonanceMax: 4,
+    enemy: "白谱院礼堂卫队",
+    backgroundImage: ASSETS.backgrounds.ch7NightHall,
+    enemyImages: [
+      { src: ASSETS.enemies.ch7AcademyGuard, label: "礼堂卫队", className: "swarm" }
+    ],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" },
+      { src: ASSETS.characters["零四"].battle, label: "零四" }
+    ],
+    maxRounds: 5,
+    goal: "护送青禾与关键证据撤离夜间礼堂",
+    goalType: "protect",
+    protectedLabel: "青禾与证据",
+    protected: 3,
+    defeatTarget: 10,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能",
+        skillName: "暮星断令",
+        actionPointCost: 1,
+        effectSummary: "切断卫队封锁线但避免伤人。",
+        text: "阿缇娅的暮星光轨擦过武器边缘，只斩断封锁线，不斩向人。",
+        musicart: "阿缇娅",
+        healthCost: 7,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 2;
+          state.evidenceSafety = (state.evidenceSafety || 0) + 1;
+        }
+      },
+      和声: {
+        displayLabel: "弥洛技能",
+        skillName: "低频护送",
+        actionPointCost: 1,
+        effectSummary: "稳定撤离路线并减少本轮追击。",
+        text: "弥洛把低频压进大理石地面，青禾脚边散落的文件没有被风卷走。",
+        musicart: "弥洛",
+        healthCost: 6,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.evidenceSafety = (state.evidenceSafety || 0) + 2;
+        }
+      },
+      静默: {
+        displayLabel: "零四技能",
+        skillName: "断拍止步",
+        actionPointCost: 1,
+        effectSummary: "让迟疑的卫队停下一拍。",
+        text: "零四没有攻击。她只是站在证据箱前，轻声问：这条命令，真的是你们想守护的秩序吗？",
+        musicart: "零四",
+        healthCost: 5,
+        effect: (state) => {
+          state.enemyDelayed = true;
+          state.enemyDamage = (state.enemyDamage || 0) + 1;
+          GameState.观察期存废倾向 -= 2;
+        }
+      },
+      音色: {
+        displayLabel: "革新派支援",
+        skillName: "柏舟青禾扶苏接应",
+        actionPointCost: 0,
+        effectSummary: "若战前通知革新派，大幅提高证据安全。",
+        text: "柏舟拦下追来的行政人员，青禾抱紧文件，扶苏把撤离路线喊得整个走廊都听得见。",
+        isConductorAction: true,
+        requiresEvent: ["ch7_reformists_notified"],
+        healthCost: 0,
+        effect: (state) => {
+          state.evidenceSafety = (state.evidenceSafety || 0) + 3;
+          state.protectedThisRound = true;
+          addTriggeredEvent("ch7_reformists_helped_evidence_escape");
+        }
+      },
+      指挥: {
+        displayLabel: "奏者判断",
+        skillName: "只守证据不伤人",
+        actionPointCost: 0,
+        effectSummary: "低伤害但提高卫队动摇。",
+        text: "你压低指挥棒，没有下攻击命令，只把撤离路线清清楚楚地标出来。",
+        isConductorAction: true,
+        healthCost: 3,
+        effect: (state) => {
+          state.mercy = (state.mercy || 0) + 1;
+          state.evidenceSafety = (state.evidenceSafety || 0) + 1;
+          GameState.历史责任公开倾向 -= 2;
+        }
+      }
+    },
+    enemyIntents: {
+      1: "P1 封锁礼堂门：卫队仍按程序执行。",
+      2: "P2 转移证据箱：青禾成为护送核心。",
+      3: "P3 命令迟疑：年轻队员开始怀疑。",
+      4: "P4 程序压迫：资深队员试图强行完成命令。",
+      5: "终段：证据必须在表决前保住。"
+    },
+    enemyAction: (round, state) => {
+      if (state.enemyDelayed) {
+        state.enemyDelayed = false;
+        return "零四的发问让卫队停住一拍，命令的裂缝被所有人看见。";
+      }
+      if (state.protectedThisRound) {
+        return "护送路线被稳住，证据箱安全前移。";
+      }
+      const penalty = round >= 4 ? 3 : 1;
+      GameState.奏者健康 -= penalty;
+      return `拘束杖敲击地面，礼堂回声让撤离脚步变慢，奏者健康额外-${penalty}。`;
+    },
+    winCondition: (state) => (state.evidenceSafety || 0) >= 8 || (state.enemyDamage || 0) + (state.mercy || 0) >= 10,
+    onWin: () => {
+      addTriggeredEvent("ch7_evidence_preserved");
+      GameState.临时看管权限倾向 -= 8;
+      GameState.历史责任公开倾向 -= 6;
+      showScene("ch7_017");
+    },
+    onLose: () => {
+      addTriggeredEvent("ch7_evidence_partially_preserved");
+      GameState.临时看管权限倾向 -= 3;
+      GameState.奏者健康 -= 5;
+      showScene("ch7_017");
+    }
+  },
+  "ch8_dark_tour_remnants": {
+    id: "ch8_dark_tour_remnants",
+    name: "第八章｜保卫赤与屿的新生",
+    narrativeReason: "黑暗巡演残部趁赤重新回应屿时袭击旧站，试图把她重新拖回未结束的巡演。",
+    aftermath: "战斗结果影响赤稳定度、默契值与新契约成立质量；失败不会中断主线，但会降低契约进度。",
+    avoidable: false,
+    battleVariant: "boss",
+    minMusicarts: 3,
+    maxMusicarts: 3,
+    teamSize: 3,
+    bossPerformanceDescription: "三名残部像被破损乐器缝合的舞台执事，面具后没有眼神，只有红线拉扯出的旧命令。",
+    availableMusicarts: ["阿缇娅", "弥洛", "零四"],
+    defaultMusicarts: ["阿缇娅", "弥洛", "零四"],
+    resonanceMax: 5,
+    enemy: "黑暗巡演残部 · 莫洛队",
+    backgroundImage: ASSETS.backgrounds.ch8FallenDarkTourStation,
+    enemyImages: [
+      { src: ASSETS.enemies.ch8DarkTourRemnants, label: "黑暗巡演残部", className: "boss" }
+    ],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" },
+      { src: ASSETS.characters["零四"].battle, label: "零四" }
+    ],
+    maxRounds: 6,
+    goal: "击退残部并稳住赤，让屿完成新契约呼唤",
+    goalType: "protect",
+    protectedLabel: "赤与屿",
+    protected: 4,
+    defeatTarget: 12,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能",
+        skillName: "暮星断红线",
+        actionPointCost: 1,
+        effectSummary: "斩断残部牵引线并稳住赤的第一拍。",
+        text: "阿缇娅的暮星光轨切开红线，却避开赤的琴弦，让她没有再被旧命令拖回去。",
+        musicart: "阿缇娅",
+        healthCost: 8,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 2;
+          state.chiSafety = (state.chiSafety || 0) + 1;
+          GameState.赤稳定度 += 3;
+        }
+      },
+      和声: {
+        displayLabel: "弥洛技能",
+        skillName: "低频定弦",
+        actionPointCost: 1,
+        effectSummary: "降低赤失控风险，并减少本轮干扰。",
+        text: "弥洛把低频压进湿冷站台，赤身边乱跳的弦线终于落回同一条呼吸。",
+        musicart: "弥洛",
+        healthCost: 7,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.chiSafety = (state.chiSafety || 0) + 2;
+          GameState.赤稳定度 += 4;
+        }
+      },
+      静默: {
+        displayLabel: "零四技能",
+        skillName: "断拍问答",
+        actionPointCost: 1,
+        effectSummary: "让残部停顿，并提醒赤她可以选择。",
+        text: "零四站到赤的侧后方，轻声说：如果不想回去，你可以不用回答他们。",
+        musicart: "零四",
+        healthCost: 6,
+        effect: (state) => {
+          state.enemyDelayed = true;
+          state.chiSafety = (state.chiSafety || 0) + 1;
+          GameState.零四恢复进度 += 2;
+        }
+      },
+      音色: {
+        displayLabel: "屿的呼唤",
+        skillName: "降B调预备",
+        actionPointCost: 0,
+        effectSummary: "若提前读懂赤的调性，直接提高默契与契约进度。",
+        text: "屿没有喊赤的名字。他先哼出那一小段降B调，让她知道这次有人真的听见了。",
+        isConductorAction: true,
+        requiresEvent: ["ch8_yu_read_chi_tonality"],
+        healthCost: 0,
+        effect: (state) => {
+          state.contractProgress = (state.contractProgress || 0) + 3;
+          state.chiSafety = (state.chiSafety || 0) + 2;
+          GameState.默契值 += 5;
+          GameState.屿赤契约进度 += 6;
+          addTriggeredEvent("ch8_yu_called_b_flat_in_battle");
+        }
+      },
+      指挥: {
+        displayLabel: "奏者判断",
+        skillName: "护住选择权",
+        actionPointCost: 0,
+        effectSummary: "牺牲输出换取赤稳定度，防止她被残部激怒。",
+        text: "你没有命令大家强行压制赤，只把护送线收得更稳：先让她拥有拒绝和接受的余地。",
+        isConductorAction: true,
+        healthCost: 4,
+        effect: (state) => {
+          state.chiSafety = (state.chiSafety || 0) + 2;
+          state.mercy = (state.mercy || 0) + 1;
+          GameState.赤稳定度 += 5;
+        }
+      }
+    },
+    enemyIntents: {
+      1: "P1 红线回收：残部尝试重接赤的旧命令。",
+      2: "P2 假谢幕：莫洛用旧巡演口号干扰屿。",
+      3: "P3 破谱合围：残部转向攻击护送队形。",
+      4: "P4 独奏者召回：赤稳定度成为核心风险。",
+      5: "P5 降B调窗口：屿必须准备最后呼唤。",
+      6: "终段：新契约只有一次完整落拍机会。"
+    },
+    enemyAction: (round, state) => {
+      if (state.enemyDelayed) {
+        state.enemyDelayed = false;
+        return "零四切断一拍问答，残部的红线短暂垂落，赤没有被旧命令拉走。";
+      }
+      if (state.protectedThisRound) {
+        state.protectedThisRound = false;
+        return "低频护住站台，残部的牵引无法穿过弥洛布下的定弦区。";
+      }
+      const penalty = round >= 4 ? 5 : 3;
+      GameState.赤稳定度 -= penalty;
+      GameState.奏者健康 -= 1;
+      return `莫洛队拖动红线，赤的琴声出现裂纹，赤稳定度-${penalty}，奏者健康-1。`;
+    },
+    winCondition: (state) => (state.chiSafety || 0) >= 10 || (state.enemyDamage || 0) + (state.mercy || 0) >= 12 || (state.contractProgress || 0) >= 6,
+    onWin: () => {
+      addTriggeredEvent("ch8_dark_tour_remnants_defeated");
+      GameState.赤稳定度 += 12;
+      GameState.默契值 += 10;
+      GameState.屿赤契约进度 += 12;
+      showScene("ch8_014");
+    },
+    onLose: () => {
+      addTriggeredEvent("ch8_contract_battle_survived_with_cost");
+      GameState.奏者健康 -= 6;
+      GameState.赤稳定度 += 3;
+      GameState.屿赤契约进度 += 4;
+      showScene("ch8_014");
+    }
+  },
+  "ch9_cizhao_pressure": {
+    id: "ch9_cizhao_pressure",
+    name: "第九章｜辞照威压感知",
+    narrativeReason: "辞照作为初响会培育律者首次展示实力，队伍必须理解此刻无法力敌，只能保护岐与岚并寻找撤退窗口。",
+    aftermath: "本战不可正面胜利；表现影响威压值、奏者健康与后续岚离场时的台词细节。",
+    avoidable: false,
+    battleVariant: "boss",
+    minMusicarts: 3,
+    maxMusicarts: 3,
+    teamSize: 3,
+    bossPerformanceDescription: "辞照的动作像被精密校准过的仪式，铂紫色瞳孔中浮着金属蚀刻般的纹路，没有愤怒，也没有杀意。",
+    availableMusicarts: ["阿缇娅", "弥洛", "零四"],
+    defaultMusicarts: ["阿缇娅", "弥洛", "零四"],
+    resonanceMax: 3,
+    enemy: "辞照 · 培育律者",
+    backgroundImage: ASSETS.backgrounds.ch9AbandonedOutpostArchive,
+    enemyImages: [
+      { src: ASSETS.enemies.ch9Cizhao, label: "辞照", className: "boss" }
+    ],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" },
+      { src: ASSETS.characters["零四"].battle, label: "零四" }
+    ],
+    maxRounds: 4,
+    goal: "识别实力差距，保护队伍并触发战术撤退",
+    goalType: "survive",
+    protectedLabel: "岐与岚",
+    protected: 3,
+    defeatTarget: 99,
+    allowEarlyWin: false,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能",
+        skillName: "暮星试探",
+        actionPointCost: 1,
+        effectSummary: "试探辞照的防线，但主要用于判断差距。",
+        text: "阿缇娅的暮星斩出半弧，却被辞照以一寸不到的位移避开，像答案早已写在纸面上。",
+        musicart: "阿缇娅",
+        healthCost: 8,
+        effect: (state) => {
+          state.pressureRead = (state.pressureRead || 0) + 2;
+          state.enemyDamage = (state.enemyDamage || 0) + 1;
+          GameState.威压值 += 8;
+        }
+      },
+      和声: {
+        displayLabel: "弥洛技能",
+        skillName: "低频护心",
+        actionPointCost: 1,
+        effectSummary: "降低本轮威压伤害，帮助队伍保持判断力。",
+        text: "弥洛把低频压在所有人心口，让那种被俯视的窒息感短暂慢下来。",
+        musicart: "弥洛",
+        healthCost: 6,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.pressureRead = (state.pressureRead || 0) + 2;
+          GameState.威压值 -= 4;
+        }
+      },
+      静默: {
+        displayLabel: "零四技能",
+        skillName: "断拍止慌",
+        actionPointCost: 1,
+        effectSummary: "稳定岐与岚，减少她们被威压压垮。",
+        text: "零四没有对辞照出手，她只是握住岐的手：先呼吸，先别被他带走判断。",
+        musicart: "零四",
+        healthCost: 5,
+        effect: (state) => {
+          state.siblingsSafe = (state.siblingsSafe || 0) + 2;
+          state.pressureRead = (state.pressureRead || 0) + 1;
+          GameState.岐好感值 += 2;
+        }
+      },
+      音色: {
+        displayLabel: "威压感知",
+        skillName: "承认无法力敌",
+        actionPointCost: 0,
+        effectSummary: "不追求输出，提前寻找撤退窗口。",
+        text: "你强迫自己承认：现在不是赢的时候。能活着带走更多人，就是这场对峙唯一正确的节拍。",
+        isConductorAction: true,
+        healthCost: 0,
+        effect: (state) => {
+          state.retreatWindow = (state.retreatWindow || 0) + 3;
+          state.pressureRead = (state.pressureRead || 0) + 2;
+          addTriggeredEvent("ch9_retreat_window_seen");
+        }
+      },
+      指挥: {
+        displayLabel: "奏者判断",
+        skillName: "护住岐岚",
+        actionPointCost: 0,
+        effectSummary: "牺牲节奏换取岐与岚的安全。",
+        text: "你把队形收回到岐与岚身侧。辞照没有追击，只像观察数据一样看着你们的选择。",
+        isConductorAction: true,
+        healthCost: 3,
+        effect: (state) => {
+          state.siblingsSafe = (state.siblingsSafe || 0) + 2;
+          GameState.岚离场分支值 += 2;
+        }
+      }
+    },
+    enemyIntents: {
+      1: "P1 精准试探：辞照只用最小动作瓦解第一轮攻击。",
+      2: "P2 铂紫凝视：威压值快速上升。",
+      3: "P3 几何光带展开：队伍被迫判断撤退窗口。",
+      4: "终段：这不是能赢的战斗，只能决定以什么姿态退下。"
+    },
+    enemyAction: (round, state) => {
+      if (state.protectedThisRound) {
+        state.protectedThisRound = false;
+        return "弥洛的低频让队伍没有立刻被威压击垮，撤退窗口变得清晰一点。";
+      }
+      const pressure = round >= 3 ? 14 : 10;
+      GameState.威压值 += pressure;
+      GameState.奏者健康 -= round >= 3 ? 3 : 1;
+      return `辞照只是向前半步，铂紫色几何光带便让所有呼吸同时滞住，威压值+${pressure}。`;
+    },
+    winCondition: (state) => (state.retreatWindow || 0) >= 5 || (state.pressureRead || 0) >= 8 || GameState.威压值 >= 70,
+    onWin: () => {
+      addTriggeredEvent("ch9_tactical_retreat_complete");
+      if (GameState.威压值 >= 70) {
+        addTriggeredEvent("ch9_pressure_forced_retreat");
+        GameState.奏者健康 -= 3;
+      } else {
+        addTriggeredEvent("ch9_retreat_window_success");
+        GameState.岚离场分支值 += 4;
+      }
+      GameState.初响会情报值 += 5;
+      showScene("ch9_007");
+    },
+    onLose: () => {
+      addTriggeredEvent("ch9_pressure_overwhelmed_retreat");
+      GameState.威压值 += 10;
+      GameState.奏者健康 -= 8;
+      showScene("ch9_007");
+    }
+  },
+  "ch10_residual_dissonance": {
+    id: "ch10_residual_dissonance",
+    name: "第十章｜老宅残留噬响体",
+    narrativeReason: "母亲旧居常年无人居住，残留噬响体从旧纸页、藤蔓和破损音叉中滋生；本战用于检验岐加入队伍后的实战融入。",
+    aftermath: "战斗结果影响岐好感值、零四恢复进度与奏者健康；失败不会中断主线，只会让队伍带着疲惫继续调查。",
+    avoidable: false,
+    battleVariant: "skirmish",
+    minMusicarts: 3,
+    maxMusicarts: 3,
+    teamSize: 3,
+    bossPerformanceDescription: "噬响体像旧乐谱、干枯藤蔓和裂开的音叉纠缠而成，威胁不高，却会不断撕扯书房里的线索。",
+    availableMusicarts: ["阿缇娅", "弥洛", "零四"],
+    defaultMusicarts: ["阿缇娅", "弥洛", "零四"],
+    resonanceMax: 4,
+    enemy: "残留噬响体群",
+    backgroundImage: ASSETS.backgrounds.ch10OldResidenceBattleRoom,
+    enemyImages: [
+      { src: ASSETS.enemies.ch10ResidualDissonance, label: "残留噬响体", className: "swarm" }
+    ],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" },
+      { src: ASSETS.characters["零四"].battle, label: "零四" }
+    ],
+    maxRounds: 5,
+    goal: "清除噬响体并保护母亲旧笔记",
+    goalType: "protect",
+    protectedLabel: "母亲旧笔记",
+    protected: 4,
+    defeatTarget: 10,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能",
+        skillName: "暮星清谱",
+        actionPointCost: 1,
+        effectSummary: "清除噬响体核心，并避免破坏旧笔记。",
+        text: "阿缇娅的暮星从纸页缝隙间穿过，只斩断缠住音叉的失谐根须。",
+        musicart: "阿缇娅",
+        healthCost: 7,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 2;
+          state.notesSafety = (state.notesSafety || 0) + 1;
+        }
+      },
+      和声: {
+        displayLabel: "弥洛技能",
+        skillName: "低频压尘",
+        actionPointCost: 1,
+        effectSummary: "稳定书房共振，减少本轮线索受损。",
+        text: "弥洛把低频压进旧木地板，飞散的纸灰像被按回五线谱，短暂恢复秩序。",
+        musicart: "弥洛",
+        healthCost: 6,
+        effect: (state) => {
+          state.protectedThisRound = true;
+          state.notesSafety = (state.notesSafety || 0) + 2;
+        }
+      },
+      静默: {
+        displayLabel: "零四技能",
+        skillName: "断拍护页",
+        actionPointCost: 1,
+        effectSummary: "令噬响体停顿，并让岐获得介入窗口。",
+        text: "零四没有急着击碎噬响体，只让它们停下一拍：现在，轮到岐自己站稳。",
+        musicart: "零四",
+        healthCost: 5,
+        effect: (state) => {
+          state.enemyDelayed = true;
+          state.notesSafety = (state.notesSafety || 0) + 1;
+          GameState.零四恢复进度 += 2;
+        }
+      },
+      音色: {
+        displayLabel: "岐的支援",
+        skillName: "岚，看着",
+        actionPointCost: 0,
+        effectSummary: "若岐已加入或获得足够信任，提高输出与融入感。",
+        text: "岐咬住发颤的尾音，向前一步：岚，看着。我不会让自己变成需要你回来救的样子。",
+        isConductorAction: true,
+        requiresEvent: ["ch9_qi_joined_party", "ch9_qi_future_branch_reserved"],
+        healthCost: 0,
+        effect: (state) => {
+          state.enemyDamage = (state.enemyDamage || 0) + 2;
+          state.qiIntegration = (state.qiIntegration || 0) + 2;
+          GameState.岐好感值 += 4;
+          addTriggeredEvent("ch10_qi_supported_battle");
+        }
+      },
+      指挥: {
+        displayLabel: "奏者判断",
+        skillName: "先护线索",
+        actionPointCost: 0,
+        effectSummary: "降低输出，优先保护母亲留下的手稿。",
+        text: "你收窄指挥范围，让所有攻击避开书桌和暗格：这些纸页不能再失去一次。",
+        isConductorAction: true,
+        healthCost: 3,
+        effect: (state) => {
+          state.notesSafety = (state.notesSafety || 0) + 2;
+          state.mercy = (state.mercy || 0) + 1;
+        }
+      }
+    },
+    enemyIntents: {
+      1: "P1 纸页扰动：噬响体试图吞噬桌面旧笔记。",
+      2: "P2 藤根缠绕：干枯藤蔓封住书房出口。",
+      3: "P3 音叉裂鸣：旧宅低频开始不稳。",
+      4: "P4 暗格撕扯：噬响体转向信件草稿。",
+      5: "终段：必须在旧笔记受损前完成清除。"
+    },
+    enemyAction: (round, state) => {
+      if (state.enemyDelayed) {
+        state.enemyDelayed = false;
+        return "零四截断噬响体的一拍，它们像失去页码的乐谱一样短暂散开。";
+      }
+      if (state.protectedThisRound) {
+        state.protectedThisRound = false;
+        return "低频护住书桌，噬响体没能撕下新的纸页。";
+      }
+      const penalty = round >= 4 ? 2 : 1;
+      state.protected = Math.max(0, (state.protected || 0) - penalty);
+      GameState.奏者健康 -= round >= 4 ? 2 : 1;
+      return `残留噬响体卷起纸灰与藤根，母亲旧笔记完整度-${penalty}，奏者健康-${round >= 4 ? 2 : 1}。`;
+    },
+    winCondition: (state) => (state.enemyDamage || 0) >= 10 || (state.notesSafety || 0) + (state.qiIntegration || 0) >= 9,
+    onWin: () => {
+      addTriggeredEvent("ch10_residual_dissonance_cleared");
+      GameState.岐好感值 += 10;
+      GameState.零四恢复进度 += 4;
+      GameState.世界观信息 += 2;
+      showScene("ch10_008");
+    },
+    onLose: () => {
+      addTriggeredEvent("ch10_residual_dissonance_survived_with_cost");
+      GameState.奏者健康 -= 5;
+      GameState.岐好感值 += 4;
+      showScene("ch10_008");
+    }
+  },
+  "ch11_raider_skirmish": {
+    id: "ch11_raider_skirmish",
+    name: "第十一章｜雪原游荡者遭遇",
+    narrativeReason: "队伍第一次面对纯粹的人类武装团伙，需要在自保与克制伤亡之间作出判断。",
+    aftermath: "战斗表现影响零四的独立判断与破在Boss战中的收手窗口。",
+    avoidable: false,
+    battleVariant: "skirmish",
+    minMusicarts: 3,
+    maxMusicarts: 3,
+    teamSize: 3,
+    bossPerformanceDescription: "三名饥饿而疲惫的游荡者依靠盾牌、短弓和雪地陷阱作战，并非噬响体。",
+    availableMusicarts: ["阿缇娅", "弥洛", "零四"],
+    defaultMusicarts: ["阿缇娅", "弥洛", "零四"],
+    resonanceMax: 4,
+    enemy: "雪原游荡者杂兵",
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    enemyImages: [{ src: ASSETS.enemies.ch11SnowfieldRaiders, label: "雪原游荡者", className: "swarm" }],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" },
+      { src: ASSETS.characters["零四"].battle, label: "零四" }
+    ],
+    maxRounds: 4,
+    goal: "制服游荡者并控制不必要伤亡",
+    goalType: "restrain",
+    defeatTarget: 8,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能", skillName: "暮星断械", actionPointCost: 1,
+        effectSummary: "切断武器与陷阱，不直接重创敌人。",
+        text: "暮星擦过握柄与绳扣，游荡者的武器先于身体失去战斗力。",
+        musicart: "阿缇娅", healthCost: 6,
+        effect: (state) => { state.enemyDamage = (state.enemyDamage || 0) + 2; state.restraint = (state.restraint || 0) + 2; }
+      },
+      和声: {
+        displayLabel: "弥洛技能", skillName: "低频压雪", actionPointCost: 1,
+        effectSummary: "压住雪尘与陷阱，创造缴械窗口。",
+        text: "低频把扬起的雪尘按回地面，埋伏者第一次暴露完整位置。",
+        musicart: "弥洛", healthCost: 5,
+        effect: (state) => { state.disarm = (state.disarm || 0) + 2; state.enemyDelayed = true; }
+      },
+      静默: {
+        displayLabel: "零四技能", skillName: "静默止步", actionPointCost: 1,
+        effectSummary: "截断攻势，验证零四的独立价值判断。",
+        text: "零四只截断动作，没有追击倒下的人。她第一次按自己的判断收住了力量。",
+        musicart: "零四", healthCost: 5,
+        effect: (state) => { state.restraint = (state.restraint || 0) + 3; state.enemyDelayed = true; GameState.零四恢复进度 += 2; }
+      },
+      音色: {
+        displayLabel: "岐的支援", skillName: "雪声引开", actionPointCost: 0,
+        effectSummary: "以短促音色引开弓手视线。",
+        text: "岐把一声短音送进侧风，箭矢偏离队伍，落在空雪里。",
+        isConductorAction: true, requiresEvent: ["ch9_qi_joined_party", "ch9_qi_future_branch_reserved"], healthCost: 0,
+        effect: (state) => { state.disarm = (state.disarm || 0) + 1; state.restraint = (state.restraint || 0) + 1; }
+      },
+      指挥: {
+        displayLabel: "奏者判断", skillName: "优先缴械", actionPointCost: 0,
+        effectSummary: "降低伤害，积累克制倾向。",
+        text: "你明确下令只破坏武器与退路，不把绝境中的普通人当作怪物清除。",
+        isConductorAction: true, healthCost: 2,
+        effect: (state) => { state.restraint = (state.restraint || 0) + 2; state.disarm = (state.disarm || 0) + 1; }
+      }
+    },
+    enemyIntents: {
+      1: "P1 雪尘掩护：弓手利用侧风遮蔽视线。",
+      2: "P2 绳套陷阱：盾手将队伍逼向预设位置。",
+      3: "P3 饥饿反扑：游荡者开始不顾伤势抢夺补给。",
+      4: "终段：必须制服而不是拖成死战。"
+    },
+    enemyAction: (round, state) => {
+      if (state.enemyDelayed) { state.enemyDelayed = false; return "攻势被压住，游荡者没有完成本轮包抄。"; }
+      GameState.奏者健康 -= round >= 3 ? 3 : 2;
+      return `粗糙武器借雪势逼近，奏者健康-${round >= 3 ? 3 : 2}。`;
+    },
+    winCondition: (state) => (state.enemyDamage || 0) >= 8 || (state.restraint || 0) + (state.disarm || 0) >= 8,
+    onWin: () => {
+      addTriggeredEvent(GameState.已触发事件.includes("ch11_skirmish_restraint_order") ? "ch11_raider_skirmish_restrained" : "ch11_raider_skirmish_forceful");
+      GameState.零四恢复进度 += 4;
+      showScene("ch11_012");
+    },
+    onLose: () => {
+      addTriggeredEvent("ch11_raider_skirmish_survived_with_cost");
+      GameState.奏者健康 -= 5;
+      showScene("ch11_012");
+    }
+  },
+  "ch11_po_boss": {
+    id: "ch11_po_boss",
+    name: "第十一章Boss｜雪原游荡者首领·破",
+    narrativeReason: "破利用雪脊、陷阱与困兽反扑阻挡队伍；目标是击退并争取收手，而非单纯消灭。",
+    aftermath: "战斗开启宽容、镇民裁决与彻底驱散三种结算。",
+    avoidable: false,
+    battleVariant: "boss",
+    minMusicarts: 3,
+    maxMusicarts: 3,
+    teamSize: 3,
+    bossPerformanceDescription: "破以拼凑长柄武器、雪脊高差和绳套陷阱作战，落入下风后会转为困兽之斗。",
+    availableMusicarts: ["阿缇娅", "弥洛", "零四"],
+    defaultMusicarts: ["阿缇娅", "弥洛", "零四"],
+    resonanceMax: 5,
+    enemy: "破",
+    backgroundImage: ASSETS.backgrounds.ch11SnowridgeAmbush,
+    enemyImages: [{ src: ASSETS.enemies.ch11Po, label: "破", className: "boss" }],
+    allyImages: [
+      { src: ASSETS.characters["阿缇娅"].transformed, label: "阿缇娅", className: "lead" },
+      { src: ASSETS.characters["弥洛"].battle, label: "弥洛" },
+      { src: ASSETS.characters["零四"].battle, label: "零四" }
+    ],
+    maxRounds: 6,
+    goal: "击退破并争取收手窗口",
+    goalType: "mercy",
+    defeatTarget: 12,
+    allowEarlyWin: true,
+    actions: {
+      旋律: {
+        displayLabel: "阿缇娅技能", skillName: "暮星破阵", actionPointCost: 1,
+        effectSummary: "击穿伏击结构并保留退路。", text: "暮星沿雪脊划开陷阱支点，没有封死破的退路。",
+        musicart: "阿缇娅", healthCost: 7,
+        effect: (state) => { state.enemyDamage = (state.enemyDamage || 0) + 3; state.mercy = (state.mercy || 0) + 1; }
+      },
+      和声: {
+        displayLabel: "弥洛技能", skillName: "低频卸势", actionPointCost: 1,
+        effectSummary: "削弱困兽反扑并缴械。", text: "低频沿长柄武器传回，破的虎口发麻，攻势第一次断开。",
+        musicart: "弥洛", healthCost: 6,
+        effect: (state) => { state.disarm = (state.disarm || 0) + 3; state.enemyDelayed = true; }
+      },
+      静默: {
+        displayLabel: "零四技能", skillName: "留白一拍", actionPointCost: 1,
+        effectSummary: "主动留下喊停的时间。", text: "零四让杀招停在最后一拍之前：你还有开口的机会。",
+        musicart: "零四", healthCost: 5,
+        effect: (state) => { state.mercy = (state.mercy || 0) + 3; state.enemyDelayed = true; }
+      },
+      音色: {
+        displayLabel: "岐的支援", skillName: "不必拼命", actionPointCost: 0,
+        effectSummary: "向残部传达收手意图。", text: "岐的声音穿过风雪：我们来找人，不是来让更多人消失。",
+        isConductorAction: true, requiresEvent: ["ch9_qi_joined_party", "ch9_qi_future_branch_reserved"], healthCost: 0,
+        effect: (state) => { state.mercy = (state.mercy || 0) + 2; state.disarm = (state.disarm || 0) + 1; }
+      },
+      指挥: {
+        displayLabel: "奏者判断", skillName: "给出活路", actionPointCost: 0,
+        effectSummary: "降低输出，明确停战条件。", text: "你把条件喊清：放下武器、归还物资，所有人都可以活着离开雪脊。",
+        isConductorAction: true, healthCost: 3,
+        effect: (state) => { state.mercy = (state.mercy || 0) + 3; }
+      }
+    },
+    enemyIntents: {
+      1: "P1 伏击战术：破利用高差与陷阱试探队伍。",
+      2: "P1 雪脊换位：破切断队伍与镇子的方向感。",
+      3: "P2 困兽之斗：伤害提升，破绽同时增大。",
+      4: "P2 不计后果：破开始用伤换伤。",
+      5: "P3 收手时刻：若保留余地，破会主动喊停。",
+      6: "终段：这场战斗必须有一个现实的结尾。"
+    },
+    enemyAction: (round, state) => {
+      if (state.enemyDelayed) { state.enemyDelayed = false; return "破的攻势被截断，雪脊上出现短暂的收手窗口。"; }
+      const cost = round >= 3 ? 4 : 3;
+      GameState.奏者健康 -= cost;
+      return `破借地形强攻，奏者健康-${cost}。`;
+    },
+    winCondition: (state) => (state.enemyDamage || 0) >= 12 || (state.mercy || 0) + (state.disarm || 0) >= 11,
+    onWin: () => {
+      addTriggeredEvent("ch11_po_defeated");
+      addTriggeredEvent("ch11_po_mercy_window");
+      GameState.世界观信息 += 2;
+      showScene("ch11_014");
+    },
+    onLose: () => {
+      addTriggeredEvent("ch11_po_battle_costly_win");
+      GameState.奏者健康 -= 7;
+      showScene("ch11_014");
+    }
+  },
   "ch0_mute_score_moths": {
     id: "ch0_mute_score_moths",
     name: "第零章｜默谱飞蛾群",
     narrativeReason: "阿缇娅刚刚觉醒，默谱飞蛾被禁曲第四拍吸引，正扑向诺伊和失声镇民。",
     aftermath: "第一场战斗让玩家确认：律者技能并不免费，每一次命令都会消耗奏者健康。",
     avoidable: false,
+    battleVariant: "skirmish",
+    minMusicarts: 1,
+    maxMusicarts: 1,
     bossPerformanceDescription: "飞蛾翅膀像被雨泡坏的旧乐谱，拍动时没有声音，只把人的呼吸一点点刮薄。",
     availableMusicarts: ["阿缇娅"],
     defaultMusicarts: ["阿缇娅"],
@@ -5612,6 +9521,7 @@ const BATTLES = {
     narrativeReason: "舞台爬行者拖着节拍器核心从红幕下爬出，试图把旧剧场重新拖回静默场。",
     aftermath: "弥洛以临时律者身份进入战斗，让玩家第一次体验双律者协同。",
     avoidable: false,
+    battleVariant: "boss",
     bossPerformanceDescription: "它像失败演出残留下来的舞台机械，爬行时每一节木肢都在敲慢半拍。",
     availableMusicarts: ["阿缇娅", "弥洛"],
     defaultMusicarts: ["阿缇娅", "弥洛"],
@@ -5731,6 +9641,7 @@ const BATTLES = {
     narrativeReason: "静默猎犬循着未鸣的契约刻痕追来。它不吞噬旋律，而是把所有活物逼回不敢发声的队形。",
     aftermath: "击退猎犬后，镇民确认静默署的追迹已经进入眠沙镇，第零章支线压力上升。",
     avoidable: true,
+    battleVariant: "skirmish",
     avoidText: "可在地图事件中选择绕开追迹路线。",
     bossPerformanceDescription: "猎犬的肋骨像一排被折弯的弱音踏板，奔跑时会把雨声压成突然断掉的休止符。",
     availableMusicarts: ["阿缇娅", "弥洛"],
@@ -5830,6 +9741,7 @@ const BATTLES = {
     narrativeReason: "剥音校尉接管旧剧场主舞台，利用无声合唱与卡戎默令把镇民声音重新压回静默场。",
     aftermath: "击破它后，眠沙镇声音恢复，第零章进入尾声。",
     avoidable: false,
+    battleVariant: "boss",
     bossPerformanceDescription: "它不是普通敌人，而是一道穿着军令外壳的静默机制，每一次挥手都像在删掉人的发声权。",
     availableMusicarts: ["阿缇娅", "弥洛"],
     defaultMusicarts: ["阿缇娅", "弥洛"],
@@ -5970,6 +9882,7 @@ const BATTLES = {
     narrativeReason: "一群音乐盒飞蛾涌向城邦边界，翅膀振动比正常快了半拍。你们必须保护瞭望塔结界。",
     aftermath: "这是候补校律者第一次正式出战，结果会影响城邦稳定与律者对你的初步判断。",
     avoidable: false,
+    battleVariant: "skirmish",
     bossPerformanceDescription: "飞蛾群不像野兽袭击，更像坏掉的音乐盒试图完成最后一次旋转：越接近结界，振翅越急。",
     availableMusicarts: ["槐序", "洛温"],
     defaultMusicarts: ["槐序", "洛温"],
@@ -6097,6 +10010,7 @@ const BATTLES = {
     narrativeReason: "长廊深处的仪仗木偶仍在复现旧日迎宾队列。它没有意识，却会把所有靠近者纳入走形的仪式。",
     aftermath: "木偶核心上的铭文会把调查推向白谱院与静默纪元旧史。",
     avoidable: false,
+    battleVariant: "skirmish",
     bossPerformanceDescription: "仪仗木偶的攻击严格遵循“前进-转身-敬礼-攻击”的固定四拍循环。它越规整，破绽也越清晰。",
     availableMusicarts: ["槐序", "洛温", "伊芙白", "明弦"],
     defaultMusicarts: ["槐序", "明弦"],
@@ -6272,6 +10186,7 @@ const BATTLES = {
     narrativeReason: "和声盛典被无拍者打断。它正在指挥所有停摆瞬间组成幽灵乐团，台下居民必须先撤离。",
     aftermath: "这场战斗会决定和声盛典的伤亡记录，并揭开第一幕七分之一的真相。",
     avoidable: false,
+    battleVariant: "boss",
     bossPerformanceDescription: "无拍者不是活物，也无法被真正杀死。正确处理方式是削弱其未完成乐章，并将它重新封入静止。",
     availableMusicarts: ["槐序", "洛温", "伊芙白", "明弦"],
     defaultMusicarts: ["槐序", "洛温"],
@@ -6563,6 +10478,7 @@ function updateUI() {
   GameState.弥洛信任 = clamp(GameState.弥洛信任, 0, 100);
   GameState.弥洛共鸣 = clamp(GameState.弥洛共鸣, 0, 100);
   GameState.弥洛压力 = clamp(GameState.弥洛压力, 0, 100);
+  GameState.弥洛好感 = clamp(GameState.弥洛好感, 0, 100);
   GameState.安柠好感 = clamp(GameState.安柠好感, 0, 100);
   GameState.缇雅好感 = clamp(GameState.缇雅好感, 0, 100);
   GameState.诺伊好感 = clamp(GameState.诺伊好感, 0, 100);
@@ -6588,6 +10504,31 @@ function updateUI() {
   GameState.归还值 = clamp(GameState.归还值, 0, 100);
   GameState.真相值 = clamp(GameState.真相值, 0, 100);
   GameState.伊莱娜隐藏好感值 = clamp(GameState.伊莱娜隐藏好感值, 0, 100);
+  GameState.零四信任 = clamp(GameState.零四信任, 0, 100);
+  GameState.零四共鸣 = clamp(GameState.零四共鸣, 0, 100);
+  GameState.零四压力 = clamp(GameState.零四压力, 0, 100);
+  GameState.心防判定值 = clamp(GameState.心防判定值, 0, 100);
+  GameState.小雀信任值 = clamp(GameState.小雀信任值, 0, 100);
+  GameState.零四恢复进度 = clamp(GameState.零四恢复进度, 0, 100);
+  GameState.卓玛风铃好感 = clamp(GameState.卓玛风铃好感, 0, 100);
+  GameState.安心值 = clamp(GameState.安心值, 0, 100);
+  GameState.屿好感 = clamp(GameState.屿好感, 0, 100);
+  GameState.澄芜好感 = clamp(GameState.澄芜好感, 0, 100);
+  GameState.默契值 = clamp(GameState.默契值, 0, 100);
+  GameState.阿缇娅情愫值 = clamp(GameState.阿缇娅情愫值, 0, 100);
+  GameState.弥洛情愫值 = clamp(GameState.弥洛情愫值, 0, 100);
+  GameState.安柠零四友情值 = clamp(GameState.安柠零四友情值, 0, 100);
+  GameState.赤稳定度 = clamp(GameState.赤稳定度, 0, 100);
+  GameState.屿赤契约进度 = clamp(GameState.屿赤契约进度, 0, 100);
+  GameState.威压值 = clamp(GameState.威压值, 0, 100);
+  GameState.岐好感值 = clamp(GameState.岐好感值, 0, 100);
+  GameState.岚离场分支值 = clamp(GameState.岚离场分支值, 0, 100);
+  GameState.初响会情报值 = clamp(GameState.初响会情报值, 0, 100);
+  GameState.观察期存废倾向 = clamp(GameState.观察期存废倾向, -100, 100);
+  GameState.临时看管权限倾向 = clamp(GameState.临时看管权限倾向, -100, 100);
+  GameState.历史责任公开倾向 = clamp(GameState.历史责任公开倾向, -100, 100);
+  GameState.老院监用印倾向 = clamp(GameState.老院监用印倾向, -100, 100);
+  GameState.沈知微最终立场值 = clamp(GameState.沈知微最终立场值, -100, 100);
 
   setText("stability-value", GameState.城邦稳定度);
   setText("discord-value", GameState.世界失谐度);
@@ -6721,8 +10662,14 @@ function executeSceneChange(sceneId) {
   autoSaveGame();
 
   const backgroundElement = document.getElementById("scene-background");
+  const sceneArea = document.getElementById("scene-area");
   const descriptionElement = document.getElementById("description-text");
   const systemPromptElement = document.getElementById("system-prompt");
+
+  const usesCinematicArtwork = scene.presentation === "cinematic"
+    || (typeof scene.backgroundImage === "string" && scene.backgroundImage.includes("/keyvisuals/cg_"));
+  sceneArea?.classList.toggle("is-cinematic", usesCinematicArtwork);
+  sceneArea?.setAttribute("data-presentation", usesCinematicArtwork ? "cinematic" : "stage");
 
   fadeSceneBackground(backgroundElement, scene.background || "#1a1a2e", scene.backgroundImage);
   descriptionElement.textContent = scene.description || "";
@@ -6752,7 +10699,7 @@ function executeSceneChange(sceneId) {
    功能: 以打字机动画渲染单句对话到屏幕
    参数: speaker(发言者名), text(对话文本), onComplete(完成回调)
    ─────────────────────────────────────────────────────────── */
-function showDialogue(speaker, text, onComplete) {
+function showDialogue(speaker, text, onComplete, variant) {
   const speakerElement = document.getElementById("speaker-name");
   const dialogueElement = document.getElementById("dialogue-text");
   const dialogueArea = document.getElementById("dialogue-area");
@@ -6780,7 +10727,7 @@ function showDialogue(speaker, text, onComplete) {
   dialogueElement.textContent = "";
   dialogueArea?.classList.add("is-dialogue-revealing");
   dialogueArea?.classList.remove("is-dialogue-advance-ready");
-  applySpeakerPresentation(speaker, dialogueArea, avatarElement);
+  applySpeakerPresentation(speaker, variant, dialogueArea, avatarElement);
   triggerNoteBurst(speaker === "\u3010\u5185\u5fc3\u3011" ? "inner" : "dialogue");
 
   const finishReveal = () => {
@@ -7109,19 +11056,22 @@ function createBattleVisualImage(image, baseClassName) {
 
 function normalizeBattleMusicarts(config, selectedMusicarts) {
   const availableMusicarts = config.availableMusicarts || config.defaultMusicarts || [];
+  const maxMusicarts = getBattleTeamMax(config);
   const candidates = Array.isArray(selectedMusicarts) && selectedMusicarts.length > 0
     ? selectedMusicarts
     : config.defaultMusicarts || availableMusicarts;
 
   return candidates
     .filter((musicart, index, array) => availableMusicarts.includes(musicart) && array.indexOf(musicart) === index)
-    .slice(0, 2);
+    .slice(0, maxMusicarts);
 }
 
 function buildBattlePrepChoices(battleId) {
   const config = BATTLES[battleId];
+  const requirementText = getBattleTeamRequirementText(config);
+  const currentTeam = normalizeBattleMusicarts(config, GameState.出战律者);
   const choices = [{
-    text: `选择2名律者出战｜当前：${normalizeBattleMusicarts(config, GameState.出战律者).join(" + ")}｜${buildBattleRiskSummary(normalizeBattleMusicarts(config, GameState.出战律者))}`,
+    text: `选择${requirementText}出战｜当前：${currentTeam.join(" + ")}｜${buildBattleRiskSummary(currentTeam)}`,
     effect: () => showTeamSelect({ battleId })
   }];
 
@@ -7216,18 +11166,21 @@ function resetTeamSelectDetailView() {
 }
 
 function normalizeTeamSelection(selectedMusicarts, availableMusicarts) {
+  const battle = pendingTeamSelection?.battleId ? BATTLES[pendingTeamSelection.battleId] : null;
+  const minMusicarts = getBattleTeamMin(battle);
+  const maxMusicarts = getBattleTeamMax(battle);
   const selected = Array.isArray(selectedMusicarts) ? selectedMusicarts : [];
   const normalized = selected
     .filter((musicart, index, array) => availableMusicarts.includes(musicart) && array.indexOf(musicart) === index)
-    .slice(0, 2);
+    .slice(0, maxMusicarts);
 
   availableMusicarts.forEach((musicart) => {
-    if (normalized.length < 2 && !normalized.includes(musicart)) {
+    if (normalized.length < minMusicarts && !normalized.includes(musicart)) {
       normalized.push(musicart);
     }
   });
 
-  return normalized.slice(0, 2);
+  return normalized.slice(0, maxMusicarts);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -7305,7 +11258,10 @@ function renderTeamSelect() {
   riskElement.textContent = riskText.text;
   riskElement.classList.toggle("is-safe", riskText.safe);
   riskElement.classList.toggle("is-warning", !riskText.safe);
-  confirmButton.disabled = GameState.出战律者.length !== 2;
+  const battle = pendingTeamSelection?.battleId ? BATTLES[pendingTeamSelection.battleId] : null;
+  const minMusicarts = getBattleTeamMin(battle);
+  const maxMusicarts = getBattleTeamMax(battle);
+  confirmButton.disabled = GameState.出战律者.length < minMusicarts || GameState.出战律者.length > maxMusicarts;
 }
 
 function openMusicartDetail(musicart) {
@@ -7448,9 +11404,12 @@ function buildDefaultSkillCards(profile) {
 
 function toggleTeamMusicart(musicart) {
   const selected = GameState.出战律者 || [];
+  const battle = pendingTeamSelection?.battleId ? BATTLES[pendingTeamSelection.battleId] : null;
+  const minMusicarts = getBattleTeamMin(battle);
+  const maxMusicarts = getBattleTeamMax(battle);
   if (selected.includes(musicart)) {
-    if (selected.length <= 2) {
-      showToast("每次战斗必须带2名律者", -1);
+    if (selected.length <= minMusicarts) {
+      showToast(`本次战斗至少需要${minMusicarts}名律者`, -1);
       return;
     }
     GameState.出战律者 = selected.filter((item) => item !== musicart);
@@ -7458,8 +11417,8 @@ function toggleTeamMusicart(musicart) {
     return;
   }
 
-  if (selected.length >= 2) {
-    GameState.出战律者 = [selected[1], musicart];
+  if (selected.length >= maxMusicarts) {
+    GameState.出战律者 = [...selected.slice(1), musicart].slice(0, maxMusicarts);
   } else {
     GameState.出战律者 = [...selected, musicart];
   }
@@ -7503,12 +11462,15 @@ function buildConcertoHint(selectedMusicarts) {
 }
 
 function confirmTeamSelection() {
-  if (!Array.isArray(GameState.出战律者) || GameState.出战律者.length !== 2) {
-    showToast("请选择2名律者", -1);
+  const teamSelection = pendingTeamSelection || {};
+  const battle = teamSelection.battleId ? BATTLES[teamSelection.battleId] : null;
+  const minMusicarts = getBattleTeamMin(battle);
+  const maxMusicarts = getBattleTeamMax(battle);
+  if (!Array.isArray(GameState.出战律者) || GameState.出战律者.length < minMusicarts || GameState.出战律者.length > maxMusicarts) {
+    showToast(`请选择${getBattleTeamRequirementText(battle)}`, -1);
     return;
   }
 
-  const teamSelection = pendingTeamSelection || {};
   pendingTeamSelection = null;
   showToast(`出战律者：${GameState.出战律者.join(" / ")}`, 1);
 
@@ -7608,7 +11570,6 @@ function openWorldMap() {
 
 function showStartupScreen() {
   showMainMenu();
-  openWorldMap();
 }
 
 function updateQuickActionButtons() {
@@ -8758,6 +12719,34 @@ function resolveCurrentChapterStartScene() {
     return "chapter4_start";
   }
 
+  if (currentSceneId.startsWith("ch5_") || currentSceneId.startsWith("chapter5_event_") || currentSceneId === "chapter5_start") {
+    return "chapter5_start";
+  }
+
+  if (currentSceneId.startsWith("ch6_") || currentSceneId.startsWith("chapter6_event_") || currentSceneId === "chapter6_start") {
+    return "chapter6_start";
+  }
+
+  if (currentSceneId.startsWith("ch7_") || currentSceneId.startsWith("chapter7_event_") || currentSceneId === "chapter7_start") {
+    return "chapter7_start";
+  }
+
+  if (currentSceneId.startsWith("ch8_") || currentSceneId.startsWith("chapter8_event_") || currentSceneId === "chapter8_start") {
+    return "chapter8_start";
+  }
+
+  if (currentSceneId.startsWith("ch9_") || currentSceneId.startsWith("chapter9_event_") || currentSceneId === "chapter9_start") {
+    return "chapter9_start";
+  }
+
+  if (currentSceneId.startsWith("ch10_") || currentSceneId.startsWith("chapter10_event_") || currentSceneId === "chapter10_start") {
+    return "chapter10_start";
+  }
+
+  if (currentSceneId.startsWith("ch11_") || currentSceneId.startsWith("chapter11_event_") || currentSceneId === "chapter11_start") {
+    return "chapter11_start";
+  }
+
   if (currentSceneId.startsWith("ch1_") || chapter === 2 || currentSceneId.startsWith("chapter2") || currentSceneId.startsWith("ch2_")) {
     return "chapter3_archive_start";
   }
@@ -9412,7 +13401,7 @@ function playDialogueSequence(dialogues, index, playbackToken, onComplete) {
         playDialogueSequence(dialogues, index + 1, playbackToken, onComplete);
       }
     );
-  });
+  }, dialogue.sprite);
 }
 
 function normalizeDialogues(scene) {
@@ -9580,7 +13569,9 @@ function getAvailablePersonalStories() {
       return false;
     }
 
-    return GameState[story.resonanceKey] >= story.threshold;
+    const unlockEventMet = !story.unlockEvent || GameState.已触发事件.includes(story.unlockEvent);
+    const resonanceThresholdMet = !story.resonanceKey || GameState[story.resonanceKey] >= story.threshold;
+    return unlockEventMet && resonanceThresholdMet;
   });
 }
 
@@ -10123,6 +14114,34 @@ function getCurrentChapterContext() {
     return "第四章不夜终响，路线D追查卡戎主线收束，不夜巡演号展开救赎值、归还值与真相值判定";
   }
 
+  if (sceneId.startsWith("ch5_") || returnSceneId.startsWith("ch5_") || sceneId.startsWith("chapter5_event_") || returnSceneId.startsWith("chapter5_event_") || sceneId === "chapter5_start" || returnSceneId === "chapter5_start") {
+    return "第五章浮光伶响，自由篇章寻找零一，浮光马戏团展开心防判定、小雀信任与零四恢复进度";
+  }
+
+  if (sceneId.startsWith("ch6_") || returnSceneId.startsWith("ch6_") || sceneId.startsWith("chapter6_event_") || returnSceneId.startsWith("chapter6_event_") || sceneId === "chapter6_start" || returnSceneId === "chapter6_start") {
+    return "第六章拾光缓响，自由篇章疗愈地带，拾光村收束零四康复、弥洛身世与阿缇娅自我认同";
+  }
+
+  if (sceneId.startsWith("ch7_") || returnSceneId.startsWith("ch7_") || sceneId.startsWith("chapter7_event_") || returnSceneId.startsWith("chapter7_event_") || sceneId === "chapter7_start" || returnSceneId === "chapter7_start") {
+    return "第七章谱变余响，白谱院内部政变与登记制度改革表决，核心追踪三项舆论倾向与老院监仲裁";
+  }
+
+  if (sceneId.startsWith("ch8_") || returnSceneId.startsWith("ch8_") || sceneId.startsWith("chapter8_event_") || returnSceneId.startsWith("chapter8_event_") || sceneId === "chapter8_start" || returnSceneId === "chapter8_start") {
+    return "第八章续弦入响，自由篇章推进赤与屿的新契约，追踪默契值、赤稳定度、契约进度与隐性情愫";
+  }
+
+  if (sceneId.startsWith("ch9_") || returnSceneId.startsWith("ch9_") || sceneId.startsWith("chapter9_event_") || returnSceneId.startsWith("chapter9_event_") || sceneId === "chapter9_start" || returnSceneId === "chapter9_start") {
+    return "第九章暗音初响，初响会与培育律者首次露面，核心追踪威压值、岐好感、岚离场分支与母亲线索";
+  }
+
+  if (sceneId.startsWith("ch10_") || returnSceneId.startsWith("ch10_") || sceneId.startsWith("chapter10_event_") || returnSceneId.startsWith("chapter10_event_") || sceneId === "chapter10_start" || returnSceneId === "chapter10_start") {
+    return "第十章白霜远响，回到母亲旧居追查北方线索，并收束安柠父亲隐秘守护的轨迹";
+  }
+
+  if (sceneId.startsWith("ch11_") || returnSceneId.startsWith("ch11_") || sceneId.startsWith("chapter11_event_") || returnSceneId.startsWith("chapter11_event_") || sceneId === "chapter11_start" || returnSceneId === "chapter11_start") {
+    return "第十一章霜隘启响，在文明边界筹备补给、争取向导并处理雪原游荡者危机";
+  }
+
   if (sceneId.startsWith("ch1_") || returnSceneId.startsWith("ch1_") || sceneId.startsWith("ch2_") || returnSceneId.startsWith("ch2_") || sceneId.startsWith("ch3_") || returnSceneId.startsWith("ch3_") || sceneId === "chapter3_archive_start" || returnSceneId === "chapter3_archive_start" || sceneId === "act1_complete" || returnSceneId === "act1_complete") {
     return "第三章旧案合辑，旧第一至第三章内容暂存归档，等待按新第三章结构重新拆谱";
   }
@@ -10180,7 +14199,7 @@ function isConditionMet(condition) {
          getFirstDialogueSpeaker() — 获取对话序列的第一个发言者
    ⚠️ 注意: updateCharacterSprite 使用 CSS 动画 (speaker-entrance) 切换立绘
    ─────────────────────────────────────────────────────────── */
-function applySpeakerPresentation(speaker, dialogueArea, avatarElement) {
+function applySpeakerPresentation(speaker, variant, dialogueArea, avatarElement) {
   const isInnerVoice = speaker === "【内心】";
   dialogueArea.classList.toggle("is-inner", isInnerVoice);
   avatarElement.classList.toggle("is-hidden", isInnerVoice);
@@ -10196,6 +14215,7 @@ function applySpeakerPresentation(speaker, dialogueArea, avatarElement) {
       avatarImage.alt = "";
     }
     avatarElement.classList.remove("has-portrait");
+    delete avatarElement.dataset.state;
     return;
   }
 
@@ -10203,7 +14223,7 @@ function applySpeakerPresentation(speaker, dialogueArea, avatarElement) {
     color: "#4A5568",
     label: Array.from(speaker || "旁白")[0] || "旁"
   };
-  const portraitPath = getCharacterAssetPath(speaker);
+  const portraitPath = getDialoguePortraitAssetPath(speaker, variant);
 
   avatarElement.style.setProperty("--avatar-accent", avatar.color);
   if (avatarFallback) {
@@ -10214,12 +14234,14 @@ function applySpeakerPresentation(speaker, dialogueArea, avatarElement) {
     avatarImage.src = portraitPath;
     avatarImage.alt = `${speaker}头像`;
     avatarElement.classList.add("has-portrait");
+    avatarElement.dataset.state = variant || "default";
   } else {
     if (avatarImage) {
       avatarImage.removeAttribute("src");
       avatarImage.alt = "";
     }
     avatarElement.classList.remove("has-portrait");
+    delete avatarElement.dataset.state;
   }
 }
 
@@ -10285,6 +14307,15 @@ function getCharacterAssetPath(speaker, variant) {
   }
 
   return characterAssets[variant] || characterAssets.default || "";
+}
+
+function getDialoguePortraitAssetPath(speaker, variant) {
+  const portraitAssets = ASSETS.dialoguePortraits?.[speaker];
+  if (portraitAssets) {
+    return portraitAssets[variant] || portraitAssets.default || getCharacterAssetPath(speaker, variant);
+  }
+
+  return getCharacterAssetPath(speaker, variant);
 }
 
 function getFirstDialogueSpeaker(dialogues) {
@@ -10405,7 +14436,9 @@ function migrateLegacyState(state) {
     "安柠好感", "缇雅好感", "诺伊好感", "诺伊希望", "诺伊恐惧",
     "镇民信任", "镇民希望", "镇民恐惧", "白栖信任", "乌鸦先生信任",
     "宁溯好感", "体感温度", "谱鸣共振", "听证倾向值", "沈知微好感", "珏衡好感",
-    "救赎值", "归还值", "真相值", "伊莱娜隐藏好感值"
+    "救赎值", "归还值", "真相值", "伊莱娜隐藏好感值",
+    "零四信任", "零四共鸣", "零四压力", "弥洛好感", "心防判定值", "小雀信任值", "零四恢复进度", "卓玛风铃好感",
+    "安心值", "屿好感", "澄芜好感", "默契值", "阿缇娅情愫值", "弥洛情愫值", "安柠零四友情值", "赤稳定度", "屿赤契约进度", "威压值", "岐好感值", "岚离场分支值", "初响会情报值", "观察期存废倾向", "临时看管权限倾向", "历史责任公开倾向", "老院监用印倾向", "沈知微最终立场值", "补给完备度", "保暖装备完备度", "干粮储备完备度", "向导雇佣状态", "地图情报完整度", "老雪好感值", "苏婆好感值", "阿雁好感值", "阿霜好感值", "霜隘镇好感度"
   ].forEach((key) => {
     if (!Number.isFinite(migratedState[key])) {
       migratedState[key] = DEFAULT_GAME_STATE[key];
@@ -10483,6 +14516,34 @@ function getChapterName(sceneId) {
     return "第四章：不夜终响";
   }
 
+  if (sceneId.startsWith("ch5_") || sceneId.startsWith("chapter5_event_") || sceneId === "chapter5_start") {
+    return "第五章：浮光伶响";
+  }
+
+  if (sceneId.startsWith("ch6_") || sceneId.startsWith("chapter6_event_") || sceneId === "chapter6_start") {
+    return "第六章：拾光缓响";
+  }
+
+  if (sceneId.startsWith("ch7_") || sceneId.startsWith("chapter7_event_") || sceneId === "chapter7_start") {
+    return "第七章：谱变余响";
+  }
+
+  if (sceneId.startsWith("ch8_") || sceneId.startsWith("chapter8_event_") || sceneId === "chapter8_start") {
+    return "第八章：续弦入响";
+  }
+
+  if (sceneId.startsWith("ch9_") || sceneId.startsWith("chapter9_event_") || sceneId === "chapter9_start") {
+    return "第九章：暗音初响";
+  }
+
+  if (sceneId.startsWith("ch10_") || sceneId.startsWith("chapter10_event_") || sceneId === "chapter10_start") {
+    return "第十章：白霜远响";
+  }
+
+  if (sceneId.startsWith("ch11_") || sceneId.startsWith("chapter11_event_") || sceneId === "chapter11_start") {
+    return "第十一章：霜隘启响";
+  }
+
   if (sceneId.startsWith("ch1_") || sceneId.startsWith("ch2_") || sceneId.startsWith("ch3_") || sceneId === "chapter3_archive_start" || sceneId === "act1_complete") {
     return "第三章旧案合辑";
   }
@@ -10496,6 +14557,18 @@ function getChapterName(sceneId) {
   }
 
   return "未命名章节";
+}
+
+function finalizeChapter11SupplyReadiness() {
+  const warm = Math.max(0, Math.min(100, Number(GameState.保暖装备完备度) || 0));
+  const food = Math.max(0, Math.min(100, Number(GameState.干粮储备完备度) || 0));
+  const map = Math.max(0, Math.min(100, Number(GameState.地图情报完整度) || 0));
+  const guide = Number(GameState.向导雇佣状态) > 0 ? 100 : 0;
+  GameState.补给完备度 = Math.round((warm + food + map + guide) / 4);
+  addTriggeredEvent("chapter11_complete");
+  addTriggeredEvent(`ch11_supply_tier_${GameState.补给完备度 >= 75 ? "high" : GameState.补给完备度 >= 45 ? "medium" : "low"}`);
+  GameState.chapterProgress = 11;
+  showScene("chapter11_start");
 }
 
 function isValidSlot(slot) {
@@ -10517,13 +14590,15 @@ function showStateChangeToasts(beforeState, afterState) {
     "槐序信任", "槐序共鸣", "槐序压力",
     "洛温信任", "洛温共鸣", "洛温压力",
     "阿缇娅信任", "阿缇娅共鸣", "阿缇娅压力",
-    "弥洛信任", "弥洛共鸣", "弥洛压力",
+    "弥洛信任", "弥洛共鸣", "弥洛压力", "弥洛好感",
     "安柠好感", "缇雅好感", "诺伊好感", "诺伊希望", "诺伊恐惧",
     "镇民信任", "镇民希望", "镇民恐惧", "白栖信任", "乌鸦先生信任",
     "伊芙白信任", "伊芙白共鸣", "伊芙白压力",
     "明弦信任", "明弦共鸣", "明弦压力",
     "白谱院声望值", "回声议会声望值", "世界观信息", "残留音核", "仪仗核心残片",
-    "救赎值", "归还值", "真相值", "伊莱娜隐藏好感值"
+    "救赎值", "归还值", "真相值", "伊莱娜隐藏好感值",
+    "零四信任", "零四共鸣", "零四压力", "心防判定值", "小雀信任值", "零四恢复进度", "卓玛风铃好感",
+    "安心值", "屿好感", "澄芜好感", "默契值", "阿缇娅情愫值", "弥洛情愫值", "安柠零四友情值", "赤稳定度", "屿赤契约进度", "威压值", "岐好感值", "岚离场分支值", "初响会情报值", "观察期存废倾向", "临时看管权限倾向", "历史责任公开倾向", "老院监用印倾向", "沈知微最终立场值"
   ];
 
   trackedKeys.forEach((key) => {
@@ -10595,6 +14670,7 @@ function formatStateLabel(key, delta) {
     弥洛信任: "弥洛·信任",
     弥洛共鸣: "弥洛·共鸣",
     弥洛压力: "弥洛·压力",
+    弥洛好感: "弥洛·好感",
     安柠好感: "安柠·好感",
     缇雅好感: "缇雅·好感",
     诺伊好感: "诺伊·好感",
@@ -10619,10 +14695,116 @@ function formatStateLabel(key, delta) {
     救赎值: "零四·救赎值",
     归还值: "零七·归还值",
     真相值: "卡戎·真相值",
-    伊莱娜隐藏好感值: "伊莱娜·隐藏好感"
+    伊莱娜隐藏好感值: "伊莱娜·隐藏好感",
+    零四信任: "零四·信任",
+    零四共鸣: "零四·共鸣",
+    零四压力: "零四·压力",
+    心防判定值: "零一·心防",
+    小雀信任值: "小雀·信任",
+    零四恢复进度: "零四·恢复进度",
+    卓玛风铃好感: "卓玛&风铃·好感",
+    安心值: "拾光村·安心值",
+    屿好感: "屿·好感",
+    澄芜好感: "澄芜·好感",
+    默契值: "赤&屿·默契",
+    阿缇娅情愫值: "阿缇娅·情愫",
+    弥洛情愫值: "弥洛·情愫",
+    安柠零四友情值: "安柠&零四·友情",
+    赤稳定度: "赤·稳定度",
+    屿赤契约进度: "屿&赤·契约进度",
+    威压值: "初响会·威压",
+    岐好感值: "岐·好感",
+    岚离场分支值: "岚·离场分支",
+    初响会情报值: "初响会·情报",
+    观察期存废倾向: "白谱院·观察期存废",
+    临时看管权限倾向: "白谱院·临时看管",
+    历史责任公开倾向: "白谱院·历史公开",
+    老院监用印倾向: "老院监·用印倾向",
+    沈知微最终立场值: "沈知微·最终立场"
   };
   const sign = delta > 0 ? "+" : "";
   return `${labelMap[key] || key} ${sign}${delta}`;
+}
+
+function resolveChapter7VoteOutcome() {
+  const beforeState = cloneData(GameState);
+  const arbitration = Math.round(((GameState.老院监用印倾向 || 0) + (GameState.沈知微最终立场值 || 0)) / 3);
+  const clauses = [
+    { key: "观察期存废倾向", passEvent: "ch7_vote_observation_clause_passed", compromiseEvent: "ch7_vote_observation_clause_compromise", failEvent: "ch7_vote_observation_clause_failed" },
+    { key: "临时看管权限倾向", passEvent: "ch7_vote_custody_clause_passed", compromiseEvent: "ch7_vote_custody_clause_compromise", failEvent: "ch7_vote_custody_clause_failed" },
+    { key: "历史责任公开倾向", passEvent: "ch7_vote_history_clause_passed", compromiseEvent: "ch7_vote_history_clause_compromise", failEvent: "ch7_vote_history_clause_failed" }
+  ];
+  let passed = 0;
+
+  clauses.forEach((clause) => {
+    const score = (GameState[clause.key] || 0) - arbitration;
+    if (score <= -18) {
+      addTriggeredEvent(clause.passEvent);
+      passed += 1;
+      return;
+    }
+    if (score <= 10) {
+      addTriggeredEvent(clause.compromiseEvent);
+      return;
+    }
+    addTriggeredEvent(clause.failEvent);
+  });
+
+  if (passed === 3) {
+    addTriggeredEvent("ch7_reform_best_outcome");
+    GameState.白谱院声望 = "支持改革";
+    GameState.白谱院声望值 += 12;
+  } else if (passed >= 1 || GameState.已触发事件.includes("ch7_evidence_preserved")) {
+    addTriggeredEvent("ch7_reform_standard_outcome");
+    GameState.白谱院声望 = "审慎改革";
+    GameState.白谱院声望值 += 6;
+  } else {
+    addTriggeredEvent("ch7_reform_conservative_outcome");
+    GameState.白谱院声望 = "保守观望";
+    GameState.白谱院声望值 += 2;
+  }
+
+  addTriggeredEvent("chapter7_vote_resolved");
+  showStateChangeToasts(beforeState, GameState);
+  showScene("ch7_022");
+}
+
+function resolveChapter8ContractOutcome() {
+  const beforeState = cloneData(GameState);
+  const resonanceScore = (GameState.默契值 || 0) + (GameState.赤稳定度 || 0) + (GameState.屿赤契约进度 || 0);
+
+  if (GameState.已触发事件.includes("ch8_b_flat_called")) {
+    GameState.屿赤契约进度 += 15;
+  }
+
+  if (GameState.已触发事件.includes("E804_atang_watch_repaired")) {
+    GameState.默契值 += 6;
+  }
+
+  if (GameState.已触发事件.includes("ch8_dark_tour_remnants_defeated")) {
+    GameState.赤稳定度 += 8;
+  }
+
+  const finalScore = resonanceScore + (GameState.已触发事件.includes("ch8_b_flat_called") ? 20 : 0);
+  if (finalScore >= 120) {
+    addTriggeredEvent("ch8_yu_chi_contract_complete");
+    addTriggeredEvent("ch8_contract_best_outcome");
+    GameState.屿赤契约进度 += 18;
+    GameState.默契值 += 8;
+    GameState.赤稳定度 += 8;
+  } else if (finalScore >= 80) {
+    addTriggeredEvent("ch8_yu_chi_contract_formed");
+    GameState.屿赤契约进度 += 10;
+    GameState.赤稳定度 += 5;
+  } else {
+    addTriggeredEvent("ch8_yu_chi_contract_fragile");
+    GameState.屿赤契约进度 += 5;
+    GameState.赤稳定度 += 3;
+  }
+
+  addTriggeredEvent("chapter8_contract_resolved");
+  showStateChangeToasts(beforeState, GameState);
+  showScene("ch8_016");
 }
 
 /* ───────────────────────────────────────────────────────────
@@ -10783,38 +14965,18 @@ function updateAISettingsUI() {
   }
 
   if (input) {
-    const key = getDeepSeekApiKey();
-    if (key) {
-      // 显示掩码
-      input.value = key.length > 8 ? key.slice(0, 4) + "****" + key.slice(-4) : key;
-    } else {
-      input.value = "";
-    }
+    input.value = "由服务器环境变量管理";
+    input.disabled = true;
   }
 }
 
 function handleSaveApiKey() {
-  const input = document.getElementById("deepseek-api-key-input");
-  if (!input) return;
-
-  const value = input.value.trim();
-  // 如果是掩码格式（包含****），不修改
-  if (value.includes("****")) {
-    showToast("密钥未变更", 0);
-    return;
-  }
-
-  if (saveDeepSeekApiKey(value)) {
-    if (value) {
-      showToast("API 密钥已保存，AI 对话已启用", 1);
-    } else {
-      showToast("API 密钥已清除", 0);
-    }
+  if (saveDeepSeekApiKey("")) {
+    showToast("API 密钥由后端环境变量管理，已清理本地遗留密钥", 1);
     updateAISettingsUI();
-    // 清除对话历史，因为新密钥可能对应不同的使用场景
     clearConversationHistory();
   } else {
-    showToast("保存失败", -1);
+    showToast("本地遗留密钥清理失败", -1);
   }
 }
 
@@ -10822,7 +14984,7 @@ function handleClearApiKey() {
   saveDeepSeekApiKey("");
   clearConversationHistory();
   updateAISettingsUI();
-  showToast("API 密钥已清除", 0);
+  showToast("本地遗留 API 密钥已清除", 0);
 }
 
 function handleClearChatHistory() {

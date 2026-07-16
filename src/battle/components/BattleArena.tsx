@@ -1,4 +1,3 @@
-import { Application, Container, Graphics } from 'pixi.js';
 import { useEffect, useRef, useState } from 'react';
 import { DynamicPortrait } from '../../character-render';
 import type { MoodState } from '../../character-render/portraitAnimationTypes';
@@ -17,100 +16,102 @@ export function BattleArena({ state }: BattleArenaProps) {
     const mount = stageRef.current;
     if (!mount) return;
 
-    const app = new Application();
     let destroyed = false;
-    let initialized = false;
     let resizeObserver: ResizeObserver | null = null;
-    let tick: (() => void) | null = null;
+    let animationFrame = 0;
+    let time = 0;
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.setAttribute('aria-hidden', 'true');
+    mount.appendChild(canvas);
 
-    void (async () => {
-      await app.init({
-        resizeTo: mount,
-        backgroundAlpha: 0,
-        antialias: true,
-        resolution: window.devicePixelRatio || 1,
-        autoDensity: true,
-      });
-      initialized = true;
+    const resize = () => {
+      const pixelRatio = window.devicePixelRatio || 1;
+      const width = Math.max(1, mount.clientWidth);
+      const height = Math.max(1, mount.clientHeight);
+      canvas.width = Math.floor(width * pixelRatio);
+      canvas.height = Math.floor(height * pixelRatio);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      context?.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    };
 
-      if (destroyed) {
-        app.destroy(true);
-        return;
+    const draw = () => {
+      if (destroyed || !context) return;
+
+      const width = mount.clientWidth;
+      const height = mount.clientHeight;
+      context.clearRect(0, 0, width, height);
+
+      context.fillStyle = '#080a10';
+      context.fillRect(0, 0, width, height);
+
+      const warmLight = context.createRadialGradient(width * 0.52, height * 0.34, 0, width * 0.52, height * 0.34, Math.max(width, height) * 0.52);
+      warmLight.addColorStop(0, 'rgba(241, 230, 198, 0.12)');
+      warmLight.addColorStop(0.58, 'rgba(196, 154, 69, 0.16)');
+      warmLight.addColorStop(1, 'rgba(196, 154, 69, 0)');
+      context.fillStyle = warmLight;
+      context.fillRect(0, 0, width, height);
+
+      context.fillStyle = 'rgba(5, 6, 9, 0.36)';
+      context.fillRect(0, 0, width, height);
+
+      const horizon = height * 0.62;
+      context.beginPath();
+      context.moveTo(0, height);
+      context.lineTo(width, height);
+      context.lineTo(width * 0.72, horizon);
+      context.lineTo(width * 0.28, horizon);
+      context.closePath();
+      context.fillStyle = 'rgba(17, 24, 39, 0.76)';
+      context.fill();
+
+      context.strokeStyle = 'rgba(196, 154, 69, 0.42)';
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(width * 0.28, horizon);
+      context.lineTo(width * 0.72, horizon);
+      context.stroke();
+
+      context.strokeStyle = 'rgba(232, 224, 204, 0.08)';
+      context.lineWidth = 1;
+      for (let index = 0; index < 9; index += 1) {
+        const y = horizon + index * 26;
+        context.beginPath();
+        context.moveTo(width * 0.22 - index * 34, y);
+        context.lineTo(width * 0.78 + index * 34, y);
+        context.stroke();
       }
 
-      mount.appendChild(app.canvas as HTMLCanvasElement);
+      for (let index = 0; index < 34; index += 1) {
+        const x = ((index * 97 + time * 14) % (width + 80)) - 40;
+        const y = height * (0.18 + ((index * 37) % 64) / 100);
+        context.beginPath();
+        context.arc(x, y, 1 + (index % 3), 0, Math.PI * 2);
+        context.fillStyle = `rgba(227, 192, 106, ${0.12 + (index % 4) * 0.03})`;
+        context.fill();
+      }
+    };
 
-      const root = new Container();
-      const floor = new Graphics();
-      const spotlight = new Graphics();
-      const staffLines = new Graphics();
-      const particles = new Graphics();
-      root.addChild(spotlight, floor, staffLines, particles);
-      app.stage.addChild(root);
-
-      let time = 0;
-
-      const draw = () => {
-        const { width, height } = app.renderer;
-        spotlight.clear();
-        floor.clear();
-        staffLines.clear();
-        particles.clear();
-
-        spotlight.rect(0, 0, width, height).fill(0x080a10);
-        spotlight.circle(width * 0.52, height * 0.34, Math.max(width, height) * 0.52).fill({
-          color: 0xc49a45,
-          alpha: 0.18,
-        });
-        spotlight.circle(width * 0.52, height * 0.34, Math.max(width, height) * 0.34).fill({
-          color: 0xf1e6c6,
-          alpha: 0.12,
-        });
-        spotlight.rect(0, 0, width, height).fill({ color: 0x050609, alpha: 0.36 });
-
-        const horizon = height * 0.62;
-        floor.poly([0, height, width, height, width * 0.72, horizon, width * 0.28, horizon]).fill({
-          color: 0x111827,
-          alpha: 0.76,
-        });
-        floor
-          .moveTo(width * 0.28, horizon)
-          .lineTo(width * 0.72, horizon)
-          .stroke({ color: 0xc49a45, alpha: 0.42, width: 2 });
-
-        for (let i = 0; i < 9; i += 1) {
-          const y = horizon + i * 26;
-          staffLines
-            .moveTo(width * 0.22 - i * 34, y)
-            .lineTo(width * 0.78 + i * 34, y)
-            .stroke({ color: 0xe8e0cc, alpha: 0.08, width: 1 });
-        }
-
-        for (let i = 0; i < 34; i += 1) {
-          const x = ((i * 97 + time * 14) % (width + 80)) - 40;
-          const y = height * (0.18 + ((i * 37) % 64) / 100);
-          particles.circle(x, y, 1 + (i % 3)).fill({ color: 0xe3c06a, alpha: 0.12 + (i % 4) * 0.03 });
-        }
-      };
-
-      tick = () => {
-        time += app.ticker.deltaTime / 60;
-        draw();
-      };
-
-      resizeObserver = new ResizeObserver(draw);
-      resizeObserver.observe(mount);
-      app.ticker.add(tick);
+    const tick = () => {
+      time += 1 / 60;
       draw();
-    })();
+      animationFrame = window.requestAnimationFrame(tick);
+    };
+
+    resizeObserver = new ResizeObserver(() => {
+      resize();
+      draw();
+    });
+    resizeObserver.observe(mount);
+    resize();
+    tick();
 
     return () => {
       destroyed = true;
       resizeObserver?.disconnect();
-      if (tick) app.ticker.remove(tick);
-      if (initialized) {
-        app.destroy(true, { children: true });
-      }
+      window.cancelAnimationFrame(animationFrame);
+      canvas.remove();
     };
   }, []);
 

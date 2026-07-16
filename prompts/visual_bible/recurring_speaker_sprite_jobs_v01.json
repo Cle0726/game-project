@@ -1,0 +1,193 @@
+{
+  "version": "1.0.0",
+  "identityManifest": "assets/references/characters/character_identity_manifest_v01.json",
+  "globalOutputRule": "single full-body character on flat neutral #b8b8b8 background for BiRefNet cutout, no cast shadow, no text, generous padding, reusable visual-novel sprite; never use green/blue chroma backgrounds that can contaminate hair edges",
+  "jobs": [
+    {
+      "id": "SPR-CH04-QI",
+      "displayName": "岐",
+      "slug": "qi",
+      "chapter": 4,
+      "path": "assets/generated/chapter4/sprites/characters/char_ch4_qi_sprite_default_v01.png",
+      "referencePaths": ["assets/generated/chapter9/keyvisuals/cg_ch9_lan_farewell_key_v02.png"],
+      "identityLock": "the dark-haired young woman on the left of the reference, short black-purple hair with burgundy tips, earnest amber eyes, small black conductor hat with rose and gold score filigree, fitted black touring uniform with crimson ribbons, thigh-high boots, slim silver baton",
+      "pose": "neutral alert standing pose, baton lowered, sincere guarded expression",
+      "avoid": ["silver hair", "harp weapon", "changed hat", "different neckline", "male anatomy"]
+    },
+    {
+      "id": "SPR-CH04-LAN",
+      "displayName": "岚",
+      "slug": "lan",
+      "chapter": 4,
+      "path": "assets/generated/chapter4/sprites/characters/char_ch4_lan_sprite_default_v01.png",
+      "referencePaths": ["assets/generated/chapter9/keyvisuals/cg_ch9_lan_farewell_key_v02.png"],
+      "identityLock": "the silver-haired young woman on the right of the reference, same delicate face, very long silver hair, rose-and-thorn halo headpiece, black and deep-crimson layered Musicart gown with gold score filigree, crescent harp-bow weapon",
+      "pose": "quiet protective standing pose with harp-bow held beside her, tired but gentle eyes",
+      "eyeProfile": "silver-gray iris with a small warm inner light, restrained wine shadow, farewell sadness without empty doll eyes",
+      "avoid": ["short dark hair", "conductor hat", "changed gown silhouette", "missing harp-bow", "male anatomy"]
+    },
+    {
+      "id": "SPR-CH08-CHI",
+      "displayName": "赤",
+      "slug": "chi",
+      "chapter": 8,
+      "path": "assets/generated/chapter8/sprites/characters/char_ch8_chi_sprite_default_v01.png",
+      "referencePaths": ["assets/generated/chapter8/keyvisuals/cg_ch8_yu_chi_new_contract_key_v01.png"],
+      "identityLock": "the young Musicart woman on the right of the reference, short wavy black hair with deep crimson ends, fixed rose hair ornament, black-crimson thorn-and-score concert gown, red-black cello and bow, same face and body proportions",
+      "pose": "full-body standing pose holding the cello upright, wary exhausted expression beginning to soften",
+      "eyeProfile": "dark wine iris with a dim ember-like inner ring, asymmetrical restrained burgundy outer-corner shadow",
+      "avoid": ["long hair", "white gown", "missing cello", "bright cheerful smile", "changed rose ornament"]
+    },
+    {
+      "id": "SPR-CH05-CHENYUE",
+      "displayName": "沉月",
+      "slug": "chenyue",
+      "chapter": 5,
+      "path": "assets/generated/chapter5/sprites/characters/char_ch5_chenyue_sprite_default_v01.png",
+      "identityLock": "elderly male circus clown around sixty, kind weathered face, understated melancholic clown makeup, worn but carefully repaired burgundy-ochre patchwork performer's coat, practical boots and prop ledger",
+      "pose": "relaxed full-body standing pose, one hand holding a small prop ledger, quietly knowing eyes",
+      "avoid": ["horror clown", "white face paint mask", "bright plastic costume", "young face", "oversized shoes"]
+    },
+    {
+      "id": "SPR-CH05-XIAOQUE",
+      "displayName": "小雀",
+      "slug": "xiaoque",
+      "chapter": 5,
+      "path": "assets/generated/chapter5/sprites/characters/char_ch5_xiaoque_sprite_default_v01.png",
+      "identityLock": "seventeen-year-old female aerial acrobat, short practical dark auburn hair, lean athletic build, warm amber-brown eyes with age-inappropriate tiredness, worn teal-crimson-gold circus performance outfit with safety wraps and soft boots",
+      "pose": "balanced full-body standing pose holding a folded aerial wrist ribbon, hopeful but cautious expression",
+      "avoid": ["child body", "revealing adult costume", "long hair", "princess dress", "carefree exaggerated smile"]
+    },
+    {
+      "id": "SPR-CH05-ZHUOMA",
+      "displayName": "卓玛",
+      "slug": "zhuoma",
+      "chapter": 5,
+      "path": "assets/generated/chapter5/sprites/characters/char_ch5_zhuoma_sprite_default_v01.png",
+      "identityLock": "twenty-four-year-old female conductor and senior acrobat, warm brown skin, dark hair in a strong braided high ponytail, confident amber eyes, practical burgundy-orange acrobat jacket, fitted dark trousers, safety harness details and compact conductor baton",
+      "pose": "confident open standing pose with baton at her hip, cheerful direct expression",
+      "avoid": ["pale silver hair", "flowing Musicart gown", "male body", "military uniform", "changed warm palette"]
+    },
+    {
+      "id": "SPR-CH05-FENGLING",
+      "displayName": "风铃",
+      "slug": "fengling",
+      "chapter": 5,
+      "path": "assets/generated/chapter5/sprites/characters/char_ch5_fengling_sprite_default_v01.png",
+      "identityLock": "twenty-four-year-old female natural Musicart, bright expressive teal eyes, long dark teal hair tied with orange-gold ribbons, colorful flowing teal-crimson aerial-silk battle dress with protective fitted shorts and gold wind-chime accents",
+      "pose": "light full-body standing pose with one long silk ribbon coiled safely around her arm, playful attentive expression",
+      "avoid": ["same face as Zhuoma", "short hair", "ball gown", "exposed lingerie", "missing aerial silk"]
+    },
+    {
+      "id": "SPR-CH07-CUIJING",
+      "displayName": "崔敬",
+      "slug": "cuijing",
+      "chapter": 7,
+      "path": "assets/generated/chapter7/sprites/characters/char_ch7_cuijing_sprite_default_v01.png",
+      "identityLock": "fifty-eight-year-old male academy administrator, meticulously groomed dark-gray short hair, tense jaw, narrow tired eyes, formal deep-navy and silver long academy robe with restrained geometric trim",
+      "pose": "straight full-body formal stance with a closed document folio, calm unyielding expression",
+      "avoid": ["villain grin", "fantasy king robe", "young face", "messy hair", "weapon"]
+    },
+    {
+      "id": "SPR-CH07-MOYANSHU",
+      "displayName": "莫言书",
+      "slug": "moyanshu",
+      "chapter": 7,
+      "path": "assets/generated/chapter7/sprites/characters/char_ch7_moyanshu_sprite_default_v01.png",
+      "identityLock": "twenty-seven-year-old male academy administrator, short black hair slightly disordered from overtime, sharp intense dark eyes, formal white-navy academy uniform with loosened collar and ink-stained document gloves",
+      "pose": "defensive full-body stance holding case files against one side, controlled frustration in his face",
+      "avoid": ["elderly face", "battle armor", "smiling politician", "long hair", "luxury robe"]
+    },
+    {
+      "id": "SPR-CH09-XUANYUAN",
+      "displayName": "玄鸦",
+      "aliases": ["玄鸢"],
+      "slug": "xuanyuan",
+      "chapter": 9,
+      "path": "assets/generated/chapter9/sprites/characters/char_ch9_xuanyuan_sprite_default_v01.png",
+      "identityLock": "thirty-year-old female Initial Resonance executive, sleek jet-black long hair, precise cool face, entirely black-and-silver minimalist formal robe without ornamental excess, pure silver conductor baton",
+      "pose": "perfectly composed full-body standing pose, baton vertical at her side, quietly absolute authority",
+      "avoid": ["gothic roses", "colorful jewelry", "warm smile", "battle armor", "white hair"]
+    },
+    {
+      "id": "SPR-CH09-ANNA-DAILY",
+      "displayName": "安娜",
+      "slug": "anna_daily",
+      "chapter": 9,
+      "path": "assets/generated/chapter9/sprites/characters/char_ch9_anna_sprite_daily_v01.png",
+      "referencePaths": ["assets/references/characters/anna/anna_daily_library_identity_user_v01.png", "assets/references/characters/anna/anna_daily_train_identity_user_v01.png"],
+      "identityLock": "preserve the same adult face, orange-red high ponytail, long bangs, clear blue eyes, large gold hoop earrings, black choker and the small beauty mark directly below the right eye",
+      "formLock": "daily form, fitted black travel jacket over a burgundy blouse and practical dark skirt or trousers",
+      "pose": "calm full-body archive-traveler standing pose holding a closed notebook",
+      "avoid": ["loose crimson-lavender hair", "black-gold star-net gown", "missing right-eye beauty mark", "red eyes", "changed hoop earrings"]
+    },
+    {
+      "id": "SPR-CH09-ANNA-HERRSCHER",
+      "displayName": "安娜",
+      "slug": "anna_herrscher",
+      "chapter": 9,
+      "path": "assets/generated/chapter9/sprites/characters/char_ch9_anna_sprite_herrscher_v01.png",
+      "referencePaths": ["assets/references/characters/anna/anna_herrscher_fullbody_user_v01.png", "assets/references/characters/anna/anna_herrscher_face_user_v01.png"],
+      "identityLock": "preserve the same elegant adult face and the small beauty mark directly below the right eye; deep crimson long loose hair fading to cool lavender ends; fixed snow-star hair ornament; black-gold star-net halter gown and translucent cool-violet drapes",
+      "eyeProfile": "ice-blue to blue-violet luminous iris, nested snowflake and fine musical-staff pupil rings, long sharp black winged liner, structured wine-red and deep-violet rose-petal eyeshadow at the outer corner, fine gold dust and a narrow score-like tear line below the lashes, beauty mark fully visible",
+      "pose": "regal full-body neutral transformation pose with one hand relaxed, no attack effect",
+      "avoid": ["orange high ponytail", "daily business clothes", "missing beauty mark", "pure red iris", "generic smoky eye", "changed gown"]
+    },
+    {
+      "id": "SPR-CH11-LAOXUE",
+      "displayName": "老雪",
+      "slug": "laoxue",
+      "chapter": 11,
+      "path": "assets/generated/chapter11/sprites/characters/char_ch11_laoxue_sprite_default_v01.png",
+      "identityLock": "sixty-year-old male frontier guide, deeply weathered face, short gray hair and beard stubble, unusually bright eyes, old frostbite with several missing fingers on the left hand, thick practical layered fur clothing and worn route satchel",
+      "pose": "steady full-body standing pose using a short snow staff, left hand visible but naturally relaxed",
+      "avoid": ["wizard", "luxury fur king", "complete left hand", "blind cloudy eyes", "oversized weapon"]
+    },
+    {
+      "id": "SPR-CH11-SUPO",
+      "displayName": "苏婆",
+      "slug": "supo",
+      "chapter": 11,
+      "path": "assets/generated/chapter11/sprites/characters/char_ch11_supo_sprite_default_v01.png",
+      "identityLock": "fifty-five-year-old sturdy female frontier town head, broad practical build, weather-reddened kind face, dark gray hair tied under a work scarf, thick wool layers and heavy brown supply apron with measuring tools",
+      "pose": "confident full-body stance with one hand at her waist and one holding a small inventory slate",
+      "avoid": ["frail grandmother", "ornate mayor uniform", "young glamorous face", "fantasy armor", "thin body"]
+    },
+    {
+      "id": "SPR-CH11-AYAN",
+      "displayName": "阿雁",
+      "slug": "ayan",
+      "chapter": 11,
+      "path": "assets/generated/chapter11/sprites/characters/char_ch11_ayan_sprite_default_v01.png",
+      "identityLock": "twenty-year-old female frontier hunter and older-presenting twin, energetic high dark-brown ponytail, warm amber eyes, practical layered white-gray fur hunting coat with rust-red scarf, compact bow and skinning knife",
+      "pose": "open alert full-body stance with bow lowered, confident outdoorsy expression",
+      "avoid": ["fantasy ranger armor", "revealing outfit", "white hair", "same reserved expression as Ashuang", "oversized bow"]
+    },
+    {
+      "id": "SPR-CH11-ASHUANG",
+      "displayName": "阿霜",
+      "slug": "ashuang",
+      "chapter": 11,
+      "path": "assets/generated/chapter11/sprites/characters/char_ch11_ashuang_sprite_default_v01.png",
+      "identityLock": "twenty-year-old female frontier hunter, twin sister of Ayan with the same face structure but a low dark-brown braid, cooler gray-brown eyes, matching white-gray fur hunting coat with muted blue scarf, compact crossbow and field binocular case",
+      "pose": "quiet watchful full-body stance scanning slightly to the side, crossbow lowered safely",
+      "avoid": ["different ethnicity from Ayan", "high ponytail", "bright smile", "fantasy ranger armor", "oversized crossbow"]
+    },
+    {
+      "id": "SPR-EXISTING-CIZHAO",
+      "displayName": "辞照",
+      "slug": "cizhao",
+      "chapter": 9,
+      "status": "reuse-existing",
+      "path": "assets/generated/chapter9/sprites/enemies/enemy_ch9_cizhao_sprite_default_v01.png"
+    },
+    {
+      "id": "SPR-EXISTING-PO",
+      "displayName": "破",
+      "slug": "po",
+      "chapter": 11,
+      "status": "reuse-existing",
+      "path": "assets/generated/chapter11/sprites/enemies/boss_ch11_po_sprite_default_v01.png"
+    }
+  ]
+}

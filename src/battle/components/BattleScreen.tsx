@@ -35,8 +35,10 @@ export function BattleScreen({
     return null;
   }
 
+  const variant = state.variant ?? 'standard';
+
   return (
-    <main ref={rootRef} className={`battle-screen battle-screen--${state.phase}`} data-game-phase="battle">
+    <main ref={rootRef} className={`battle-screen battle-screen--${state.phase} battle-screen--${variant}`} data-game-phase="battle">
       <BattleArena state={state} />
       <BattleHUD state={state} onSelectMusicart={onSelectMusicart} onSkill={onSkill} />
       <div className="battle-transition-layer" aria-hidden="true">

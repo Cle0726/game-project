@@ -1,17 +1,25 @@
 import ashenCorridorMapSrc from '../../assets/worldmap/map_ashen_corridor_manuscript_v01.png';
 import ashenCorridorThumbSrc from '../../assets/worldmap/thumb_ashen_corridor_manuscript_v01.png';
-import echoCitadelMapSrc from '../../assets/worldmap/map_echo_citadel_illuminated_manuscript_v01.png';
-import echoCitadelThumbSrc from '../../assets/worldmap/thumb_echo_citadel_illuminated_manuscript_v01.png';
 import hiddenRegionMapSrc from '../../assets/worldmap/map_hidden_region_sepia_placeholder_v01.png';
 import hiddenRegionThumbSrc from '../../assets/worldmap/thumb_hidden_region_sepia_placeholder_v01.png';
 import mujianStationMapSrc from '../../assets/worldmap/map_ch1_mujian_station_atlas_v01.png';
 import mujianStationThumbSrc from '../../assets/worldmap/thumb_ch1_mujian_station_atlas_v01.png';
 import frostScoreTowerMapSrc from '../../assets/worldmap/map_ch2_frost_score_tower_atlas_v01.png';
 import frostScoreTowerThumbSrc from '../../assets/worldmap/thumb_ch2_frost_score_tower_atlas_v01.png';
-import whiteScoreInstituteMapSrc from '../../assets/worldmap/map_ch3_white_score_institute_atlas_v01.png';
-import whiteScoreInstituteThumbSrc from '../../assets/worldmap/thumb_ch3_white_score_institute_atlas_v01.png';
+import whiteScoreInstituteMapSrc from '../../assets/worldmap/map_ch3_white_score_institute_atlas_v02.png';
+import whiteScoreInstituteThumbSrc from '../../assets/worldmap/thumb_ch3_white_score_institute_atlas_v02.png';
 import nightlessTrainMapSrc from '../../assets/worldmap/map_ch4_nightless_train_atlas_v01.png';
 import nightlessTrainThumbSrc from '../../assets/worldmap/thumb_ch4_nightless_train_atlas_v01.png';
+import floatingCircusMapSrc from '../../assets/worldmap/map_ch5_floating_circus_atlas_v01.png';
+import floatingCircusThumbSrc from '../../assets/worldmap/thumb_ch5_floating_circus_atlas_v01.png';
+import shiguangVillageMapSrc from '../../assets/worldmap/map_ch6_shiguang_village_atlas_v01.png';
+import shiguangVillageThumbSrc from '../../assets/worldmap/thumb_ch6_shiguang_village_atlas_v01.png';
+import whiteScoreReformMapSrc from '../../assets/worldmap/map_ch7_white_score_reform_atlas_v01.png';
+import whiteScoreReformThumbSrc from '../../assets/worldmap/thumb_ch7_white_score_reform_atlas_v01.png';
+import fallenDarkTourMapSrc from '../../assets/worldmap/map_ch8_fallen_dark_tour_atlas_v01.png';
+import fallenDarkTourThumbSrc from '../../assets/worldmap/thumb_ch8_fallen_dark_tour_atlas_v01.png';
+import firstResonanceOutpostMapSrc from '../../assets/worldmap/map_ch9_first_resonance_outpost_atlas_v01.png';
+import firstResonanceOutpostThumbSrc from '../../assets/worldmap/thumb_ch9_first_resonance_outpost_atlas_v01.png';
 import residualPathMapSrc from '../../assets/worldmap/map_residual_path_miansha_manuscript_v01.png';
 import residualPathThumbSrc from '../../assets/worldmap/thumb_residual_path_miansha_manuscript_v01.png';
 import type { WorldRegion } from './worldMapTypes';
@@ -1145,6 +1153,104 @@ export const WORLD_MAP_REGIONS: WorldRegion[] = [
         isCompleted: false,
         isRevisitable: true
       }
+    ]
+  },
+  {
+    id: 'chapter5_floating_circus',
+    name: '浮光马戏团',
+    subtitle: '第五章 · 浮光伶响',
+    musicEmotion: '暖幕之下的自由抉择',
+    colorTheme: { primary: '#E6AF57', secondary: '#23162D', accent: '#B93C4A' },
+    thumbnailSrc: floatingCircusThumbSrc,
+    fullMapSrc: floatingCircusMapSrc,
+    unlockCondition: { type: 'chapter_progress', minChapter: 5 },
+    isHidden: false,
+    narrativeHook: '暖色帐篷、巡演车厢与训练场围成短暂的家；零一与零四的选择在此交汇。',
+    locationNodes: [
+      { id: 'chapter5_start', name: '浮光来讯', positionPercent: { x: 14, y: 82 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch5_001', name: '营地入口', positionPercent: { x: 28, y: 65 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch5_004', name: '小雀的秘密接触', positionPercent: { x: 52, y: 48 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch5_008', name: '琉璃团长的心防', positionPercent: { x: 68, y: 35 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch5_014', name: '帐篷外的月亮', positionPercent: { x: 86, y: 18 }, nodeType: 'story', isCompleted: false, isRevisitable: true }
+    ]
+  },
+  {
+    id: 'chapter6_shiguang_village',
+    name: '拾光村',
+    subtitle: '第六章 · 拾光缓响',
+    musicEmotion: '温泉与慢慢复原的心',
+    colorTheme: { primary: '#D8B66E', secondary: '#245B58', accent: '#80C7B3' },
+    thumbnailSrc: shiguangVillageThumbSrc,
+    fullMapSrc: shiguangVillageMapSrc,
+    unlockCondition: { type: 'chapter_progress', minChapter: 6 },
+    isHidden: false,
+    narrativeHook: '温泉、梯田、古树与河桥把疗愈地带连在一起；这里不催促任何人立刻好起来。',
+    locationNodes: [
+      { id: 'chapter6_start', name: '拾光村入口', positionPercent: { x: 14, y: 82 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch6_000', name: '古树下的停步', positionPercent: { x: 28, y: 60 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch6_003', name: '温泉边的旧伤', positionPercent: { x: 52, y: 42 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch6_006', name: '田野里的轻战斗', positionPercent: { x: 68, y: 28 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch6_008', name: '拾光村余响', positionPercent: { x: 86, y: 16 }, nodeType: 'story', isCompleted: false, isRevisitable: true }
+    ]
+  },
+  {
+    id: 'chapter7_white_score_reform',
+    name: '白谱院·改革夜',
+    subtitle: '第七章 · 谱变余响',
+    musicEmotion: '雨夜听证与制度回声',
+    colorTheme: { primary: '#E7DAB5', secondary: '#13223E', accent: '#7699C9' },
+    thumbnailSrc: whiteScoreReformThumbSrc,
+    fullMapSrc: whiteScoreReformMapSrc,
+    unlockCondition: { type: 'chapter_progress', minChapter: 7 },
+    isHidden: false,
+    narrativeHook: '同一座学院在夜里呈现另一面：听证、档案、签名与撤离路线共同决定规则是否重写。',
+    locationNodes: [
+      { id: 'chapter7_start', name: '改革议程', positionPercent: { x: 14, y: 82 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch7_004', name: '档案核查请求', positionPercent: { x: 30, y: 60 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch7_010', name: '弥洛的回应', positionPercent: { x: 48, y: 46 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch7_016', name: '证据护送', positionPercent: { x: 66, y: 34 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch7_021', name: '表决大会', positionPercent: { x: 82, y: 22 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch7_023', name: '改革后告别', positionPercent: { x: 92, y: 12 }, nodeType: 'story', isCompleted: false, isRevisitable: true }
+    ]
+  },
+  {
+    id: 'chapter8_fallen_dark_tour',
+    name: '暗巡残站',
+    subtitle: '第八章 · 续弦入响',
+    musicEmotion: '废站中的新契约',
+    colorTheme: { primary: '#CB7188', secondary: '#1D1930', accent: '#9D72D6' },
+    thumbnailSrc: fallenDarkTourThumbSrc,
+    fullMapSrc: fallenDarkTourMapSrc,
+    unlockCondition: { type: 'chapter_progress', minChapter: 8 },
+    isHidden: false,
+    narrativeHook: '暗巡旧站的断轨仍通向过去，赤与屿却在这里尝试写下不再重复的回应。',
+    locationNodes: [
+      { id: 'chapter8_start', name: '独奏残响', positionPercent: { x: 14, y: 82 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch8_000', name: '残站入口', positionPercent: { x: 28, y: 64 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch8_004', name: '屿向赤靠近', positionPercent: { x: 48, y: 46 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch8_012', name: '新契约准备', positionPercent: { x: 68, y: 30 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch8_013', name: '保卫新生战', positionPercent: { x: 78, y: 22 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch8_015', name: '续弦余响', positionPercent: { x: 90, y: 12 }, nodeType: 'story', isCompleted: false, isRevisitable: true }
+    ]
+  },
+  {
+    id: 'chapter9_first_resonance_outpost',
+    name: '初响会荒废据点',
+    subtitle: '第九章 · 暗音初响',
+    musicEmotion: '雨夜档案与无法力敌的威压',
+    colorTheme: { primary: '#B48FE6', secondary: '#1D1B28', accent: '#A65D70' },
+    thumbnailSrc: firstResonanceOutpostThumbSrc,
+    fullMapSrc: firstResonanceOutpostMapSrc,
+    unlockCondition: { type: 'chapter_progress', minChapter: 9 },
+    isHidden: false,
+    narrativeHook: '焚毁档案、残余营地与封闭实验室把所有人推向初响会第一次真正的阴影。',
+    locationNodes: [
+      { id: 'chapter9_start', name: '岚与岐的线索', positionPercent: { x: 14, y: 82 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch9_001', name: '荒废据点入口', positionPercent: { x: 30, y: 64 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch9_006', name: '辞照的威压', positionPercent: { x: 52, y: 44 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch9_008', name: '岚的选择', positionPercent: { x: 68, y: 30 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch9_012', name: '岐的决定', positionPercent: { x: 82, y: 20 }, nodeType: 'story', isCompleted: false, isRevisitable: true },
+      { id: 'ch9_016', name: '安娜的远景', positionPercent: { x: 92, y: 12 }, nodeType: 'story', isCompleted: false, isRevisitable: true }
     ]
   },
   {

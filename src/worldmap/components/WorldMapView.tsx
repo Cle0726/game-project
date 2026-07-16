@@ -156,11 +156,7 @@ export function WorldMapView({
             >
               <span className="region-card__scroll-cap region-card__scroll-cap--top" />
               <span className="region-card__image-wrap">
-                {isUnlocked ? (
-                  <img src={region.thumbnailSrc} alt="" />
-                ) : (
-                  <span className="region-card__unknown">?</span>
-                )}
+                <img src={region.thumbnailSrc} alt={`${region.name}区域地图缩略图`} />
                 {!isUnlocked ? <span className="region-card__lock" aria-hidden="true" /> : null}
                 <RegionRevealTransition
                   region={region}
@@ -169,9 +165,9 @@ export function WorldMapView({
                 />
               </span>
               <span className="region-card__content">
-                <span className="region-card__name">{isUnlocked ? region.name : '未响之地'}</span>
+                <span className="region-card__name">{region.name}</span>
                 <span className="region-card__subtitle">
-                  {isUnlocked ? region.subtitle ?? region.musicEmotion : '旋律被灰褐色剪影遮住'}
+                  {isUnlocked ? region.subtitle ?? region.musicEmotion : `${region.subtitle ?? region.musicEmotion} · 待章节推进`}
                 </span>
               </span>
               <span className="region-card__scroll-cap region-card__scroll-cap--bottom" />

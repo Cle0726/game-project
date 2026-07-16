@@ -12,7 +12,7 @@ var GACHA_POOL = [
     type: "律者档案",
     title: "阿缇娅",
     subtitle: "暮星序曲 / 自然律者",
-    image: "assets/generated/chapter0/sprites/characters/char_ch0_atya_sprite_transformed_ai_v01.png"
+    image: "assets/generated/character_states/sprites/char_atya_sprite_default_v04.png"
   },
   {
     id: "musicart_milo",
@@ -20,7 +20,7 @@ var GACHA_POOL = [
     type: "律者档案",
     title: "弥洛",
     subtitle: "低音防线 / 双律者合奏",
-    image: "assets/generated/chapter0/sprites/characters/char_ch0_milo_sprite_default_v02.png"
+    image: "assets/generated/character_states/sprites/char_milo_sprite_default_v04.png"
   },
   {
     id: "musicart_yuna_sequence07",

@@ -1,0 +1,51 @@
+﻿{
+  "chapter": 6,
+  "title": "拾光缓响",
+  "artDirectionFile": "prompts/chapter6/ch6_visual_asset_prompt_system_v01.md",
+  "referenceSources": [
+    "https://game.takt-op.jp/",
+    "https://takt-op.fandom.com/wiki/Takt_op._-_Game",
+    "https://dic.pixiv.net/a/%E5%AE%BF%E5%91%BD%E5%9B%9E%E5%93%8D",
+    "https://zh.wikipedia.org/zh-cn/%E5%AE%BF%E5%91%BD%E8%BF%B4%E9%9F%BF"
+  ],
+  "assets": [
+    {
+      "id": "A001",
+      "key": "ch6ShiguangVillageEstablishing",
+      "type": "background",
+      "status": "generated",
+      "path": "assets/generated/chapter6/backgrounds/bg_ch6_shiguang_village_establishing_v01.png",
+      "dimensions": "1672x941",
+      "runtimeWiredIn": "assets_data.js",
+      "notes": "Chapter 6 establishing wide background; golden terraces, wooden village, hot spring mist, ancient tree, wind chimes."
+    },
+    {
+      "id": "A002",
+      "key": "ch6HotSpringTalk",
+      "type": "background",
+      "status": "queued",
+      "path": "assets/generated/chapter6/backgrounds/bg_ch6_hot_spring_talk_v01.png"
+    },
+    {
+      "id": "A003",
+      "key": "cgCh6AtyaAncientTreeMonologue",
+      "type": "keyvisual",
+      "status": "queued",
+      "path": "assets/generated/chapter6/keyvisuals/cg_ch6_atya_ancient_tree_monologue_v01.png"
+    },
+    {
+      "id": "A004",
+      "key": "cgCh6ChengwuSequence04HotSpringGuide",
+      "type": "keyvisual",
+      "status": "queued",
+      "path": "assets/generated/chapter6/keyvisuals/cg_ch6_chengwu_sequence04_hot_spring_guide_v01.png"
+    },
+    {
+      "id": "A005",
+      "key": "cgCh6YuBatonRecovery",
+      "type": "keyvisual",
+      "status": "queued",
+      "path": "assets/generated/chapter6/keyvisuals/cg_ch6_yu_baton_recovery_v01.png"
+    }
+  ]
+}

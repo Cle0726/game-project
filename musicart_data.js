@@ -10,6 +10,7 @@ var MUSICART_RULES = {
   洛温: { gender: "male", trustKey: "洛温信任", resonanceKey: "洛温共鸣", pressureKey: "洛温压力" },
   阿缇娅: { gender: "female", trustKey: "阿缇娅信任", resonanceKey: "阿缇娅共鸣", pressureKey: "阿缇娅压力" },
   弥洛: { gender: "male", trustKey: "弥洛信任", resonanceKey: "弥洛共鸣", pressureKey: "弥洛压力" },
+  零四: { gender: "female", trustKey: "零四信任", resonanceKey: "零四共鸣", pressureKey: "零四压力" },
   伊芙白: { gender: "female", trustKey: "伊芙白信任", resonanceKey: "伊芙白共鸣", pressureKey: "伊芙白压力" },
   明弦: { gender: "female", trustKey: "明弦信任", resonanceKey: "明弦共鸣", pressureKey: "明弦压力" }
 };
@@ -34,6 +35,11 @@ var MUSICART_PROFILES = {
     codename: "低鸣骑士",
     concept: "临时律者，固定低频防线",
     avatar: "低"
+  },
+  零四: {
+    codename: "断拍归零",
+    concept: "康复中的静默序列，重新学习选择",
+    avatar: "04"
   },
   伊芙白: {
     codename: "蓝调改色",

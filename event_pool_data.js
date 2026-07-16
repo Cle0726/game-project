@@ -55,6 +55,87 @@ var PERSONAL_STORIES = [
     resonanceKey: "槐序共鸣",
     seenEvent: "story_seen:huaixu_03",
     sceneId: "story_huaixu_03"
+  },
+  {
+    id: "atya_02",
+    character: "阿缇娅",
+    chapter: 10,
+    title: "默契之后",
+    unlockEvent: "ch10_atya_after_tacit_unlock",
+    seenEvent: "story_seen:atya_02",
+    sceneId: "story_atya_02"
+  },
+  {
+    id: "milo_02",
+    character: "弥洛",
+    chapter: 10,
+    title: "默契之后",
+    unlockEvent: "ch10_milo_after_tacit_unlock",
+    seenEvent: "story_seen:milo_02",
+    sceneId: "story_milo_02"
+  },
+  {
+    id: "qi_01",
+    character: "岐",
+    chapter: 10,
+    title: "新的笑容",
+    unlockEvent: "E1003_qi_lan_half_charm",
+    seenEvent: "story_seen:qi_01",
+    sceneId: "story_qi_01"
+  },
+  {
+    id: "milo_03",
+    character: "弥洛",
+    chapter: 10,
+    title: "北方的猜想",
+    unlockEvent: "E1004_milo_observatory_guess",
+    seenEvent: "story_seen:milo_03",
+    sceneId: "story_milo_03"
+  },
+  {
+    id: "atya_03",
+    character: "阿缇娅",
+    chapter: 11,
+    title: "出发前夜",
+    unlockEvent: "ch11_atya_departure_eve_unlock",
+    seenEvent: "story_seen:atya_03",
+    sceneId: "story_atya_03"
+  },
+  {
+    id: "milo_04",
+    character: "弥洛",
+    chapter: 11,
+    title: "出发前夜",
+    unlockEvent: "ch11_milo_departure_eve_unlock",
+    seenEvent: "story_seen:milo_04",
+    sceneId: "story_milo_04"
+  },
+  {
+    id: "anning_01",
+    character: "安柠",
+    chapter: 11,
+    title: "边境人情",
+    unlockEvent: "ch11_heating_repair_clear",
+    seenEvent: "story_seen:anning_01",
+    sceneId: "story_anning_01"
+  },
+  {
+    id: "qi_02",
+    character: "岐",
+    chapter: 11,
+    title: "另一种姐妹情",
+    unlockEvent: "E1111_qi_hunter_twins",
+    seenEvent: "story_seen:qi_02",
+    sceneId: "story_qi_02"
+  },
+  {
+    id: "sequence04_01",
+    character: "零四",
+    chapter: 11,
+    title: "打雪仗之后",
+    unlockEvent: "ch11_snowball_clear",
+    seenEvent: "story_seen:sequence04_01",
+    sceneId: "story_sequence04_01"
   }
 ];
 

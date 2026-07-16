@@ -2,8 +2,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from config import settings
 from database import engine, Base
 from routers import auth_router, save_router, teabreak_router, gacha_router
+
+# 生产启动安全门槛：默认 JWT 密钥等危险配置必须在服务启动前被拦截。
+settings.validate_runtime_security()
 
 # 创建数据库表（如果不存在的话）
 Base.metadata.create_all(bind=engine)

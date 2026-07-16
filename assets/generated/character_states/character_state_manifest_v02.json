@@ -3,77 +3,77 @@
     "displayName": "阿缇娅",
     "states": {
       "default": "assets/generated/character_states/sprites/char_atya_sprite_default_v04.png",
-      "smile": "assets/generated/character_states/sprites/char_atya_sprite_smile_v02.png",
-      "worried": "assets/generated/character_states/sprites/char_atya_sprite_worried_v02.png",
-      "serious": "assets/generated/character_states/sprites/char_atya_sprite_serious_v02.png",
-      "shocked": "assets/generated/character_states/sprites/char_atya_sprite_shocked_v02.png",
-      "special": "assets/generated/character_states/sprites/char_atya_sprite_special_v02.png"
+      "smile": "assets/generated/character_states/sprites/char_atya_sprite_smile_v04.png",
+      "worried": "assets/generated/character_states/sprites/char_atya_sprite_worried_v04.png",
+      "serious": "assets/generated/character_states/sprites/char_atya_sprite_serious_v04.png",
+      "shocked": "assets/generated/character_states/sprites/char_atya_sprite_shocked_v04.png",
+      "special": "assets/generated/character_states/sprites/char_atya_sprite_special_v04.png"
     }
   },
   "milo": {
     "displayName": "弥洛",
     "states": {
       "default": "assets/generated/character_states/sprites/char_milo_sprite_default_v04.png",
-      "smile": "assets/generated/character_states/sprites/char_milo_sprite_smile_v02.png",
-      "worried": "assets/generated/character_states/sprites/char_milo_sprite_worried_v02.png",
-      "serious": "assets/generated/character_states/sprites/char_milo_sprite_serious_v02.png",
-      "shocked": "assets/generated/character_states/sprites/char_milo_sprite_shocked_v02.png",
-      "special": "assets/generated/character_states/sprites/char_milo_sprite_special_v02.png"
+      "smile": "assets/generated/character_states/sprites/char_milo_sprite_smile_v04.png",
+      "worried": "assets/generated/character_states/sprites/char_milo_sprite_worried_v04.png",
+      "serious": "assets/generated/character_states/sprites/char_milo_sprite_serious_v04.png",
+      "shocked": "assets/generated/character_states/sprites/char_milo_sprite_shocked_v04.png",
+      "special": "assets/generated/character_states/sprites/char_milo_sprite_special_v04.png"
     }
   },
   "anning": {
     "displayName": "安柠",
     "states": {
-      "default": "assets/generated/character_states/sprites/char_anning_sprite_default_v02.png",
-      "smile": "assets/generated/character_states/sprites/char_anning_sprite_smile_v02.png",
-      "worried": "assets/generated/character_states/sprites/char_anning_sprite_worried_v02.png",
-      "serious": "assets/generated/character_states/sprites/char_anning_sprite_serious_v02.png",
-      "shocked": "assets/generated/character_states/sprites/char_anning_sprite_shocked_v02.png",
-      "special": "assets/generated/character_states/sprites/char_anning_sprite_special_v02.png"
+      "default": "assets/generated/character_states/sprites/char_anning_sprite_default_v04.png",
+      "smile": "assets/generated/character_states/sprites/char_anning_sprite_smile_v04.png",
+      "worried": "assets/generated/character_states/sprites/char_anning_sprite_worried_v04.png",
+      "serious": "assets/generated/character_states/sprites/char_anning_sprite_serious_v04.png",
+      "shocked": "assets/generated/character_states/sprites/char_anning_sprite_shocked_v04.png",
+      "special": "assets/generated/character_states/sprites/char_anning_sprite_special_v04.png"
     }
   },
   "ningsu": {
     "displayName": "宁溯",
     "states": {
-      "default": "assets/generated/character_states/sprites/char_ningsu_sprite_default_v02.png",
-      "smile": "assets/generated/character_states/sprites/char_ningsu_sprite_smile_v02.png",
-      "worried": "assets/generated/character_states/sprites/char_ningsu_sprite_worried_v02.png",
-      "serious": "assets/generated/character_states/sprites/char_ningsu_sprite_serious_v02.png",
-      "shocked": "assets/generated/character_states/sprites/char_ningsu_sprite_shocked_v02.png",
-      "special": "assets/generated/character_states/sprites/char_ningsu_sprite_special_v02.png"
+      "default": "assets/generated/character_states/sprites/char_ningsu_sprite_default_v04.png",
+      "smile": "assets/generated/character_states/sprites/char_ningsu_sprite_smile_v04.png",
+      "worried": "assets/generated/character_states/sprites/char_ningsu_sprite_worried_v04.png",
+      "serious": "assets/generated/character_states/sprites/char_ningsu_sprite_serious_v04.png",
+      "shocked": "assets/generated/character_states/sprites/char_ningsu_sprite_shocked_v04.png",
+      "special": "assets/generated/character_states/sprites/char_ningsu_sprite_special_v04.png"
     }
   },
   "shen_zhiwei": {
     "displayName": "沈知微",
     "states": {
-      "default": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_default_v02.png",
-      "smile": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_smile_v02.png",
-      "worried": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_worried_v02.png",
-      "serious": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_serious_v02.png",
-      "shocked": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_shocked_v02.png",
-      "special": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_special_v02.png"
+      "default": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_default_v04.png",
+      "smile": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_smile_v04.png",
+      "worried": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_worried_v04.png",
+      "serious": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_serious_v04.png",
+      "shocked": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_shocked_v04.png",
+      "special": "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_special_v04.png"
     }
   },
   "juheng": {
     "displayName": "珏衡",
     "states": {
-      "default": "assets/generated/character_states/sprites/char_juheng_sprite_default_v02.png",
-      "smile": "assets/generated/character_states/sprites/char_juheng_sprite_smile_v02.png",
-      "worried": "assets/generated/character_states/sprites/char_juheng_sprite_worried_v02.png",
-      "serious": "assets/generated/character_states/sprites/char_juheng_sprite_serious_v02.png",
-      "shocked": "assets/generated/character_states/sprites/char_juheng_sprite_shocked_v02.png",
-      "special": "assets/generated/character_states/sprites/char_juheng_sprite_special_v02.png"
+      "default": "assets/generated/character_states/sprites/char_juheng_sprite_default_v04.png",
+      "smile": "assets/generated/character_states/sprites/char_juheng_sprite_smile_v04.png",
+      "worried": "assets/generated/character_states/sprites/char_juheng_sprite_worried_v04.png",
+      "serious": "assets/generated/character_states/sprites/char_juheng_sprite_serious_v04.png",
+      "shocked": "assets/generated/character_states/sprites/char_juheng_sprite_shocked_v04.png",
+      "special": "assets/generated/character_states/sprites/char_juheng_sprite_special_v04.png"
     }
   },
   "tiya": {
     "displayName": "缇雅",
     "states": {
-      "default": "assets/generated/character_states/sprites/char_tiya_sprite_default_v02.png",
-      "smile": "assets/generated/character_states/sprites/char_tiya_sprite_smile_v02.png",
-      "worried": "assets/generated/character_states/sprites/char_tiya_sprite_worried_v02.png",
-      "serious": "assets/generated/character_states/sprites/char_tiya_sprite_serious_v02.png",
-      "shocked": "assets/generated/character_states/sprites/char_tiya_sprite_shocked_v02.png",
-      "special": "assets/generated/character_states/sprites/char_tiya_sprite_special_v02.png"
+      "default": "assets/generated/character_states/sprites/char_tiya_sprite_default_v04.png",
+      "smile": "assets/generated/character_states/sprites/char_tiya_sprite_smile_v04.png",
+      "worried": "assets/generated/character_states/sprites/char_tiya_sprite_worried_v04.png",
+      "serious": "assets/generated/character_states/sprites/char_tiya_sprite_serious_v04.png",
+      "shocked": "assets/generated/character_states/sprites/char_tiya_sprite_shocked_v04.png",
+      "special": "assets/generated/character_states/sprites/char_tiya_sprite_special_v04.png"
     }
   },
   "sequence04": {
@@ -85,6 +85,28 @@
       "serious": "assets/generated/chapter4/sprites/characters/char_ch4_sequence04_sprite_serious_v01.png",
       "shocked": "assets/generated/chapter4/sprites/characters/char_ch4_sequence04_sprite_shocked_v01.png",
       "special": "assets/generated/chapter4/sprites/characters/char_ch4_sequence04_sprite_special_v01.png"
+    }
+  },
+  "chengwu": {
+    "displayName": "??",
+    "states": {
+      "default": "assets/generated/chapter6/sprites/characters/char_ch6_chengwu_sprite_default_v01.png",
+      "smile": "assets/generated/chapter6/sprites/characters/char_ch6_chengwu_sprite_smile_v01.png",
+      "worried": "assets/generated/chapter6/sprites/characters/char_ch6_chengwu_sprite_worried_v01.png",
+      "serious": "assets/generated/chapter6/sprites/characters/char_ch6_chengwu_sprite_serious_v01.png",
+      "shocked": "assets/generated/chapter6/sprites/characters/char_ch6_chengwu_sprite_shocked_v01.png",
+      "special": "assets/generated/chapter6/sprites/characters/char_ch6_chengwu_sprite_special_v01.png"
+    }
+  },
+  "yu": {
+    "displayName": "?",
+    "states": {
+      "default": "assets/generated/chapter6/sprites/characters/char_ch6_yu_sprite_default_v01.png",
+      "smile": "assets/generated/chapter6/sprites/characters/char_ch6_yu_sprite_smile_v01.png",
+      "worried": "assets/generated/chapter6/sprites/characters/char_ch6_yu_sprite_worried_v01.png",
+      "serious": "assets/generated/chapter6/sprites/characters/char_ch6_yu_sprite_serious_v01.png",
+      "shocked": "assets/generated/chapter6/sprites/characters/char_ch6_yu_sprite_shocked_v01.png",
+      "special": "assets/generated/chapter6/sprites/characters/char_ch6_yu_sprite_special_v01.png"
     }
   }
 }

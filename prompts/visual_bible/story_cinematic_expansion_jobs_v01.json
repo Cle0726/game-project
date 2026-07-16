@@ -1,0 +1,118 @@
+{
+  "version": "1.0.0",
+  "renderFamily": "opera-painterly-anime-v1",
+  "globalProfile": "prompts/visual_bible/chapter_style_profiles_v01.json",
+  "identityManifest": "assets/references/characters/character_identity_manifest_v01.json",
+  "rules": {
+    "execution": "Generate and review one image at a time.",
+    "composition": "16:9 cinematic story illustration with a quieter lower 22 percent for dialogue UI.",
+    "identity": "Use only the listed clean identity references. Never use old green-fringed or damaged cutouts.",
+    "avoid": ["character sheet", "multiple panels", "readable text", "watermark", "UI", "face drift", "outfit redesign", "generic glowing eyes"]
+  },
+  "jobs": [
+    {
+      "id": "CG-CH00-02",
+      "chapter": 0,
+      "sceneAnchor": "childhood silent-piano memory",
+      "path": "assets/generated/chapter0/keyvisuals/cg_ch0_silent_piano_memory_v01.png",
+      "references": ["assets/generated/chapter0/backgrounds/bg_ch0_childhood_silent_piano_room_v01.png"],
+      "prompt": "A close memory of a mother's hand gently holding a child's hand above silent piano keys, rain and old city light beyond the window, faces outside frame, intimate restraint, wet charcoal burgundy violet and antique gold, the piano must remain unplayed."
+    },
+    {
+      "id": "CG-CH01-03",
+      "chapter": 1,
+      "sceneAnchor": "first stable dual-Musicart coordination",
+      "path": "assets/generated/chapter1/keyvisuals/cg_ch1_duet_coordination_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_atya_musicart_mother_v01.png", "assets/generated/chapter0/characters/char_ch0_milo_low_hum_knight_mother_v01.png", "assets/generated/chapter1/backgrounds/bg_ch1_mujian_station_platform_v01.png"],
+      "prompt": "Atya and Milo hold two distinct combat lines on a fog-soaked abandoned station platform while the unseen conductor aligns their beat, disciplined eye contact rather than a victory pose, cold fog gray and wet iron with small lamp amber accents."
+    },
+    {
+      "id": "CG-CH02-04",
+      "chapter": 2,
+      "sceneAnchor": "snow-camp confession after the tower",
+      "path": "assets/generated/chapter2/keyvisuals/cg_ch2_snow_camp_confession_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_atya_musicart_mother_v01.png", "assets/generated/chapter0/characters/char_ch0_milo_low_hum_knight_mother_v01.png", "assets/generated/chapter2/backgrounds/bg_ch2_snow_camp_night_v01.png"],
+      "prompt": "A quiet two-person confession beside a protected blue-gold fire below the frozen observatory, visible breath and aurora reflected in the ice, vulnerability without romance posing, ice blue silver white pale cyan and faint gold."
+    },
+    {
+      "id": "CG-CH02-05",
+      "chapter": 2,
+      "sceneAnchor": "Atya faces the nameless Musicart score fragment",
+      "path": "assets/generated/chapter2/keyvisuals/cg_ch2_atya_nameless_score_camp_v01.png",
+      "references": ["assets/generated/chapter0/characters/char_ch0_atya_musicart_mother_v01.png", "assets/generated/chapter2/backgrounds/bg_ch2_snow_camp_night_v01.png"],
+      "prompt": "Atya sits beside the protected blue-gold snow-camp fire holding a broken anonymous score fragment, worried that without being called by name she might also have lost her recognizable face; preserve her exact short purple hair, golden musical pupils, burgundy eye shadow, gold staff tear markings, black rose and black-burgundy-gold transformed dress; frozen observatory and aurora behind her, restrained vulnerability, no romance pose."
+    },
+    {
+      "id": "CG-CH03-04",
+      "chapter": 3,
+      "sceneAnchor": "hearing verdict turns into confrontation",
+      "path": "assets/generated/chapter3/keyvisuals/cg_ch3_hearing_verdict_break_v01.png",
+      "references": ["assets/generated/character_states/sprites/char_juheng_sprite_serious_v04.png", "assets/generated/character_states/sprites/char_shen_zhiwei_sprite_serious_v04.png"],
+      "prompt": "Inside the White Score Academy hearing chamber, Juheng and Shen Zhiwei face each other across a broken line of sealed documents as formal order fractures, measured symmetry destabilized by one diagonal beam of stained-glass light, white marble champagne gold soft violet."
+    },
+    {
+      "id": "CG-CH04-05",
+      "chapter": 4,
+      "sceneAnchor": "Sequence Four chooses to stop obeying",
+      "path": "assets/generated/chapter4/keyvisuals/cg_ch4_sequence04_first_choice_v01.png",
+      "references": ["assets/generated/chapter4/sprites/characters/char_ch4_sequence04_sprite_serious_v01.png"],
+      "prompt": "Sequence Four stands in the black-lacquer opera train organ carriage as false applause mechanisms fail around her, one hand lowering instead of executing the next command, a first visible personal choice, crimson velvet brass gold and midnight blue with textured blacks."
+    },
+    {
+      "id": "CG-CH05-04",
+      "chapter": 5,
+      "sceneAnchor": "Zero One lets Zero Four leave",
+      "path": "assets/generated/chapter5/keyvisuals/cg_ch5_zero1_releases_zero4_v01.png",
+      "references": ["assets/generated/chapter4/sprites/characters/char_ch4_sequence04_sprite_worried_v01.png"],
+      "prompt": "At the quiet circus entrance before dawn, the protective ring is opened rather than closed; Zero Four takes one uncertain step toward the road while the circus guardian remains behind under the last warm string lights, found-family tenderness with visible fear, canvas red honey gold and night indigo."
+    },
+    {
+      "id": "CG-CH06-07",
+      "chapter": 6,
+      "sceneAnchor": "ordinary repair becomes healing",
+      "path": "assets/generated/chapter6/keyvisuals/cg_ch6_waterwheel_shared_repair_v01.png",
+      "references": ["assets/generated/character_states/sprites/char_anning_sprite_smile_v04.png", "assets/generated/chapter6/backgrounds/bg_ch6_waterwheel_repair_shed_v01.png"],
+      "prompt": "Anning repairs a small waterwheel gear for no military reason while companions quietly pass tools, ordinary satisfaction as emotional recovery, golden rice fields leaf green spring cyan warm wood, breathable late-afternoon light and no heroic pose."
+    },
+    {
+      "id": "CG-CH07-05",
+      "chapter": 7,
+      "sceneAnchor": "petition passes from private archive to public hall",
+      "path": "assets/generated/chapter7/keyvisuals/cg_ch7_petition_handoff_v01.png",
+      "references": ["assets/generated/character_states/sprites/char_shen_zhiwei_sprite_worried_v04.png", "assets/generated/character_states/sprites/char_juheng_sprite_serious_v04.png"],
+      "prompt": "A sealed petition is physically handed across the boundary between the academy archive and the public hearing hall, two women with conflicting duties share the frame without reconciliation posing, white marble old gold night violet and ink blue."
+    },
+    {
+      "id": "CG-CH08-04",
+      "chapter": 8,
+      "sceneAnchor": "the repaired pocket watch starts again",
+      "path": "assets/generated/chapter8/keyvisuals/cg_ch8_pocket_watch_first_tick_v01.png",
+      "references": ["assets/generated/chapter8/backgrounds/bg_ch8_pocket_watch_repair_shelter_v01.png"],
+      "prompt": "Close cinematic moment of a repaired pocket watch making its first tick between two careful hands inside a rain-dark ticket office shelter, faces soft in the background rather than dominant, charcoal rain blue dark rose and one amber lantern."
+    },
+    {
+      "id": "CG-CH09-04",
+      "chapter": 9,
+      "sceneAnchor": "Anna eye transformation detail",
+      "path": "assets/generated/chapter9/keyvisuals/cg_ch9_anna_eye_transition_detail_v01.png",
+      "references": ["assets/references/characters/anna/anna_daily_library_identity_user_v01.png", "assets/references/characters/anna/anna_herrscher_face_user_v01.png"],
+      "prompt": "A single continuous close-up transition focused on Anna's right eye: daily clear blue iris becoming ice-blue to blue-violet with nested snowflake and musical-staff pupil rings, long sharp black liner, structured wine-red and deep-violet petal shadow, fine gold score tear line, the small beauty mark directly below the right eye remains clearly visible and unmoved."
+    },
+    {
+      "id": "CG-CH10-04",
+      "chapter": 10,
+      "sceneAnchor": "old research and ice-blade clue align",
+      "path": "assets/generated/chapter10/keyvisuals/cg_ch10_research_iceblade_alignment_v01.png",
+      "references": ["assets/generated/chapter10/keyvisuals/cg_ch10_old_residence_main_key_v01.png"],
+      "prompt": "On an old residence desk, a weathered research diagram, a broken ornament and a reflected ice-blade silhouette align into one discoverable clue, hands at the frame edge but no readable text, faded sepia dust blue winter gray and old brass."
+    },
+    {
+      "id": "CG-CH11-03",
+      "chapter": 11,
+      "sceneAnchor": "frostpass residents hold the line together",
+      "path": "assets/generated/chapter11/keyvisuals/cg_ch11_frostpass_shared_defense_v01.png",
+      "references": ["assets/generated/chapter11/keyvisuals/cg_ch11_frostpass_town_main_key_v01.png"],
+      "prompt": "Frontier residents and the traveling party reinforce a wind-battered gate together during a whiteout, practical rope timber braces and shared labor rather than a military charge, snow white weathered timber iron gray and honest hearth amber."
+    }
+  ]
+}

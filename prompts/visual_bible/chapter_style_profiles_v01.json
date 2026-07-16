@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0",
+  "renderFamily": "opera-painterly-anime-v1",
+  "global": {
+    "assetRatio": "16:9",
+    "backgroundComposition": "wide visual-novel background, human-eye camera height, clean sprite staging zones, quieter lower quarter for dialogue UI",
+    "materialLanguage": "painterly anime concept art, precise architecture, readable midtones, restrained cinematic bloom, detailed but not photorealistic",
+    "backgroundAvoid": [
+      "recognizable main characters",
+      "text or signage that must be read",
+      "watermark",
+      "UI",
+      "dead-black shadows",
+      "fisheye distortion",
+      "random modern objects",
+      "crowded foreground blocking sprite placement"
+    ]
+  },
+  "chapters": {
+    "0": { "title": "禁曲未响", "palette": ["wet charcoal", "burgundy", "violet neon", "antique gold"], "motifs": ["silent pianos", "rain", "roses", "thorns", "opera curtains", "broken clocks"], "lighting": "rainy night with warm practical lamps and readable reflected color" },
+    "1": { "title": "黑巡半响", "palette": ["fog gray", "wet iron", "muted violet", "lamp amber"], "motifs": ["railway mist", "old station clocks", "black patrol lines", "warm inn windows"], "lighting": "cold diffuse fog contrasted by small human-scale amber lights" },
+    "2": { "title": "雪谱冻响", "palette": ["ice blue", "silver white", "pale cyan", "faint gold"], "motifs": ["crystal corridors", "scientific cathedral", "frozen score lines", "aurora"], "lighting": "high-key cold light with crystalline refraction; never muddy or dead gray" },
+    "3": { "title": "白谱缚响", "palette": ["white marble", "champagne gold", "stained-glass color", "soft violet"], "motifs": ["academy sanctuary", "archive geometry", "formal hearing", "measured symmetry"], "lighting": "clear cathedral daylight with controlled gold reflections" },
+    "4": { "title": "不夜终响", "palette": ["black lacquer", "crimson velvet", "brass gold", "midnight blue"], "motifs": ["opera train", "false applause", "organ pipes", "armored carriage joints"], "lighting": "saturated practical candlelight and cold moonlit windows; blacks retain texture" },
+    "5": { "title": "浮光伶响", "palette": ["warm orange", "canvas red", "honey gold", "night indigo"], "motifs": ["traveling circus", "string lights", "trapeze silk", "found family"], "lighting": "welcoming amber bulbs with enough shadow to preserve the tension of confinement" },
+    "6": { "title": "拾光缓响", "palette": ["golden rice", "leaf green", "spring cyan", "warm wood"], "motifs": ["terraces", "hot spring mist", "ancient tree", "waterwheel", "wind chimes"], "lighting": "breathable rural daylight and warm sunset, avoiding tropical resort imagery" },
+    "7": { "title": "谱变余响", "palette": ["white marble", "old gold", "night violet", "ink blue"], "motifs": ["same academy by day and night", "petitions", "archive evidence", "public vote"], "lighting": "retain chapter 3 architecture; change only time, practical lamps and political atmosphere" },
+    "8": { "title": "续弦入响", "palette": ["rain blue", "charcoal", "campfire amber", "dark rose"], "motifs": ["ruined station", "empty seat", "campfire silence", "broken pocket watch"], "lighting": "intimate low-key frames with facial readability and deliberate negative space" },
+    "9": { "title": "暗音初响", "palette": ["storm gray", "platinum", "deep violet", "frozen blue"], "motifs": ["abandoned outpost", "cultivated authority", "farewell", "distant crystal city"], "lighting": "unnaturally still moonlight and precise platinum-violet accents" },
+    "10": { "title": "白霜远响", "palette": ["faded sepia", "dust blue", "winter gray", "old brass"], "motifs": ["old residence", "handwritten research", "maintenance records", "northbound clues"], "lighting": "soft dust-filled daylight for memories, cold moonlight for northern foreshadowing" },
+    "11": { "title": "霜隘启响", "palette": ["snow white", "weathered timber", "iron gray", "hearth amber"], "motifs": ["frontier settlement", "survival supplies", "wind-carved snow", "practical hospitality"], "lighting": "cold overcast exterior and honest amber interiors without ornamental luxury" }
+  }
+}

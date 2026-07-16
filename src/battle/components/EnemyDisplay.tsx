@@ -54,8 +54,8 @@ export function EnemyDisplay({ enemy }: EnemyDisplayProps) {
         if (!spriteRef.current || !rootRef.current) return;
         const { width, height } = app.renderer;
         elapsed += app.ticker.deltaTime / 60;
-        rootRef.current.position.set(width * 0.66, height * 0.38);
-        const baseScale = Math.min(width / 1254, height / 1254) * 0.58;
+        rootRef.current.position.set(width * 0.26, height * 0.43);
+        const baseScale = Math.min(width / 1254, height / 1254) * 0.5;
         const defeatedScale = visualStateRef.current === 'defeated' ? 0.9 : 1;
         rootRef.current.scale.set(baseScale * defeatedScale * (1 + Math.sin(elapsed * 2.2) * 0.018));
       });

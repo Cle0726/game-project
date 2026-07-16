@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "promptOrder": ["identityLock", "formLock", "eyeProfile", "expressionPose", "chapterStyle", "camera", "negativeLock"],
+  "globalRules": {
+    "identityPriority": "Character identity overrides chapter style and lighting.",
+    "stateRule": "Only expression, hand pose and small state effects may change between reusable states.",
+    "referenceRule": "Never use green-fringed, low-resolution or damaged cutouts as generation references.",
+    "temporaryUploadRule": "Copy user-provided references from temporary folders into this directory before generation."
+  },
+  "characters": {
+    "阿缇娅": {
+      "slug": "atya",
+      "tier": "core",
+      "identityReferences": ["assets/references/characters/atya/atya_identity_mother_user_v01.png", "assets/generated/chapter0/characters/char_ch0_atya_musicart_mother_v01.png"],
+      "identityLock": "young woman, compact oval face, short layered dark purple bob, gold amber eyes, unchanged nose and lip proportions, black-red-gold gothic concert dress, black rose and thorn filigree, fixed collar ornament",
+      "eyeProfiles": {
+        "daily": "gold amber iris, restrained wine-red liner, no glowing score tears",
+        "herrscher": "golden note-shaped pupil, pale violet iris shadow, sharp black-violet upper liner, layered dark-violet and burgundy rose-petal eyeshadow at the outer corner, fine gold staff lines below the eye"
+      },
+      "negativeLock": "no long hair, no blue eyes, no white dress, no changed neckline, no missing black rose, no generic smoky makeup"
+    },
+    "弥洛": { "slug": "milo", "tier": "core", "identityReferences": ["assets/generated/chapter0/characters/char_ch0_milo_low_hum_knight_mother_v01.png"], "identityLock": "young man, consistent narrow face, short dark hair, dark red and black low-hum knight coat, fixed shoulder silhouette and weapon details", "negativeLock": "no long hair, no pale academy uniform, no altered coat silhouette" },
+    "安柠": { "slug": "anning", "tier": "core", "identityReferences": ["assets/generated/chapter0/characters/char_ch0_anning_mechanic_mother_v01.png"], "identityLock": "young woman mechanic, brown hair tied back, warm brown eyes, practical white shirt, dark fitted vest and utility trousers, red tool accents", "negativeLock": "no ornate gown, no white hair, no fantasy armor, no removed tool belt" },
+    "缇雅": { "slug": "tiya", "tier": "core", "identityReferences": ["assets/generated/chapter0/characters/char_ch0_tiya_human_mother_v01.png"], "identityLock": "young woman, short dark hair, compact black-red travel outfit, fixed asymmetrical skirt and boot silhouette", "negativeLock": "no long gown, no pale hair, no blue-white uniform" },
+    "宁溯": { "slug": "ningsu", "tier": "core", "identityReferences": ["assets/generated/character_states/sprites/char_ningsu_sprite_default_v04.png"], "identityLock": "slender blue-haired woman, cold blue-silver long coat, precise scientific silhouette and crystal accents", "negativeLock": "no warm red palette, no short casual outfit, no changed hair length" },
+    "沈知微": { "slug": "shen_zhiwei", "tier": "core", "identityReferences": ["assets/generated/character_states/sprites/char_shen_zhiwei_sprite_default_v04.png"], "identityLock": "mature silver-haired adjudicator, long crimson formal robe, black-gold inner layers, composed narrow face", "negativeLock": "no white academy coat, no youthful round face, no shortened robe" },
+    "珏衡": { "slug": "juheng", "tier": "core", "identityReferences": ["assets/generated/character_states/sprites/char_juheng_sprite_default_v04.png"], "identityLock": "silver-haired order-type Musicart, white-gold long uniform, geometric accessories, straight controlled silhouette", "eyeProfile": "clear silver-gray iris with precise geometric light lines around the pupil, restrained liner, emotionally focused rather than empty", "negativeLock": "no rose-petal eyeshadow, no black-red gothic dress, no hollow silent-sequence eyes" },
+    "零四": {
+      "slug": "sequence04",
+      "tier": "core",
+      "identityReferences": ["assets/generated/chapter4/sprites/characters/char_ch4_sequence04_sprite_default_v01.png"],
+      "identityLock": "slender silver-haired girl, layered white feather-like dress, same youthful face and translucent blade-like ribbons",
+      "eyeProfiles": { "silent": "silver-gray nearly empty iris with a tiny fading dark-gold ember, no ornate eyeshadow", "recovered": "dark-gold warmth returning from the pupil outward, softened lower-lid reflection" },
+      "negativeLock": "no dark hair, no black armor, no mature face, no rose-petal makeup"
+    },
+    "澄芜": { "slug": "chengwu", "tier": "recurring", "identityReferences": ["assets/generated/chapter6/characters/char_ch6_chengwu_mother_v01_source_magenta.png"], "identityLock": "middle-aged rural healer, long brown hair, layered practical green-brown dress and shawl", "negativeLock": "no palace gown, no short hair, no armor" },
+    "屿": { "slug": "yu", "tier": "recurring", "identityReferences": ["assets/generated/chapter6/characters/char_ch6_yu_mother_v01_source_green.png"], "identityLock": "young man, messy black hair, muted blue-gray rural travel clothes, worn baton case", "negativeLock": "no military uniform, no bright aristocratic coat, no long hair" },
+    "安娜": {
+      "slug": "anna",
+      "tier": "major",
+      "identityReferences": {
+        "daily": ["assets/references/characters/anna/anna_daily_library_identity_user_v01.png", "assets/references/characters/anna/anna_daily_train_identity_user_v01.png"],
+        "herrscher": ["assets/references/characters/anna/anna_herrscher_fullbody_user_v01.png", "assets/references/characters/anna/anna_herrscher_face_user_v01.png", "assets/references/characters/anna/anna_herrscher_seated_identity_user_v01.png"]
+      },
+      "sharedFaceLock": "same elegant adult face, vivid blue-family eyes, small beauty mark directly below the right eye, fixed eye spacing, nose and lip shape",
+      "forms": {
+        "daily": "orange-red high ponytail, long bangs, blue eyes, large gold hoop earrings, black choker, practical dark jacket or blouse; never transformed gown",
+        "herrscher": "deep crimson long loose hair fading into cool lavender at the ends, snow-star hair ornament, black-gold star-net halter gown, translucent cool-violet drapes; never orange high ponytail"
+      },
+      "eyeProfiles": {
+        "daily": "clear blue iris, restrained black liner, natural warm shadow, right-eye beauty mark unobstructed",
+        "herrscher": "ice-blue to blue-violet luminous iris, nested snowflake and fine musical-staff pupil rings, long sharp black winged liner, structured wine-red and deep-violet rose-petal eyeshadow at the outer corner, fine gold dust and a narrow score-like tear line below the lower lashes, right-eye beauty mark still clearly visible"
+      },
+      "negativeLock": "no missing beauty mark, no pure red iris, no generic smoky eye, no swapping daily and transformed hair, no changing hoop earrings in daily form, no changing snow-star ornament or star-net gown in herrscher form"
+    }
+  }
+}

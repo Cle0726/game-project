@@ -1,0 +1,751 @@
+{
+  "generatedAt": "2026-07-14T08:02:59.436Z",
+  "chapters": [
+    {
+      "chapter": 0,
+      "sceneCount": 22,
+      "uniqueBackgrounds": 14,
+      "candidates": [
+        {
+          "id": "ch0_013_forbidden_performance",
+          "score": 12,
+          "reasons": [
+            "决定"
+          ],
+          "currentBackground": "ch0AbandonedTheaterStage",
+          "currentBackgroundPath": "assets/generated/chapter0/backgrounds/bg_ch0_abandoned_theater_stage_v01.png",
+          "description": "旧剧场舞台上，诺伊倒在旧钢琴旁，手里还抓着乐谱。卡戎暗中放大静默场，镇民的声音被进一步抽走。缇雅坐到钢琴前，决定完成无声旋律的最后一拍。"
+        },
+        {
+          "id": "ch0_017_stage_crawler",
+          "score": 10,
+          "reasons": [
+            "残响"
+          ],
+          "currentBackground": "ch0AbandonedTheaterStage",
+          "currentBackgroundPath": "assets/generated/chapter0/backgrounds/bg_ch0_abandoned_theater_stage_v01.png",
+          "description": "舞台爬行者从幕布后拖着节拍器核心爬出。弥洛站在钟声残响边缘，低鸣像一堵无形墙，暂时替你们挡住塌落的舞台。"
+        },
+        {
+          "id": "ch0_018_teabreak_not_tiya",
+          "score": 10,
+          "reasons": [
+            "intimate-scene"
+          ],
+          "currentBackground": "ch0MianshaTownSquare",
+          "currentBackgroundPath": "assets/generated/chapter0/backgrounds/bg_ch0_miansha_town_square_piano_v01.png",
+          "description": "餐馆避难所里，阿缇娅盯着一杯热水超过十分钟。安柠让她喝，她说自己不需要补充水分。你看着她，看得太久，久到她先指出了这件事。"
+        },
+        {
+          "id": "ch0_003_old_piano",
+          "score": 8,
+          "reasons": [],
+          "currentBackground": "ch0MianshaTownSquare",
+          "currentBackgroundPath": "assets/generated/chapter0/backgrounds/bg_ch0_miansha_town_square_piano_v01.png",
+          "description": "琴键没有真正落下，琴槌却在琴箱里微微颤动。你忽然明白：这架钢琴不是不会响，而是一直在忍着不响。"
+        },
+        {
+          "id": "ch0_007_voiceless_morning",
+          "score": 8,
+          "reasons": [],
+          "currentBackground": "ch0MianshaTownSquare",
+          "currentBackgroundPath": "assets/generated/chapter0/backgrounds/bg_ch0_miansha_town_square_piano_v01.png",
+          "description": "第二天清晨，眠沙镇没有任何声音。老人张着嘴却发不出声，孩子哭得满脸通红，哭声却没有传出来。"
+        },
+        {
+          "id": "ch0_008_map_open",
+          "score": 8,
+          "reasons": [],
+          "currentBackground": "ch0MianshaTownSquare",
+          "currentBackgroundPath": "assets/generated/chapter0/backgrounds/bg_ch0_miansha_town_square_piano_v01.png",
+          "description": "地图探索开放：钟楼、唱片店、旧剧场、广场旧钢琴、餐馆避难所、废弃学校、乐器行、镇长办公室、地下排水道。拖延过久，静默场会加深。"
+        }
+      ]
+    },
+    {
+      "chapter": 1,
+      "sceneCount": 47,
+      "uniqueBackgrounds": 14,
+      "candidates": [
+        {
+          "id": "ch1_black_010",
+          "score": 20,
+          "reasons": [
+            "第一次",
+            "残响"
+          ],
+          "currentBackground": "ch1StationInnDiningDawn",
+          "currentBackgroundPath": "assets/generated/chapter1/backgrounds/bg_ch1_station_inn_dining_dawn_v01.png",
+          "description": "翌日清晨，浓雾第一次出现短暂稀薄。柯婆婆把一枚吊坠碎片塞进你手里，像把一个名字托付给你。"
+        },
+        {
+          "id": "ch1_black_013",
+          "score": 20,
+          "reasons": [
+            "第一次",
+            "残响"
+          ],
+          "currentBackground": "ch1StationInnDiningDawn",
+          "currentBackgroundPath": "assets/generated/chapter1/backgrounds/bg_ch1_station_inn_dining_dawn_v01.png",
+          "description": "翌日清晨，浓雾第一次出现短暂稀薄。柯婆婆把一枚吊坠碎片塞进你手里，像把一个名字托付给你。安柠把零四的断裂节拍器、巡逻日志残页和吊坠碎片逐一封存。"
+        },
+        {
+          "id": "ch1_black_014",
+          "score": 19,
+          "reasons": [
+            "母亲"
+          ],
+          "currentBackground": "ch1MujianStationPlatform",
+          "currentBackgroundPath": "assets/generated/chapter1/backgrounds/bg_ch1_mujian_station_platform_v01.png",
+          "description": "车队准备离开雾茧站时，站台广播忽然自行启动。卡戎的声音清晰得可怕：你们手上那半枚吊坠的另一半，我这里恰好也有一片。"
+        },
+        {
+          "id": "ch1_side_atya_dinner",
+          "score": 16,
+          "reasons": [
+            "第一次",
+            "intimate-scene"
+          ],
+          "currentBackground": "ch1StationInnWarm",
+          "currentBackgroundPath": "assets/generated/chapter1/backgrounds/bg_ch1_station_inn_warm_v01.png",
+          "description": "雾稍散的傍晚，阿缇娅第一次主动提议去吃点东西。她不需要进食，却认真计算着缇雅活着时在这种光线里吃过多少顿饭。"
+        },
+        {
+          "id": "ch1_side_milo_score",
+          "score": 16,
+          "reasons": [
+            "intimate-scene"
+          ],
+          "currentBackground": "ch1MujianStationPlatform",
+          "currentBackgroundPath": "assets/generated/chapter1/backgrounds/bg_ch1_mujian_station_platform_v01.png",
+          "description": "深夜，弥洛独自在候车室临摹零四掉落的乐谱碎片。雾贴着窗玻璃，像一层听不见的伴奏。"
+        },
+        {
+          "id": "chapter1_start",
+          "score": 16,
+          "reasons": [
+            "Boss",
+            "决定"
+          ],
+          "currentBackground": "ch1MujianRoad",
+          "currentBackgroundPath": "assets/generated/chapter1/backgrounds/bg_ch1_mujian_road_rain_v01.png",
+          "description": "雨后公路还没完全干。第零章Boss战掉落的【默令残页】被安柠重新摊开，残页边缘那半枚白色吊坠图案，与缇雅遗物上的花纹严丝合缝地重叠在一起。你们决定沿着卡戎留下的路线，前往雾茧站。"
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "sceneCount": 41,
+      "uniqueBackgrounds": 15,
+      "candidates": [
+        {
+          "id": "ch2_007_institute",
+          "score": 18,
+          "reasons": [
+            "决定"
+          ],
+          "currentBackground": "silentCore",
+          "currentBackgroundPath": "assets/generated/backgrounds/bg_silent_core_tuning_fork_v02.png",
+          "description": "你决定原地封存音叉核心。白金色封印纹沿着裂口一圈圈收紧，银色脉动终于慢下来，像被迫回到一份旧规章里。"
+        },
+        {
+          "id": "ch2_snow_010_a",
+          "score": 16,
+          "reasons": [
+            "第一次"
+          ],
+          "currentBackground": "ch2CoreChamber",
+          "currentBackgroundPath": "assets/generated/chapter2/backgrounds/bg_ch2_core_recording_chamber_v01.png",
+          "description": "结局一：信任移交。宁溯主动开启核心舱，全程陪同讲解。她把权限钥匙递出时，指尖第一次没有发抖。"
+        },
+        {
+          "id": "ch2_side_ningsu_camp",
+          "score": 14,
+          "reasons": [
+            "第一次",
+            "加入",
+            "intimate-scene"
+          ],
+          "currentBackground": "ch2SnowCampNight",
+          "currentBackgroundPath": "assets/generated/chapter2/backgrounds/bg_ch2_snow_camp_night_v01.png",
+          "description": "宁溯正式加入后的第一次营地夜谈，她坐得很端正，像连吃饭都还在遵守封存设施的轮值表。"
+        },
+        {
+          "id": "ch2_snow_011",
+          "score": 14,
+          "reasons": [
+            "残响"
+          ],
+          "currentBackground": "ch2CoreChamber",
+          "currentBackgroundPath": "assets/generated/chapter2/backgrounds/bg_ch2_core_recording_chamber_v01.png",
+          "description": "核心舱内部比外面更安静。中央的残响记录仪覆着薄冰，待机灯却仍按四拍明灭，像有人把一段不敢寄出的留言保存到了今天。"
+        },
+        {
+          "id": "ch2_002_memory",
+          "score": 13,
+          "reasons": [
+            "承认",
+            "intimate-scene"
+          ],
+          "currentBackground": "graystringDusk",
+          "currentBackgroundPath": "assets/generated/backgrounds/bg_graystring_gallery_v02.png",
+          "description": "明弦的目光在槐序的舞鞋与扇骨之间停了一瞬，像是看见了一支她不愿承认熟悉的旧曲。"
+        },
+        {
+          "id": "ch2_005",
+          "score": 12,
+          "reasons": [],
+          "currentBackground": "silentCore",
+          "currentBackgroundPath": "assets/generated/backgrounds/bg_silent_core_tuning_fork_v02.png",
+          "description": "长廊最深处的圆形广场里，中央矗立着一座倾颓的巨型音叉雕塑。它曾经高耸入云，如今从中段折断，断口渗出近乎液态的银色光，规律地脉动，像一颗仍在跳动、却已经认不出自己心跳节奏的心脏。"
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "sceneCount": 34,
+      "uniqueBackgrounds": 14,
+      "candidates": [
+        {
+          "id": "ch3_white_008_high",
+          "score": 21,
+          "reasons": [
+            "第一次",
+            "听证"
+          ],
+          "currentBackground": "ch3HearingChamber",
+          "currentBackgroundPath": "assets/generated/chapter3/backgrounds/bg_ch3_hearing_chamber_v01.png",
+          "description": "高倾向听证：温别克和柏舟的证词让礼堂第一次出现真正的停顿。沈知微把结论从看管改为附条件通过。"
+        },
+        {
+          "id": "ch3_white_013",
+          "score": 21,
+          "reasons": [
+            "第一次",
+            "听证"
+          ],
+          "currentBackground": "ch3ReceptionHall",
+          "currentBackgroundPath": "assets/generated/chapter3/backgrounds/bg_ch3_reception_hall_v01.png",
+          "description": "听证结果尘埃落定后，沈知微单独召见主角与阿缇娅。她没有改变制度，却第一次改变了自己审视制度的方式。"
+        },
+        {
+          "id": "ch3_side_atya_form",
+          "score": 17,
+          "reasons": [
+            "听证",
+            "intimate-scene"
+          ],
+          "currentBackground": "ch3ReceptionHall",
+          "currentBackgroundPath": "assets/generated/chapter3/backgrounds/bg_ch3_reception_hall_v01.png",
+          "description": "听证结束后的夜晚，阿缇娅在窗边写着什么。彩窗光落在纸上，像一张终于留白的表格。"
+        },
+        {
+          "id": "ch3_white_011",
+          "score": 16,
+          "reasons": [
+            "选择"
+          ],
+          "currentBackground": "ch3HearingChamber",
+          "currentBackgroundPath": "assets/generated/chapter3/backgrounds/bg_ch3_hearing_chamber_v01.png",
+          "description": "战斗结束后，珏衡收起审谱杖。她不是被击败，而是在亲眼看见阿缇娅收手的那一刻，选择把所见如实写进报告。"
+        },
+        {
+          "id": "ch3_minigame_hearing_statement",
+          "score": 15,
+          "reasons": [
+            "听证"
+          ],
+          "currentBackground": "ch3ReceptionHall",
+          "currentBackgroundPath": "assets/generated/chapter3/backgrounds/bg_ch3_reception_hall_v01.png",
+          "description": "听证陈述编排：你需要从一路收集的证据中选出最能递进的顺序，让制度先看见事实，再看见事实背后的人。"
+        },
+        {
+          "id": "ch3_white_001",
+          "score": 15,
+          "reasons": [
+            "听证"
+          ],
+          "currentBackground": "ch3ReceptionHall",
+          "currentBackgroundPath": "assets/generated/chapter3/backgrounds/bg_ch3_reception_hall_v01.png",
+          "description": "接待处的流程比想象中顺畅，直到行政人员的目光落在阿缇娅身上。她被要求佩戴一枚素净的银色临时观察徽章。"
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "sceneCount": 29,
+      "uniqueBackgrounds": 9,
+      "candidates": [
+        {
+          "id": "ch4_013",
+          "score": 21,
+          "reasons": [
+            "终战",
+            "第一次"
+          ],
+          "currentBackground": "ch4CoreOrganChamber",
+          "currentBackgroundPath": "assets/generated/chapter4/backgrounds/bg_ch4_core_organ_chamber_v01.png",
+          "description": "最终战前，所有曾被这条主线牵引的人站在不同位置。有人准备战斗，有人准备作证，有人第一次准备停下鼓掌。"
+        },
+        {
+          "id": "ch4_003",
+          "score": 19,
+          "reasons": [
+            "救"
+          ],
+          "currentBackground": "ch4AudienceCar",
+          "currentBackgroundPath": "assets/generated/chapter4/backgrounds/bg_ch4_audience_car_v01.png",
+          "description": "在众多相似面容里，弥洛第一个认出那道带着断裂节拍器痕迹的身影。零四维持着固定鼓掌姿态，眼中暗金色光几乎熄灭。"
+        },
+        {
+          "id": "ch4_005",
+          "score": 19,
+          "reasons": [
+            "救"
+          ],
+          "currentBackground": "ch4AudienceCar",
+          "currentBackgroundPath": "assets/generated/chapter4/backgrounds/bg_ch4_audience_car_v01.png",
+          "description": "阿缇娅没有拔出指挥棒，只是伸出手，覆在零四冰凉的手背上。唤醒不是命令，而是一场很慢、很轻的合奏。"
+        },
+        {
+          "id": "chapter4_event_E401",
+          "score": 19,
+          "reasons": [
+            "救"
+          ],
+          "currentBackground": "ch4AudienceCar",
+          "currentBackgroundPath": "assets/generated/chapter4/backgrounds/bg_ch4_audience_car_v01.png",
+          "description": "E401 · 观众席逐一辨认。绯红座椅间，静默序列像被摆成一场永不散场的谢幕。"
+        },
+        {
+          "id": "chapter4_event_E402",
+          "score": 19,
+          "reasons": [
+            "救"
+          ],
+          "currentBackground": "ch4AudienceCar",
+          "currentBackgroundPath": "assets/generated/chapter4/backgrounds/bg_ch4_audience_car_v01.png",
+          "description": "E402 · 赤的车厢角落。她没有鼓掌，也没有逃跑，只是持续对着空座独奏。"
+        },
+        {
+          "id": "chapter4_event_minigame_audience_identify",
+          "score": 19,
+          "reasons": [
+            "救"
+          ],
+          "currentBackground": "ch4AudienceCar",
+          "currentBackgroundPath": "assets/generated/chapter4/backgrounds/bg_ch4_audience_car_v01.png",
+          "description": "小游戏 · 观众席辨认挑战。根据节拍延迟、眼部残光和手腕刻痕判断谁仍保有反应。"
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "sceneCount": 23,
+      "uniqueBackgrounds": 8,
+      "candidates": [
+        {
+          "id": "ch5_011",
+          "score": 22,
+          "reasons": [
+            "选择",
+            "决定"
+          ],
+          "currentBackground": "ch5FloatingCircusCamp",
+          "currentBackgroundPath": "assets/generated/chapter5/backgrounds/bg_ch5_floating_circus_camp_v01.png",
+          "description": "浮光马戏团外围，零一深吸一口气，转向小雀。她的声音罕见地带着不确定。"
+        },
+        {
+          "id": "ch5_006",
+          "score": 12,
+          "reasons": [
+            "Boss"
+          ],
+          "currentBackground": "ch5MainTentInterior",
+          "currentBackgroundPath": "assets/generated/chapter5/backgrounds/bg_ch5_main_tent_interior_v01.png",
+          "description": "零四怔怔地看着眼前这位前辈。暖橙灯光落在两人眼中，一边像家，一边像还没拆掉的枷锁。"
+        },
+        {
+          "id": "ch5_008",
+          "score": 12,
+          "reasons": [
+            "Boss"
+          ],
+          "currentBackground": "ch5MainTentInterior",
+          "currentBackgroundPath": "assets/generated/chapter5/backgrounds/bg_ch5_main_tent_interior_v01.png",
+          "description": "零一的目光扫过主角一行，语气骤然锐利。暖灯仍然亮着，光却忽然有了边界。"
+        },
+        {
+          "id": "ch5_010",
+          "score": 12,
+          "reasons": [
+            "第一次"
+          ],
+          "currentBackground": "ch5BackstagePropWorkshop",
+          "currentBackgroundPath": "assets/generated/chapter5/backgrounds/bg_ch5_backstage_prop_workshop_v01.png",
+          "description": "战斗后的主帐篷里，道具散落一地。零一跌坐在暖光边缘，第一次露出与外表年龄不符的疲惫。"
+        },
+        {
+          "id": "ch5_001",
+          "score": 10,
+          "reasons": [],
+          "currentBackground": "ch5FloatingCircusCamp",
+          "currentBackgroundPath": "assets/generated/chapter5/backgrounds/bg_ch5_floating_circus_camp_v01.png",
+          "description": "队伍远远看见那片温暖的光：巨大的红橙色帆布帐篷缠满暖黄色串灯，热闹的手绘海报在风里轻轻晃动。"
+        },
+        {
+          "id": "ch5_002",
+          "score": 10,
+          "reasons": [],
+          "currentBackground": "ch5FloatingCircusCamp",
+          "currentBackgroundPath": "assets/generated/chapter5/backgrounds/bg_ch5_floating_circus_camp_v01.png",
+          "description": "入口处，一对活力四射的搭档热情迎来。卓玛笑得爽朗，风铃则从半空丝绸上倒挂下来，像一阵被灯光染暖的风。"
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "sceneCount": 17,
+      "uniqueBackgrounds": 12,
+      "candidates": [
+        {
+          "id": "ch6_000",
+          "score": 4,
+          "reasons": [],
+          "currentBackground": "ch6ShiguangVillageEstablishing",
+          "currentBackgroundPath": "assets/generated/chapter6/backgrounds/bg_ch6_shiguang_village_establishing_v01.png",
+          "description": "拾光村全景。金色梯田层层叠起，木屋、温泉、古树和风铃组成了一个不问来路的庇护地。"
+        },
+        {
+          "id": "ch6_001",
+          "score": 4,
+          "reasons": [],
+          "currentBackground": "ch6HotSpringTalk",
+          "currentBackgroundPath": "assets/generated/chapter6/backgrounds/bg_ch6_hot_spring_talk_v01.png",
+          "description": "温泉边，澄芜告诉零四：康复不是变成别人期待的样子，而是重新拥有“随便”的权利。"
+        },
+        {
+          "id": "chapter6_event_E601",
+          "score": 4,
+          "reasons": [],
+          "currentBackground": "ch6HotSpringTalk",
+          "currentBackgroundPath": "assets/generated/chapter6/backgrounds/bg_ch6_hot_spring_talk_v01.png",
+          "description": "E601 · 温泉边的闲谈。村民只给片语，不要求玩家审判他们的来路。"
+        },
+        {
+          "id": "chapter6_event_E602",
+          "score": 4,
+          "reasons": [],
+          "currentBackground": "ch6ShiguangVillageEstablishing",
+          "currentBackgroundPath": "assets/generated/chapter6/backgrounds/bg_ch6_shiguang_village_establishing_v01.png",
+          "description": "E602 · 梯田劳作体验。没有战斗、没有阴谋，只有修好坏掉的东西。"
+        },
+        {
+          "id": "chapter6_event_E603",
+          "score": 4,
+          "reasons": [],
+          "currentBackground": "ch6ShiguangVillageEstablishing",
+          "currentBackgroundPath": "assets/generated/chapter6/backgrounds/bg_ch6_shiguang_village_establishing_v01.png",
+          "description": "E603 · 老树的往事。拾光村并非没有伤口，而是学会了不再互相伤害。"
+        },
+        {
+          "id": "chapter6_event_E604",
+          "score": 4,
+          "reasons": [],
+          "currentBackground": "ch6HotSpringTalk",
+          "currentBackgroundPath": "assets/generated/chapter6/backgrounds/bg_ch6_hot_spring_talk_v01.png",
+          "description": "E604 · 澄芜的过去。她也曾在“我是谁”这件事上挣扎很多年。"
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "sceneCount": 38,
+      "uniqueBackgrounds": 11,
+      "candidates": [
+        {
+          "id": "ch7_006",
+          "score": 16,
+          "reasons": [],
+          "currentBackground": "ch7NightHall",
+          "currentBackgroundPath": "assets/generated/chapter7/backgrounds/bg_ch7_white_score_night_hall_v01.png",
+          "description": "青禾展示完整统计样本：临时看管的负面后果并非少数异常。"
+        },
+        {
+          "id": "ch7_015",
+          "score": 16,
+          "reasons": [],
+          "currentBackground": "ch7NightHall",
+          "currentBackgroundPath": "assets/generated/chapter7/backgrounds/bg_ch7_white_score_night_hall_v01.png",
+          "description": "安柠截获内部调度：崔敬手下将以例行整理为由转移青禾关键统计资料。"
+        },
+        {
+          "id": "ch7_016",
+          "score": 16,
+          "reasons": [],
+          "currentBackground": "ch7NightHall",
+          "currentBackgroundPath": "assets/generated/chapter7/backgrounds/bg_ch7_white_score_night_hall_v01.png",
+          "description": "夜间礼堂里，卫队奉命阻止“干扰正常档案管理程序”的行为，但命令本身已经露出裂缝。"
+        },
+        {
+          "id": "ch7_017",
+          "score": 16,
+          "reasons": [],
+          "currentBackground": "ch7NightHall",
+          "currentBackgroundPath": "assets/generated/chapter7/backgrounds/bg_ch7_white_score_night_hall_v01.png",
+          "description": "战斗后，年轻队员拒绝继续执行可疑命令，监察队内部发生分裂。"
+        },
+        {
+          "id": "ch7_018",
+          "score": 16,
+          "reasons": [],
+          "currentBackground": "ch7NightHall",
+          "currentBackgroundPath": "assets/generated/chapter7/backgrounds/bg_ch7_white_score_night_hall_v01.png",
+          "description": "珏衡开口，判断今晚的命令不属于秩序，而属于应被制止的越权。"
+        },
+        {
+          "id": "ch7_020",
+          "score": 16,
+          "reasons": [],
+          "currentBackground": "ch7NightHall",
+          "currentBackgroundPath": "assets/generated/chapter7/backgrounds/bg_ch7_white_score_night_hall_v01.png",
+          "description": "大会前夜，白谱院灯火通明。所有人都在以自己的方式，与明天的自己提前打招呼。"
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "sceneCount": 31,
+      "uniqueBackgrounds": 8,
+      "candidates": [
+        {
+          "id": "ch8_002",
+          "score": 22,
+          "reasons": [],
+          "currentBackground": "ch8CampfireNight",
+          "currentBackgroundPath": "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png",
+          "description": "入夜后，安柠与零四守着火堆。她们没有谈宏大的制度，只谈今天谁先把湿柴点着。"
+        },
+        {
+          "id": "ch8_003",
+          "score": 22,
+          "reasons": [],
+          "currentBackground": "ch8CampfireNight",
+          "currentBackgroundPath": "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png",
+          "description": "篝火旁的沉默没有尴尬。有人修怀表，有人擦枪，有人只是把视线移开又移回来。"
+        },
+        {
+          "id": "ch8_010",
+          "score": 22,
+          "reasons": [],
+          "currentBackground": "ch8CampfireNight",
+          "currentBackgroundPath": "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png",
+          "description": "卓玛与风铃赶来支援，带来旧站地形图和一包被雨淋湿的糖。"
+        },
+        {
+          "id": "ch8_016",
+          "score": 22,
+          "reasons": [],
+          "currentBackground": "ch8CampfireNight",
+          "currentBackgroundPath": "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png",
+          "description": "零四注意到赤收起琴弓时的小动作，与缇雅曾经教她的“先确认自己安全”几乎一样。"
+        },
+        {
+          "id": "chapter8_event_E802",
+          "score": 22,
+          "reasons": [],
+          "currentBackground": "ch8CampfireNight",
+          "currentBackgroundPath": "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png",
+          "description": "E802 · 屿与弥洛的对谈。弥洛提醒屿，不要把亏欠伪装成温柔。"
+        },
+        {
+          "id": "chapter8_event_E805",
+          "score": 22,
+          "reasons": [],
+          "currentBackground": "ch8CampfireNight",
+          "currentBackgroundPath": "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png",
+          "description": "E805 · 零四与安柠的手作时光。两人把旧站捡到的铜线做成小小护符。"
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "sceneCount": 25,
+      "uniqueBackgrounds": 11,
+      "candidates": [
+        {
+          "id": "ch9_003",
+          "score": 22,
+          "reasons": [],
+          "currentBackground": "ch8CampfireNight",
+          "currentBackgroundPath": "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png",
+          "description": "暴风雨前的宁静里，主角与阿缇娅/弥洛的隐性关系又向前一步。"
+        },
+        {
+          "id": "chapter9_event_E905",
+          "score": 22,
+          "reasons": [],
+          "currentBackground": "ch8CampfireNight",
+          "currentBackgroundPath": "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png",
+          "description": "E905 · 弥洛与辞照的对照沉思。弥洛谈起“完整的自我是否比破碎的自我更幸运”。"
+        },
+        {
+          "id": "chapter9_event_E904",
+          "score": 17,
+          "reasons": [
+            "母亲"
+          ],
+          "currentBackground": "ch9AbandonedOutpostArchive",
+          "currentBackgroundPath": "assets/generated/chapter9/backgrounds/bg_ch9_abandoned_outpost_archive_v01.png",
+          "description": "E904 · 玄鸦调查笔记残页。疑似记录着主角母亲离开零号奏者计划后的第一步。"
+        },
+        {
+          "id": "ch9_001",
+          "score": 12,
+          "reasons": [],
+          "currentBackground": "ch9AbandonedOutpostArchive",
+          "currentBackgroundPath": "assets/generated/chapter9/backgrounds/bg_ch9_abandoned_outpost_archive_v01.png",
+          "description": "禁曲派残部旧据点里，岚第一反应是护在岐身前，随即露出疲惫的苦笑。"
+        },
+        {
+          "id": "ch9_002",
+          "score": 12,
+          "reasons": [],
+          "currentBackground": "ch9AbandonedOutpostArchive",
+          "currentBackgroundPath": "assets/generated/chapter9/backgrounds/bg_ch9_abandoned_outpost_archive_v01.png",
+          "description": "众人协助岐与岚筛出会牵连无辜者的旧档案，焚毁真正危险的名单。"
+        },
+        {
+          "id": "ch9_006",
+          "score": 12,
+          "reasons": [
+            "第一次"
+          ],
+          "currentBackground": "ch9OutpostEntranceStillNight",
+          "currentBackgroundPath": "assets/generated/chapter9/backgrounds/bg_ch9_outpost_entrance_still_night_v01.png",
+          "description": "辞照以近乎排练过千百次的优雅动作展开战斗姿态。队伍第一次面对“无法力敌”的存在。"
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "sceneCount": 35,
+      "uniqueBackgrounds": 12,
+      "candidates": [
+        {
+          "id": "story_qi_01",
+          "score": 22,
+          "reasons": [],
+          "currentBackground": "ch8CampfireNight",
+          "currentBackgroundPath": "assets/generated/chapter8/backgrounds/bg_ch8_campfire_unspoken_night_v01.png",
+          "description": "岐把那枚手工饰品放在掌心。火光从饰品断面擦过，像在替另一半仍未抵达的人留一盏灯。"
+        },
+        {
+          "id": "ch10_001",
+          "score": 20,
+          "reasons": [
+            "选择"
+          ],
+          "currentBackground": "ch10NorthboundTransitCamp",
+          "currentBackgroundPath": "assets/generated/chapter10/backgrounds/bg_ch10_northbound_transit_camp_v01.png",
+          "description": "出发前，零四主动承担起物资清点。她的动作熟练得不像是几个月前那个连选择都要人引导的存在。"
+        },
+        {
+          "id": "chapter10_event_E1005",
+          "score": 20,
+          "reasons": [
+            "第一次"
+          ],
+          "currentBackground": "ch10NorthboundTransitCamp",
+          "currentBackgroundPath": "assets/generated/chapter10/backgrounds/bg_ch10_northbound_transit_camp_v01.png",
+          "description": "E1005 · 零四的成长印记。零四整理这一路的成长记录，第一次主动说出自己认为重要的瞬间。"
+        },
+        {
+          "id": "ch10_006",
+          "score": 19,
+          "reasons": [
+            "母亲"
+          ],
+          "currentBackground": "ch10MotherOldStudy",
+          "currentBackgroundPath": "assets/generated/chapter10/backgrounds/bg_ch10_mother_old_study_v01.png",
+          "description": "旧书房积尘已久，声波草图、泛黄笔记与一处半开的暗格，拼出母亲曾经独自研究的方向。"
+        },
+        {
+          "id": "chapter10_event_E1001",
+          "score": 19,
+          "reasons": [
+            "母亲"
+          ],
+          "currentBackground": "ch10MotherOldStudy",
+          "currentBackgroundPath": "assets/generated/chapter10/backgrounds/bg_ch10_mother_old_study_v01.png",
+          "description": "E1001 · 老宅阁楼。找到母亲年轻时期的一件私人物品：一枚与主角吊坠花纹相似的旧发簪。"
+        },
+        {
+          "id": "chapter10_event_minigame_old_notes",
+          "score": 19,
+          "reasons": [
+            "母亲"
+          ],
+          "currentBackground": "ch10MotherOldStudy",
+          "currentBackgroundPath": "assets/generated/chapter10/backgrounds/bg_ch10_mother_old_study_v01.png",
+          "description": "旧笔记辨读：从母亲潦草的手稿中辨认“备用解法”“北方聚落”“不需要濒死就能共鸣”等关键词。"
+        }
+      ]
+    },
+    {
+      "chapter": 11,
+      "sceneCount": 46,
+      "uniqueBackgrounds": 12,
+      "candidates": [
+        {
+          "id": "ch11_006",
+          "score": 20,
+          "reasons": [],
+          "currentBackground": "ch11SnowridgeAmbush",
+          "currentBackgroundPath": "assets/generated/chapter11/backgrounds/bg_ch11_snowridge_ambush_v01.png",
+          "description": "外围猎场里，猎户双子阿雁与阿霜带来雪原游荡者活动范围扩大的警告。"
+        },
+        {
+          "id": "ch11_011",
+          "score": 20,
+          "reasons": [],
+          "currentBackground": "ch11SnowridgeAmbush",
+          "currentBackgroundPath": "assets/generated/chapter11/backgrounds/bg_ch11_snowridge_ambush_v01.png",
+          "description": "雪原游荡者杂兵从岩脊后围出。他们是拿着武器的普通人，也是被绝境推到这里的人。"
+        },
+        {
+          "id": "ch11_012",
+          "score": 20,
+          "reasons": [],
+          "currentBackground": "ch11SnowridgeAmbush",
+          "currentBackgroundPath": "assets/generated/chapter11/backgrounds/bg_ch11_snowridge_ambush_v01.png",
+          "description": "队伍沿溃退路线找到游荡者临时营地。一个身影正在雪脊上重新布置防线。"
+        },
+        {
+          "id": "ch11_013",
+          "score": 20,
+          "reasons": [],
+          "currentBackground": "ch11SnowridgeAmbush",
+          "currentBackgroundPath": "assets/generated/chapter11/backgrounds/bg_ch11_snowridge_ambush_v01.png",
+          "description": "破站在风口，拼凑武器压在肩上。他的眼神没有胜券在握，只有退无可退。"
+        },
+        {
+          "id": "ch11_014",
+          "score": 20,
+          "reasons": [],
+          "currentBackground": "ch11SnowridgeAmbush",
+          "currentBackgroundPath": "assets/generated/chapter11/backgrounds/bg_ch11_snowridge_ambush_v01.png",
+          "description": "破的武器垂了下来。胜负已定，真正的问题变成如何结束这场冲突。"
+        },
+        {
+          "id": "ch11_018",
+          "score": 20,
+          "reasons": [],
+          "currentBackground": "ch11SnowridgeAmbush",
+          "currentBackgroundPath": "assets/generated/chapter11/backgrounds/bg_ch11_snowridge_ambush_v01.png",
+          "description": "岐站在镇外飞雪中，想起小时候和岚挤在一起取暖的冬天。"
+        }
+      ]
+    }
+  ]
+}

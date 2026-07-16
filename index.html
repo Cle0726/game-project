@@ -9,9 +9,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>宿命回响：残响之途</title>
+  <link rel="stylesheet" href="src/styles/design-tokens.css?v=ui-remaster-20260713">
   <link rel="stylesheet" href="style.css?v=base-20260703">
   <link rel="stylesheet" href="responsive-overrides.css?v=responsive-20260703">
   <link rel="stylesheet" href="gacha_overhaul.css">
+  <link rel="stylesheet" href="ui-remaster.css?v=ui-remaster-20260713">
   <!-- VFX ENGINE DEPENDENCIES -->
   <!-- ═══ HEAD: 外部依赖 (GSAP/PixiJS/SplitType/vfx.js) ═══ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -121,6 +123,36 @@
               <img src="assets/generated/chapter_covers/cover_ch4_nightless_finale_v01.png" alt="不夜终响">
               <span>Chapter IV · 路线D</span>
               <strong>不夜终响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter5_start">
+              <img src="assets/generated/chapter5/keyvisuals/cg_ch5_floating_circus_main_key_v01.png" alt="浮光伶响">
+              <span>Chapter V · 自由篇章</span>
+              <strong>浮光伶响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter7_start">
+              <img src="assets/generated/chapter7/keyvisuals/cg_ch7_academy_reform_hearing_key_v01.png" alt="谱变余响">
+              <span>Chapter VII · 自由篇章</span>
+              <strong>谱变余响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter8_start">
+              <img src="assets/generated/chapter8/keyvisuals/cg_ch8_yu_chi_new_contract_key_v01.png" alt="续弦入响">
+              <span>Chapter VIII · 自由篇章</span>
+              <strong>续弦入响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter9_start">
+              <img src="assets/generated/chapter9/keyvisuals/cg_ch9_lan_farewell_key_v02.png" alt="暗音初响">
+              <span>Chapter IX · 自由篇章</span>
+              <strong>暗音初响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter10_start">
+              <img src="assets/generated/chapter10/keyvisuals/cg_ch10_old_residence_main_key_v01.png" alt="白霜远响">
+              <span>Chapter X · 自由篇章</span>
+              <strong>白霜远响</strong>
+            </button>
+            <button type="button" class="entry-gallery-card" data-entry-scene="chapter11_start">
+              <img src="assets/generated/chapter11/keyvisuals/cg_ch11_frostpass_town_main_key_v01.png" alt="霜隘启响">
+              <span>Chapter XI · 自由篇章</span>
+              <strong>霜隘启响</strong>
             </button>
             <button type="button" class="entry-gallery-card" data-entry-scene="chapter3_archive_start">
               <img src="assets/generated/chapter_covers/cover_ch3_legacy_archive_v01.png" alt="第三章旧案合辑">
@@ -356,22 +388,22 @@
         </div>
         <div class="ai-settings-content">
           <p class="ai-settings-desc">
-            输入 DeepSeek API 密钥以启用 AI 实时对话。密钥仅保存在本地浏览器中，不会上传到任何服务器。
+            AI 实时对话由后端代理调用 DeepSeek。请在服务器环境变量 <code>DEEPSEEK_API_KEY</code> 中配置密钥；浏览器端不再保存 API 密钥。
           </p>
           <div class="ai-settings-input-group">
-            <label for="deepseek-api-key-input">API 密钥</label>
-            <input type="password" id="deepseek-api-key-input" placeholder="sk-xxxxxxxxxxxxxxxx" autocomplete="off">
+            <label for="deepseek-api-key-input">后端密钥状态</label>
+            <input type="password" id="deepseek-api-key-input" placeholder="由服务器环境变量管理" autocomplete="off" disabled>
           </div>
           <div class="ai-settings-status">
             <span id="ai-status-text">当前状态：未启用</span>
           </div>
           <div class="ai-settings-actions">
-            <button type="button" id="save-api-key-button" class="team-confirm-button">保存密钥</button>
-            <button type="button" id="clear-api-key-button" class="team-secondary-button">清除密钥</button>
+            <button type="button" id="save-api-key-button" class="team-confirm-button" disabled>密钥由后端管理</button>
+            <button type="button" id="clear-api-key-button" class="team-secondary-button">清除本地遗留密钥</button>
             <button type="button" id="clear-chat-history-button" class="team-secondary-button">清除对话历史</button>
           </div>
           <p class="ai-settings-note">
-            提示：启用后，茶歇对话将使用 DeepSeek AI 生成实时回复。如果 API 调用失败，会自动回退到本地预设对话。
+            提示：茶歇对话会优先请求本地后端；如果后端未配置 DeepSeek 或 API 调用失败，会自动回退到本地预设对话。
           </p>
         </div>
       </section>
@@ -536,4 +568,3 @@
   <script src="gacha_overhaul.js"></script>
 </body>
 </html>
-
