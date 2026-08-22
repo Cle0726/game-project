@@ -4,34 +4,35 @@ import {
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
 } from './archiveRegionData';
+import {
+  createRegionRegistry,
+  type SceneRegionEntry,
+} from '../simulation/exploration/RegionSystem';
 
-export interface ExplorationSceneEntry {
-  sceneId: string;
-  region: ExplorationRegionDefinition;
-}
+export type ExplorationSceneEntry = SceneRegionEntry<ExplorationRegionDefinition>;
 
 const REGIONS = [
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
+] as const;
+
+const SCENE_ENTRIES: ExplorationSceneEntry[] = [
+  { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
+  { sceneId: 'ch3_white_003', region: WHITE_ACADEMY_ARCHIVE_MILO_REGION },
+  { sceneId: 'ch3_white_004', region: WHITE_ACADEMY_ARCHIVE_ANNING_REGION },
 ];
 
-const REGION_BY_ID = new Map(REGIONS.map((region) => [region.id, region]));
-
-const ENTRY_BY_SCENE_ID = new Map<string, ExplorationSceneEntry>([
-  ['chapter3_white_start', { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION }],
-  ['ch3_white_003', { sceneId: 'ch3_white_003', region: WHITE_ACADEMY_ARCHIVE_MILO_REGION }],
-  ['ch3_white_004', { sceneId: 'ch3_white_004', region: WHITE_ACADEMY_ARCHIVE_ANNING_REGION }],
-]);
+const registry = createRegionRegistry(REGIONS, SCENE_ENTRIES, PROTOTYPE_REGION.id);
 
 export function getExplorationRegion(regionId: string): ExplorationRegionDefinition | undefined {
-  return REGION_BY_ID.get(regionId);
+  return registry.getRegion(regionId);
 }
 
 export function getExplorationEntry(sceneId: string): ExplorationSceneEntry | undefined {
-  return ENTRY_BY_SCENE_ID.get(sceneId);
+  return registry.getSceneEntry(sceneId);
 }
 
 export function getDefaultExplorationRegion(): ExplorationRegionDefinition {
-  return PROTOTYPE_REGION;
+  return registry.getDefaultRegion();
 }

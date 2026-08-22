@@ -1,6 +1,17 @@
-export function findQuestById<T extends { id: string }>(items: T[] | undefined, id: string | undefined): T | undefined {
-  if (!id) return undefined;
-  return items?.find((item) => item.id === id);
+import {
+  completeQuest as completeSimulationQuest,
+  findQuestById as findSimulationQuestById,
+} from '../simulation/quest/QuestSystem';
+
+/**
+ * Legacy compatibility wrappers.
+ * New quest transition rules live under src/simulation/quest/QuestSystem.ts.
+ */
+export function findQuestById<T extends { id: string }>(
+  items: T[] | undefined,
+  id: string | undefined,
+): T | undefined {
+  return findSimulationQuestById(items, id);
 }
 
 export function completeQuest(
@@ -9,14 +20,14 @@ export function completeQuest(
   completedQuestIds: string[],
   completedQuestId: string | undefined,
 ): { activeQuestId?: string; completedQuestIds: string[]; changed: boolean } {
-  if (!completedQuestId || activeQuestId !== completedQuestId || completedQuestIds.includes(completedQuestId)) {
-    return { activeQuestId, completedQuestIds, changed: false };
-  }
-
-  const quest = quests?.find((item) => item.id === completedQuestId);
+  const result = completeSimulationQuest(
+    quests,
+    { activeQuestId, completedQuestIds },
+    completedQuestId,
+  );
   return {
-    activeQuestId: quest?.nextQuestId,
-    completedQuestIds: [...completedQuestIds, completedQuestId],
-    changed: true,
+    activeQuestId: result.activeQuestId,
+    completedQuestIds: result.completedQuestIds,
+    changed: result.changed,
   };
 }

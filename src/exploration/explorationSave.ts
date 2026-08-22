@@ -1,3 +1,9 @@
+import {
+  loadRegionExplorationSnapshot,
+  saveRegionExplorationSnapshot,
+} from '../simulation/state/SimulationPersistence';
+import { getSimulationRuntime } from '../simulation/runtime/SimulationRuntime';
+
 export interface ExplorationSaveState {
   version: 1;
   regionId: string;
@@ -8,34 +14,31 @@ export interface ExplorationSaveState {
   npcPositions: Record<string, { x: number; y: number }>;
 }
 
-const STORAGE_KEY = 'cle.exploration.verticalSlice.v1';
-
 export function loadExplorationSave(regionId: string): ExplorationSaveState | undefined {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return undefined;
-    const parsed = JSON.parse(raw) as Partial<ExplorationSaveState>;
-    if (parsed.version !== 1 || parsed.regionId !== regionId) return undefined;
-    if (!parsed.playerPosition || typeof parsed.clockMinute !== 'number') return undefined;
-
-    return {
-      version: 1,
-      regionId,
-      playerPosition: parsed.playerPosition,
-      clockMinute: parsed.clockMinute,
-      activeQuestId: parsed.activeQuestId,
-      completedQuestIds: Array.isArray(parsed.completedQuestIds) ? parsed.completedQuestIds : [],
-      npcPositions: parsed.npcPositions ?? {},
-    };
-  } catch {
-    return undefined;
-  }
+  const snapshot = loadRegionExplorationSnapshot(regionId);
+  if (!snapshot) return undefined;
+  return {
+    version: 1,
+    ...snapshot,
+  };
 }
 
 export function saveExplorationState(state: ExplorationSaveState): void {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // Exploration persistence is additive; storage failure must not stop the game.
+  const newlyCompletedQuestIds = saveRegionExplorationSnapshot(state);
+  if (!newlyCompletedQuestIds.length) return;
+
+  const runtime = getSimulationRuntime();
+  const simulationState = runtime.start();
+  const issuedAt =
+    Math.max(0, simulationState.clock.day - 1) * 1440 + simulationState.clock.minuteOfDay;
+
+  for (const questId of newlyCompletedQuestIds) {
+    runtime.commands.dispatch({
+      type: 'quest.complete',
+      source: 'player',
+      actorId: 'player',
+      issuedAt,
+      payload: { questId },
+    });
   }
 }

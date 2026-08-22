@@ -1,9 +1,11 @@
 import type { Sprite } from 'pixi.js';
+import {
+  createActorMotionState as createSimulationActorMotionState,
+  stepActorMotion,
+  type ActorMotionState,
+} from '../simulation/exploration/ActorMotionSystem';
 
-export interface ActorMotionState {
-  phase: number;
-  facingX: -1 | 1;
-}
+export type { ActorMotionState } from '../simulation/exploration/ActorMotionSystem';
 
 export interface ActorMotionInput {
   dx: number;
@@ -13,12 +15,14 @@ export interface ActorMotionInput {
   baseScale: number;
 }
 
-const WALK_CYCLES_PER_SECOND = 2.7;
-
 export function createActorMotionState(): ActorMotionState {
-  return { phase: 0, facingX: 1 };
+  return createSimulationActorMotionState();
 }
 
+/**
+ * Legacy Pixi adapter. Motion math lives in ActorMotionSystem; this file only
+ * applies the calculated pose to the current Sprite implementation.
+ */
 export function updateActorMotion(
   sprite: Sprite | undefined,
   state: ActorMotionState,
@@ -26,27 +30,19 @@ export function updateActorMotion(
 ): void {
   if (!sprite) return;
 
-  if (Math.abs(input.dx) > 0.001) {
-    state.facingX = input.dx < 0 ? -1 : 1;
-  }
+  const pose = stepActorMotion(state, input);
 
   if (!input.isMoving) {
-    state.phase = 0;
-    sprite.y += (0 - sprite.y) * Math.min(1, input.deltaSeconds * 12);
-    sprite.rotation += (0 - sprite.rotation) * Math.min(1, input.deltaSeconds * 12);
-    sprite.scale.set(input.baseScale * state.facingX, input.baseScale);
-    return;
+    const smoothing = Math.min(1, Math.max(0, input.deltaSeconds) * 12);
+    sprite.y += (pose.offsetY - sprite.y) * smoothing;
+    sprite.rotation += (pose.rotation - sprite.rotation) * smoothing;
+  } else {
+    sprite.y = pose.offsetY;
+    sprite.rotation = pose.rotation;
   }
 
-  state.phase += input.deltaSeconds * Math.PI * 2 * WALK_CYCLES_PER_SECOND;
-  const stride = Math.sin(state.phase);
-  const bounce = Math.abs(Math.sin(state.phase));
-  const leanDirection = Math.abs(input.dx) > Math.abs(input.dy) ? Math.sign(input.dx) : 0;
-
-  sprite.y = -bounce * 5;
-  sprite.rotation = stride * 0.018 + leanDirection * 0.012;
   sprite.scale.set(
-    input.baseScale * state.facingX * (1 + bounce * 0.012),
-    input.baseScale * (1 - bounce * 0.018),
+    input.baseScale * pose.scaleXFactor,
+    input.baseScale * pose.scaleYFactor,
   );
 }
