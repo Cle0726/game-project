@@ -10,6 +10,7 @@ export class SimulationRuntime {
   readonly commands = new CommandBus();
   readonly events = this.commands.events;
   private running = false;
+  private destroyed = false;
   private disposeCoreCommands: () => void;
 
   constructor() {
@@ -17,6 +18,10 @@ export class SimulationRuntime {
   }
 
   start(): SimulationStateV1 {
+    if (this.destroyed) {
+      throw new Error('SimulationRuntime.start(): runtime has been destroyed');
+    }
+
     const state = getOrCreateSimulationStateV1();
     if (!this.running) {
       this.running = true;
@@ -39,20 +44,31 @@ export class SimulationRuntime {
     return this.running;
   }
 
+  get isDestroyed(): boolean {
+    return this.destroyed;
+  }
+
   get state(): SimulationStateV1 {
+    if (this.destroyed) {
+      throw new Error('SimulationRuntime.state: runtime has been destroyed');
+    }
     return readSimulationStateV1() ?? this.start();
   }
 
   destroy(): void {
+    if (this.destroyed) return;
     this.stop();
     this.disposeCoreCommands();
     this.commands.clear();
+    this.destroyed = true;
   }
 }
 
 let sharedRuntime: SimulationRuntime | undefined;
 
 export function getSimulationRuntime(): SimulationRuntime {
-  sharedRuntime ??= new SimulationRuntime();
+  if (!sharedRuntime || sharedRuntime.isDestroyed) {
+    sharedRuntime = new SimulationRuntime();
+  }
   return sharedRuntime;
 }
