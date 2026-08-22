@@ -18,7 +18,9 @@ interface LegacyFreeRoamInputShape {
 }
 
 /** Transitional bridge that moves keyboard state/semantics out of FreeRoamPrototype. */
-export function wireLegacyFreeRoamInput(runtime: FreeRoamPrototype): void {
+export function wireLegacyFreeRoamInput(
+  runtime: FreeRoamPrototype,
+): ExplorationInputController {
   const legacy = runtime as unknown as LegacyFreeRoamInputShape;
   const input = new ExplorationInputController();
   legacy.keys = input.pressedKeys;
@@ -60,4 +62,6 @@ export function wireLegacyFreeRoamInput(runtime: FreeRoamPrototype): void {
     window.addEventListener('keydown', legacy.onKeyDown);
     window.addEventListener('keyup', legacy.onKeyUp);
   };
+
+  return input;
 }
