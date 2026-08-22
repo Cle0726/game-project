@@ -24,11 +24,10 @@ const REGIONS = [
 ] as const;
 
 const SCENE_ENTRIES: ExplorationSceneEntry[] = [
-  // Chapter 0 keeps its authored opening cinematic. We intercept only the moments
-  // where the canonical scene asks the player to physically investigate or travel.
-  { sceneId: 'ch0_001', region: CH0_MIANSHA_ALLEY_REGION },
-  { sceneId: 'ch0_003', region: CH0_MIANSHA_ALLEY_REGION },
-  { sceneId: 'ch0_004', region: CH0_MIANSHA_PIANO_SQUARE_REGION },
+  // Keep chapter0_start and all authored choices intact. Exploration replaces only
+  // the physical arrival at town and the walk up to the sealed piano.
+  { sceneId: 'ch0_001_road_entrance', region: CH0_MIANSHA_ALLEY_REGION },
+  { sceneId: 'ch0_002_silent_town', region: CH0_MIANSHA_PIANO_SQUARE_REGION },
 
   // Existing chapter-3 regression slices remain registered against the same runtime.
   { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
