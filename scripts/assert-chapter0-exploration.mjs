@@ -9,47 +9,79 @@ const game = read('game.js');
 const registry = read('src/exploration/regionRegistry.ts');
 const chapter0 = read('src/exploration/chapter0RegionData.ts');
 
-for (const sceneId of ['ch0_001', 'ch0_003', 'ch0_004']) {
-  assert(game.includes(sceneId), `Canonical scene ${sceneId} must exist in game.js`);
-  assert(registry.includes(`sceneId: '${sceneId}'`), `${sceneId} must be registered as an exploration bridge`);
+const canonicalBridgeScenes = [
+  'ch0_001_road_entrance',
+  'ch0_002_silent_town',
+];
+
+for (const sceneId of canonicalBridgeScenes) {
+  // Require the exact SCENES object key, not a loose substring. This prevents stale
+  // aliases such as ch0_001 from accidentally matching ch0_001_road_entrance.
+  assert(
+    game.includes(`"${sceneId}": {`),
+    `Canonical scene ${sceneId} must exist as an exact SCENES key in game.js`,
+  );
+  assert(
+    registry.includes(`sceneId: '${sceneId}'`),
+    `${sceneId} must be registered as an exploration bridge`,
+  );
+}
+
+for (const staleSceneId of ["sceneId: 'ch0_001'", "sceneId: 'ch0_003'", "sceneId: 'ch0_004'"]) {
+  assert(!registry.includes(staleSceneId), `Stale chapter-0 bridge must be removed: ${staleSceneId}`);
 }
 
 for (const assetPath of [
   'assets/generated/chapter0/backgrounds/bg_ch0_miansha_residential_alley_v01.png',
   'assets/generated/chapter0/backgrounds/bg_ch0_miansha_town_square_piano_v01.png',
-  'assets/generated/character_states/sprites/char_anning_sprite_default_v04.png',
-  'assets/generated/character_states/sprites/char_tiya_sprite_default_v04.png',
+  'assets/generated/chapter0/sprites/characters/char_ch0_anning_sprite_default_v02.png',
+  'assets/generated/chapter0/sprites/characters/char_ch0_tiya_sprite_default_ai_v01.png',
+  'assets/generated/chapter0/sprites/characters/char_ch0_noi_sprite_default_v03.png',
 ]) {
   assert(exists(assetPath), `Missing chapter-0 exploration asset: ${assetPath}`);
 }
 
 for (const questId of [
-  'ch0_inspect_silent_alley',
-  'ch0_follow_tiya_to_square',
-  'ch0_reach_old_piano',
+  'ch0_reach_road_entrance',
+  'ch0_reach_sealed_piano',
 ]) {
   assert(chapter0.includes(`id: '${questId}'`), `Missing quest ${questId}`);
 }
 
-for (const zoneId of ['ch0-metal-plate', 'ch0-town-exit', 'ch0-old-piano']) {
-  const matches = chapter0.match(new RegExp(`id: '${zoneId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'`, 'g')) ?? [];
-  // Each main target appears once in the quest target and once as the interaction zone.
-  assert(matches.length >= 2, `Quest target ${zoneId} must resolve to an interaction zone`);
+for (const zoneId of ['ch0-road-entrance', 'ch0-sealed-piano']) {
+  const targetUse = chapter0.includes(`target: { type: 'zone', id: '${zoneId}' }`);
+  const zoneUse = chapter0.includes(`id: '${zoneId}',`);
+  assert(targetUse && zoneUse, `Quest target ${zoneId} must resolve to an interaction zone`);
 }
 
-const waypointLinkTargets = [
-  'alley_entry', 'alley_mid', 'metal_plate', 'anning_wait', 'tiya_wait', 'town_exit',
-  'square_entry', 'square_mid', 'old_piano', 'square_west', 'square_east',
-];
-for (const waypointId of waypointLinkTargets) {
+for (const waypointId of [
+  'alley_entry',
+  'alley_mid',
+  'anning_wait',
+  'tiya_wait',
+  'road_entrance',
+  'square_entry',
+  'square_mid',
+  'sealed_piano',
+  'noi_wait',
+  'anning_square',
+  'tiya_square',
+]) {
   assert(chapter0.includes(`id: '${waypointId}'`), `Missing waypoint ${waypointId}`);
 }
 
-assert(chapter0.includes("nextQuestId: 'ch0_follow_tiya_to_square'"), 'Alley tutorial quest chain must advance to town-centre travel');
-assert(chapter0.includes("storySceneId: 'ch0_001'"), 'Metal plate must return to canonical ch0_001');
-assert(chapter0.includes("storySceneId: 'ch0_003'"), 'Town exit must return to canonical ch0_003');
-assert(chapter0.includes("storySceneId: 'ch0_004'"), 'Old piano must return to canonical ch0_004');
-assert(!chapter0.includes('DeepSeek') && !chapter0.includes('OpenAI'), 'Chapter 0 first slice must remain LLM OFF');
+assert(
+  chapter0.includes("storySceneId: 'ch0_001_road_entrance'"),
+  'Road entrance must return to canonical ch0_001_road_entrance',
+);
+assert(
+  chapter0.includes("storySceneId: 'ch0_002_silent_town'"),
+  'Sealed piano must return to canonical ch0_002_silent_town',
+);
+assert(
+  !chapter0.includes('DeepSeek') && !chapter0.includes('OpenAI'),
+  'Chapter 0 first slice must remain LLM OFF',
+);
 
 if (failures.length) {
   console.error('Chapter 0 exploration guard failed:');
