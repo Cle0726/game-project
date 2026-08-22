@@ -2,92 +2,76 @@
 
 > 状态：设计冻结候选（2026-08-22）
 >
-> 目标：在不推倒现有 `game.js / SCENES / BATTLES / TeaBreak / WorldMap` 的前提下，把自由探索升级为可支撑第 0～11 章、NPC 日程、关系、记忆、信息传播和后续 LLM Agent 的正式 Simulation Runtime。
+> 目标：保留现有 `game.js / SCENES / BATTLES / TeaBreak / WorldMap` Canonical Runtime，在外层建立可支撑第 0～11 章自由探索、NPC 模拟与后续 Agent 的 Simulation Runtime。
 
-## 核心原则
+## 四条硬规则
 
 1. AI 不拥有世界真相。
 2. AI 不直接执行动作。
 3. AI 不直接修改剧情 Flag、关系数值、奖励、战斗结果或坐标。
-4. AI 只提出结构化 Interpretation / Intent，游戏规则负责验证与执行。
+4. AI 只提出结构化 Interpretation / Intent，规则系统负责验证与执行。
 
 ```text
 Player / Story / Agent Intent
-          ↓
-      GameCommand
-          ↓
-    CommandValidator
-          ↓
-        Reducer
-          ↓
-   Canonical Game State
-          ↓
-      WorldEvent
-          ↓
-Quest / Story / Witness / Memory / Relationship / Agent
+→ GameCommand
+→ CommandValidator
+→ State mutation
+→ WorldEvent
+→ Quest / Story / Witness / Memory / Relationship / Agent
 ```
 
-## Canonical Runtime
+## Canonical 与 Simulation
 
-`game.js` 继续承担 `GameState / SCENES / choices / BATTLES / TeaBreak / save / showScene / goToScene`。Phase A 不做全量 TypeScript 重写。
+`game.js` 继续承担 `GameState / SCENES / choices / BATTLES / TeaBreak / save / showScene / goToScene`。Phase A 不进行全量 TypeScript 重写。
 
-`src/exploration-legacy-main.ts` 只作为旧剧情入口与新 `ExplorationRuntime` 之间的迁移桥。
+新状态唯一挂载在 `window.GameState.simulationV1`，保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。
 
-## SimulationStateV1
-
-唯一新状态容器：`window.GameState.simulationV1`。
-
-保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。
-
-旧 `cle.exploration.verticalSlice.v1` 只保留一次迁移兼容；正式探索数据进入主存档。
+旧 `cle.exploration.verticalSlice.v1` 只做一次迁移，之后探索数据进入现有主存档体系。
 
 ## Command / Event
 
-```text
-GameCommand → CommandValidator → Handler → SimulationStateV1 → WorldEvent
-```
-
-当前核心命令：`region.enter / exploration.return_point.set / quest.complete`。
+当前命令：`region.enter / exploration.return_point.set / quest.complete`。
 
 当前事件：`region.entered / exploration.return_point_set / quest.completed`。
 
-`source: agent` 被代码规则禁止直接完成 Quest。
+`source: agent` 被 Validator 明确禁止直接完成 Quest。
 
-## ExplorationRuntime
+## Stable ExplorationRuntime
 
-章节/WorldMap 入口只依赖 `src/simulation/exploration/ExplorationRuntime.ts`。
+章节和 WorldMap 入口只依赖：
+
+```text
+src/simulation/exploration/ExplorationRuntime.ts
+```
+
+当前迁移链：
 
 ```text
 legacy scene entry
-      ↓
-ExplorationRuntime
-      ↓
-FreeRoamPrototype compatibility shell
-      ↓
-formal Simulation / Presentation modules
+→ ExplorationRuntime
+→ FreeRoamPrototype compatibility shell
+→ formal Simulation / Presentation modules
 ```
 
-`FreeRoamPrototype` 是待删除兼容壳，不作为未来章节开发 API。
+`FreeRoamPrototype` 仅是 Phase A 待删除兼容壳，不再是未来章节开发 API。
 
-### 已接入 live runtime 的确定性系统
+## 已接入实际玩法的确定性系统
 
 `NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`
 
-### 已接入 live runtime 的 Renderer / Presentation
+## 已接入实际玩法的 Presentation
 
 `ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`
 
-负责 Camera/HUD layout、地图背景/fallback/debug overlay、玩家/NPC Sprite、HUD、地图内对话、Quest marker/highlight。
+已经接管 Camera/HUD layout、地图背景与 debug overlay、玩家/NPC Sprite、HUD、地图对话、Quest marker/highlight。
 
-这些模块都已通过 `ExplorationRuntime` 接管当前第三章切片。
-
-## Phase A Migration Adapters
+## 迁移 Adapter
 
 `LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`
 
-只用于迁移期。正式 Loop/Renderer 完成后整体删除。
+这些 Adapter 只用于 Phase A 保持第三章现有切片稳定；正式 Loop/Renderer 完成后全部删除。
 
-## Compatibility shell 剩余职责
+## Compatibility shell 目前只剩
 
 ```text
 Keyboard input lifecycle
@@ -99,31 +83,29 @@ periodic persistence trigger
 Pixi Application lifecycle
 ```
 
-下一阶段建立 `InputController + ExplorationLoop`，然后移除 `FreeRoamPrototype`。
-
-## Story / AI 边界
-
-剧情分 `Canonical Beat / Authored Dynamic Beat / Emergent Beat`。
-
-Fast Loop 永不调用 LLM；Simulation Loop 主要使用 TypeScript 规则；Cognitive Loop 只在重要事件异步调用模型。
-
-模型允许输出 `dialogue / interpretation / intent / mood`，不得输出 `relationship delta / canonical flag / quest completion / reward / battle result / coordinates`。
-
-Relationship / Emotion / Knowledge / Memory 保持分离；Memory append-only。
-
-## NPC LOD
+下一阶段：
 
 ```text
-L0 玩家附近：完整模拟
-L1 同区域离镜：简化模拟
-L2 其他区域：离屏时间片 / TravelState
-L3 Dormant：只结算必要日程
+InputController
+→ ExplorationLoop / NPC orchestration
+→ Story/Exit lifecycle cleanup
+→ remove FreeRoamPrototype
 ```
+
+之后正式从 `chapter0_start` 开始第0章自由移动改造。
+
+## AI 后续边界
+
+剧情保持 `Canonical Beat / Authored Dynamic Beat / Emergent Beat` 分层。Fast Loop 永不调用 LLM；Simulation Loop 主要是 TypeScript 规则；Cognitive Loop 只在重要事件异步调用模型。
+
+模型只允许输出 `dialogue / interpretation / intent / mood`，不得输出 `relationship delta / canonical flag / quest completion / reward / battle result / coordinates`。
+
+Relationship / Emotion / Knowledge / Memory 分离，Memory append-only。
+
+NPC 后续使用 L0～L3 Simulation LOD；离屏 NPC 不逐帧寻路。
 
 ## Phase A checkpoint
 
-已完成并接入 live runtime：状态、存档、Command/Event、导航、Quest、时钟、日程、Region、运动、碰撞、Interaction、World/Actor/HUD/Dialogue/Objective Presentation、稳定 `ExplorationRuntime` 边界与 architecture guard。
+当前已经完成并接入 live runtime：SimulationState、Persistence、Command/Event、导航、Quest、Clock、Schedule、Region、ActorMotion、Collision、Movement、Interaction、World/Actor/HUD/Dialogue/Objective Presentation、稳定 `ExplorationRuntime` 边界和 architecture guard。
 
-下一步：`InputController → ExplorationLoop/NPC orchestration → Story/Exit lifecycle cleanup → remove FreeRoamPrototype`。
-
-之后正式从 `chapter0_start` 开始第0章自由移动改造。第0章第一阶段保持 **LLM OFF**。
+第0章第一阶段保持 **LLM OFF**，先保证玩法、存档、回滚、剧情桥和战斗返回可靠。
