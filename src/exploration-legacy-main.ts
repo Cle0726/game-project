@@ -127,22 +127,26 @@ async function enterExploration(
   });
 
   const savedPosition = simulationRuntime.state.regions[region.id]?.playerPosition;
-  simulationRuntime.commands.dispatch({
-    type: 'region.enter',
-    source,
-    actorId: 'player',
-    issuedAt: getIssuedAt(),
-    payload: {
-      regionId: region.id,
-      playerPosition: savedPosition ? { ...savedPosition } : { ...region.playerSpawn },
-    },
-  });
 
   try {
     await runtime.mount(host);
+
+    // Record entry only after the Pixi region is successfully mounted. A failed load
+    // must never leave a canonical "region.entered" event behind.
+    simulationRuntime.commands.dispatch({
+      type: 'region.enter',
+      source,
+      actorId: 'player',
+      issuedAt: getIssuedAt(),
+      payload: {
+        regionId: region.id,
+        playerPosition: savedPosition ? { ...savedPosition } : { ...region.playerSpawn },
+      },
+    });
   } catch (error) {
     console.error(`[exploration] failed to mount region ${region.id}`, error);
     destroyRuntime();
+    window.gamePhase = 'main_story';
     if (fallbackSceneId) {
       callOriginalScene(fallbackSceneId);
     } else {
