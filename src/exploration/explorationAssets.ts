@@ -1,8 +1,8 @@
 export const WHITE_ACADEMY_PLAZA_ASSETS = {
   // Dedicated walkable plaza background generated for the live exploration slice.
-  // The SVG embeds a compressed copy of the approved concept so the current GitHub
-  // connector can commit it as UTF-8 text. A full-resolution WebP can replace this
-  // path later without changing exploration runtime code.
+  // The committed SVG embeds a compressed copy of the approved concept so the current
+  // GitHub connector can store the artwork as UTF-8 text. A full-resolution WebP can
+  // replace this path later without changing exploration runtime code.
   backgroundSrc: '/assets/generated/exploration/white-academy-plaza/bg_white_academy_plaza_v01.svg',
   fullResolutionTarget: '/assets/generated/exploration/white-academy-plaza/bg_white_academy_plaza_v01.webp',
   protagonistMaleSrc: '/assets/generated/characters/char_protagonist_rinche_male_default_v01.png',
