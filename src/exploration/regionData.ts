@@ -10,7 +10,7 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
   assets: {
     backgroundSrc: WHITE_ACADEMY_PLAZA_ASSETS.backgroundSrc,
     playerSpriteSrc: WHITE_ACADEMY_PLAZA_ASSETS.protagonistFallbackSrc,
-    playerSpriteScale: 0.19,
+    playerSpriteScale: 1,
   },
   collisionZones: [
     { id: 'academy-north-wing', x: 250, y: 90, width: 690, height: 300 },
@@ -19,10 +19,10 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
     { id: 'south-garden', x: 430, y: 1110, width: 700, height: 210 },
   ],
   waypoints: [
-    { id: 'south_entry', position: { x: 1120, y: 990 }, links: ['plaza_center', 'garden_east'] },
+    { id: 'south_entry', position: { x: 1120, y: 990 }, links: ['plaza_center', 'garden_east', 'atya_rest'] },
     { id: 'garden_east', position: { x: 1260, y: 1080 }, links: ['south_entry', 'east_lower'] },
     { id: 'plaza_center', position: { x: 1110, y: 790 }, links: ['south_entry', 'fountain_east', 'east_lower'] },
-    { id: 'fountain_east', position: { x: 910, y: 760 }, links: ['plaza_center', 'north_center'] },
+    { id: 'fountain_east', position: { x: 910, y: 760 }, links: ['plaza_center', 'north_center', 'atya_rest'] },
     { id: 'north_center', position: { x: 1110, y: 560 }, links: ['fountain_east', 'academy_gate', 'east_upper'] },
     { id: 'academy_gate', position: { x: 1510, y: 520 }, links: ['north_center', 'east_upper'] },
     { id: 'east_upper', position: { x: 1480, y: 700 }, links: ['academy_gate', 'north_center', 'east_lower', 'milo_patrol'] },
@@ -72,7 +72,7 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
       position: { x: 930, y: 990 },
       speed: 95,
       spriteSrc: WHITE_ACADEMY_PLAZA_ASSETS.atyaSrc,
-      spriteScale: 0.18,
+      spriteScale: 1,
       interactionText: '按 E 与阿缇娅交谈',
       schedule: [
         { minuteOfDay: 480, targetWaypointId: 'atya_rest', activity: '观察白谱院' },
@@ -87,7 +87,7 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
       position: { x: 1500, y: 940 },
       speed: 105,
       spriteSrc: WHITE_ACADEMY_PLAZA_ASSETS.miloSrc,
-      spriteScale: 0.18,
+      spriteScale: 1,
       interactionText: '按 E 与弥洛交谈',
       questCompleteId: 'find_milo',
       schedule: [
