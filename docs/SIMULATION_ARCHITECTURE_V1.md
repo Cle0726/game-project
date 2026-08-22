@@ -38,13 +38,7 @@ Player / Story / Agent Intent
 
 ## Stable ExplorationRuntime
 
-章节和 WorldMap 入口只依赖：
-
-```text
-src/simulation/exploration/ExplorationRuntime.ts
-```
-
-当前迁移链：
+章节和 WorldMap 入口只依赖 `src/simulation/exploration/ExplorationRuntime.ts`。
 
 ```text
 legacy scene entry
@@ -55,33 +49,25 @@ legacy scene entry
 
 `FreeRoamPrototype` 仅是 Phase A 待删除兼容壳，不再是未来章节开发 API。
 
-## 已接入实际玩法的确定性系统
+## 已接入 live runtime 的确定性系统
 
 `NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`
 
-## 已接入实际玩法的 Presentation
+## 已接入 live runtime 的 Presentation
 
 `ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`
 
 已经接管 Camera/HUD layout、地图背景与 debug overlay、玩家/NPC Sprite、HUD、地图对话、Quest marker/highlight。
 
-## 迁移 Adapter
+## Phase A 迁移 Adapter
 
 `LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`
 
-这些 Adapter 只用于 Phase A 保持第三章现有切片稳定；正式 Loop/Renderer 完成后全部删除。
+只用于保持当前第三章切片稳定；正式 Loop/Renderer 完成后全部删除。
 
-## Compatibility shell 目前只剩
+## Compatibility shell 剩余职责
 
-```text
-Keyboard input lifecycle
-frame update orchestration
-NPC schedule/move orchestration
-interaction dispatch orchestration
-story open / exit lifecycle
-periodic persistence trigger
-Pixi Application lifecycle
-```
+`Keyboard input lifecycle / frame update orchestration / NPC schedule-move orchestration / interaction dispatch / story-exit lifecycle / periodic persistence trigger / Pixi Application lifecycle`。
 
 下一阶段：
 
@@ -90,22 +76,19 @@ InputController
 → ExplorationLoop / NPC orchestration
 → Story/Exit lifecycle cleanup
 → remove FreeRoamPrototype
+→ chapter0_start
 ```
-
-之后正式从 `chapter0_start` 开始第0章自由移动改造。
 
 ## AI 后续边界
 
-剧情保持 `Canonical Beat / Authored Dynamic Beat / Emergent Beat` 分层。Fast Loop 永不调用 LLM；Simulation Loop 主要是 TypeScript 规则；Cognitive Loop 只在重要事件异步调用模型。
+剧情保持 `Canonical Beat / Authored Dynamic Beat / Emergent Beat` 分层。Fast Loop 永不调用 LLM；Simulation Loop 主要使用 TypeScript 规则；Cognitive Loop 只在重要事件异步调用模型。
 
 模型只允许输出 `dialogue / interpretation / intent / mood`，不得输出 `relationship delta / canonical flag / quest completion / reward / battle result / coordinates`。
 
-Relationship / Emotion / Knowledge / Memory 分离，Memory append-only。
-
-NPC 后续使用 L0～L3 Simulation LOD；离屏 NPC 不逐帧寻路。
+Relationship / Emotion / Knowledge / Memory 分离，Memory append-only。NPC 后续使用 L0～L3 Simulation LOD，离屏 NPC 不逐帧寻路。
 
 ## Phase A checkpoint
 
-当前已经完成并接入 live runtime：SimulationState、Persistence、Command/Event、导航、Quest、Clock、Schedule、Region、ActorMotion、Collision、Movement、Interaction、World/Actor/HUD/Dialogue/Objective Presentation、稳定 `ExplorationRuntime` 边界和 architecture guard。
+当前已经完成并接入 live runtime：SimulationState、Persistence、Command/Event、Navigation、Quest、Clock、Schedule、Region、ActorMotion、Collision、Movement、Interaction、World/Actor/HUD/Dialogue/Objective Presentation、稳定 `ExplorationRuntime` 边界和 architecture guard。
 
 第0章第一阶段保持 **LLM OFF**，先保证玩法、存档、回滚、剧情桥和战斗返回可靠。
