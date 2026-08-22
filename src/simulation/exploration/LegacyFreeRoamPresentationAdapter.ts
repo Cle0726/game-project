@@ -1,13 +1,15 @@
-import type { Container } from 'pixi.js';
+import type { Container, Graphics, Text } from 'pixi.js';
 import type { FreeRoamPrototype } from '../../exploration/FreeRoamPrototype';
 import type {
   ExplorationDialogueLine,
+  ExplorationInteractionZone,
   ExplorationNpcDefinition,
   ExplorationRegionDefinition,
   Vec2,
 } from '../../exploration/explorationTypes';
 import { findQuestById } from '../quest/QuestSystem';
 import { ExplorationDialoguePresentation } from './ExplorationDialoguePresentation';
+import { ExplorationHudPresentation } from './ExplorationHudPresentation';
 import {
   ExplorationObjectivePresentation,
   type ObjectiveNpcPosition,
@@ -23,10 +25,23 @@ interface LegacyFreeRoamPresentationShape {
   world: Container;
   keys: Set<string>;
   npcs: LegacyNpcRuntimeShape[];
+  nearbyNpc?: LegacyNpcRuntimeShape;
+  nearbyZone?: ExplorationInteractionZone;
   activeQuestId?: string;
   dialogueNpcId?: string;
   dialoguePanel?: Container;
+  prompt: Text;
+  status: Text;
+  clockText: Text;
+  questTitle: Text;
+  questDescription: Text;
+  clockPanel?: Graphics;
+  controlsText?: Text;
+  buildHud(): void;
   buildDialoguePanel(): void;
+  updateHudPositions(): void;
+  updatePrompt(): void;
+  refreshQuestHud(): void;
   startDialogue(
     lines: ExplorationDialogueLine[],
     npcId: string | undefined,
@@ -41,7 +56,7 @@ interface LegacyFreeRoamPresentationShape {
 }
 
 /**
- * Transitional bridge that moves dialogue state and objective marker ownership out of
+ * Transitional bridge that moves HUD/dialogue/objective presentation ownership out of
  * FreeRoamPrototype while keeping its current Pixi shell/API intact.
  */
 export function wireLegacyFreeRoamPresentation(
@@ -49,8 +64,51 @@ export function wireLegacyFreeRoamPresentation(
   region: ExplorationRegionDefinition,
 ): void {
   const legacy = runtime as unknown as LegacyFreeRoamPresentationShape;
+  let hud: ExplorationHudPresentation | undefined;
   let dialogue: ExplorationDialoguePresentation | undefined;
   let objective: ExplorationObjectivePresentation | undefined;
+
+  const ensureHud = () => {
+    hud ??= new ExplorationHudPresentation(legacy.app.stage, region.name);
+    legacy.prompt = hud.prompt;
+    legacy.status = hud.status;
+    legacy.clockText = hud.clockText;
+    legacy.questTitle = hud.questTitle;
+    legacy.questDescription = hud.questDescription;
+    legacy.clockPanel = hud.clockPanel;
+    legacy.controlsText = hud.controlsText;
+    return hud;
+  };
+
+  legacy.buildHud = () => {
+    ensureHud();
+    legacy.buildDialoguePanel();
+    legacy.refreshQuestHud();
+    legacy.updateHudPositions();
+  };
+
+  legacy.refreshQuestHud = () => {
+    const currentHud = ensureHud();
+    const quest = findQuestById(region.quests, legacy.activeQuestId);
+    if (!quest) {
+      currentHud.setQuest('探索目标已完成', '继续探索，或前往下一个剧情入口。');
+      return;
+    }
+    currentHud.setQuest(`◆ ${quest.title}`, quest.description);
+  };
+
+  legacy.updatePrompt = () => {
+    const currentHud = ensureHud();
+    if (legacy.isDialogueActive()) {
+      currentHud.setPrompt('');
+      return;
+    }
+    currentHud.setPrompt(
+      legacy.nearbyNpc?.definition.interactionText ??
+        legacy.nearbyZone?.interactionText ??
+        '',
+    );
+  };
 
   legacy.buildDialoguePanel = () => {
     dialogue ??= new ExplorationDialoguePresentation(legacy.app.stage);
