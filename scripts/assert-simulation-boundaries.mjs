@@ -17,6 +17,7 @@ const freeRoam = read('src/exploration/FreeRoamPrototype.ts');
 const explorationRuntime = read('src/simulation/exploration/ExplorationRuntime.ts');
 const inputController = read('src/simulation/exploration/ExplorationInputController.ts');
 const explorationLoop = read('src/simulation/exploration/ExplorationLoop.ts');
+const npcController = read('src/simulation/exploration/ExplorationNpcController.ts');
 const collisionSystem = read('src/simulation/exploration/CollisionSystem.ts');
 const movementSystem = read('src/simulation/exploration/MovementSystem.ts');
 const interactionSystem = read('src/simulation/exploration/InteractionSystem.ts');
@@ -30,6 +31,7 @@ const actorViewAdapter = read('src/simulation/exploration/LegacyFreeRoamActorVie
 const worldViewAdapter = read('src/simulation/exploration/LegacyFreeRoamWorldViewAdapter.ts');
 const inputAdapter = read('src/simulation/exploration/LegacyFreeRoamInputAdapter.ts');
 const loopAdapter = read('src/simulation/exploration/LegacyFreeRoamLoopAdapter.ts');
+const npcAdapter = read('src/simulation/exploration/LegacyFreeRoamNpcAdapter.ts');
 const movementAdapter = read('src/simulation/exploration/LegacyFreeRoamMovementAdapter.ts');
 const interactionAdapter = read('src/simulation/exploration/LegacyFreeRoamInteractionAdapter.ts');
 const presentationAdapter = read('src/simulation/exploration/LegacyFreeRoamPresentationAdapter.ts');
@@ -42,69 +44,68 @@ const simulationClock = read('src/simulation/runtime/SimulationClock.ts');
 const scheduleSystem = read('src/simulation/agent/ScheduleSystem.ts');
 
 const failures = [];
+const requireText = (condition, message) => { if (!condition) failures.push(message); };
 
-if (!explorationSave.includes("../simulation/state/SimulationPersistence")) failures.push('explorationSave.ts must delegate to SimulationPersistence');
-if (explorationSave.includes('cle.exploration.verticalSlice.v1')) failures.push('explorationSave.ts must not own the legacy localStorage key');
-if (!persistence.includes('cle.exploration.verticalSlice.v1')) failures.push('SimulationPersistence.ts must retain one-time legacy migration support');
-if (!adapter.includes('simulationV1')) failures.push('LegacyGameStateAdapter.ts must own the GameState.simulationV1 bridge');
-if (!runtime.includes('CommandBus') || !runtime.includes('registerCoreCommandHandlers')) failures.push('SimulationRuntime.ts must own a validated CommandBus with core handlers');
-if (!coreCommands.includes("command.source === 'agent'")) failures.push('CoreCommandHandlers.ts must explicitly block agent quest completion');
-if (!coreCommands.includes("type: 'region.entered'")) failures.push('CoreCommandHandlers.ts must emit canonical region entry events');
-if (!coreCommands.includes("type: 'quest.completed'")) failures.push('CoreCommandHandlers.ts must emit canonical quest completion events');
-if (/window\.GameState/.test(freeRoam)) failures.push('FreeRoamPrototype.ts must not directly mutate window.GameState');
-if (!legacyMain.includes("./simulation/exploration/ExplorationRuntime")) failures.push('exploration-legacy-main.ts must depend on the stable ExplorationRuntime boundary');
-if (/LegacyFreeRoam(?:ActorView|WorldView|Input|Loop|Movement|Interaction|Presentation|Renderer)Adapter/.test(legacyMain)) failures.push('exploration-legacy-main.ts must not know individual migration adapters');
+requireText(explorationSave.includes("../simulation/state/SimulationPersistence"), 'explorationSave.ts must delegate to SimulationPersistence');
+requireText(!explorationSave.includes('cle.exploration.verticalSlice.v1'), 'explorationSave.ts must not own the legacy localStorage key');
+requireText(persistence.includes('cle.exploration.verticalSlice.v1'), 'SimulationPersistence.ts must retain one-time legacy migration support');
+requireText(adapter.includes('simulationV1'), 'LegacyGameStateAdapter.ts must own the GameState.simulationV1 bridge');
+requireText(runtime.includes('CommandBus') && runtime.includes('registerCoreCommandHandlers'), 'SimulationRuntime.ts must own validated core command handling');
+requireText(coreCommands.includes("command.source === 'agent'"), 'CoreCommandHandlers.ts must block agent quest completion');
+requireText(coreCommands.includes("type: 'region.entered'"), 'CoreCommandHandlers.ts must emit region entry events');
+requireText(coreCommands.includes("type: 'quest.completed'"), 'CoreCommandHandlers.ts must emit quest completion events');
+requireText(!/window\.GameState/.test(freeRoam), 'FreeRoamPrototype.ts must not directly mutate window.GameState');
+requireText(legacyMain.includes("./simulation/exploration/ExplorationRuntime"), 'legacy entry must depend on ExplorationRuntime');
+requireText(!/LegacyFreeRoam(?:ActorView|WorldView|Input|Loop|Npc|Movement|Interaction|Presentation|Renderer)Adapter/.test(legacyMain), 'legacy entry must not know individual migration adapters');
 
-if (!explorationRuntime.includes('wireLegacyFreeRoamActorViews')) failures.push('ExplorationRuntime.ts must wire actor views');
-if (!explorationRuntime.includes('wireLegacyFreeRoamWorldView')) failures.push('ExplorationRuntime.ts must wire world presentation');
-if (!explorationRuntime.includes('wireLegacyFreeRoamInput')) failures.push('ExplorationRuntime.ts must wire the InputController');
-if (!explorationRuntime.includes('wireLegacyFreeRoamLoop')) failures.push('ExplorationRuntime.ts must wire the formal ExplorationLoop');
-if (!explorationRuntime.includes('wireLegacyFreeRoamMovement')) failures.push('ExplorationRuntime.ts must wire live movement');
-if (!explorationRuntime.includes('wireLegacyFreeRoamInteraction')) failures.push('ExplorationRuntime.ts must wire live interaction');
-if (!explorationRuntime.includes('wireLegacyFreeRoamPresentation')) failures.push('ExplorationRuntime.ts must wire HUD/dialogue/objective presentation');
-if (!explorationRuntime.includes('wireLegacyFreeRoamRenderer')) failures.push('ExplorationRuntime.ts must wire renderer layout');
+for (const name of [
+  'wireLegacyFreeRoamActorViews',
+  'wireLegacyFreeRoamWorldView',
+  'wireLegacyFreeRoamInput',
+  'wireLegacyFreeRoamLoop',
+  'wireLegacyFreeRoamNpcs',
+  'wireLegacyFreeRoamMovement',
+  'wireLegacyFreeRoamInteraction',
+  'wireLegacyFreeRoamPresentation',
+  'wireLegacyFreeRoamRenderer',
+]) requireText(explorationRuntime.includes(name), `ExplorationRuntime.ts must include ${name}`);
 
-if (!inputController.includes('movementInput')) failures.push('ExplorationInputController.ts must own movement key interpretation');
-if (!explorationLoop.includes('class ExplorationLoop')) failures.push('ExplorationLoop.ts must own deterministic frame ordering');
-if (!explorationLoop.includes('port.updateNpcs')) failures.push('ExplorationLoop.ts must sequence NPC updates');
-if (!explorationLoop.includes('port.persistState')) failures.push('ExplorationLoop.ts must own periodic persistence timing');
-if (!inputAdapter.includes("from './ExplorationInputController'")) failures.push('LegacyFreeRoamInputAdapter.ts must delegate to ExplorationInputController');
-if (!loopAdapter.includes("from './ExplorationLoop'")) failures.push('LegacyFreeRoamLoopAdapter.ts must delegate to ExplorationLoop');
-if (!actorViewAdapter.includes("from './ExplorationActorViewFactory'")) failures.push('LegacyFreeRoamActorViewAdapter.ts must delegate to ExplorationActorViewFactory');
-if (!worldViewAdapter.includes("from './ExplorationWorldPresentation'")) failures.push('LegacyFreeRoamWorldViewAdapter.ts must delegate to ExplorationWorldPresentation');
-if (!movementAdapter.includes("from './MovementSystem'")) failures.push('LegacyFreeRoamMovementAdapter.ts must delegate to MovementSystem');
-if (!interactionAdapter.includes("from './InteractionSystem'")) failures.push('LegacyFreeRoamInteractionAdapter.ts must delegate to InteractionSystem');
-if (!presentationAdapter.includes("from './ExplorationDialoguePresentation'")) failures.push('LegacyFreeRoamPresentationAdapter.ts must delegate dialogue presentation');
-if (!presentationAdapter.includes("from './ExplorationHudPresentation'")) failures.push('LegacyFreeRoamPresentationAdapter.ts must delegate HUD presentation');
-if (!presentationAdapter.includes("from './ExplorationObjectivePresentation'")) failures.push('LegacyFreeRoamPresentationAdapter.ts must delegate objective presentation');
-if (!rendererAdapter.includes("from './ExplorationRenderer'")) failures.push('LegacyFreeRoamRendererAdapter.ts must delegate to ExplorationRenderer');
+requireText(inputController.includes('movementInput'), 'ExplorationInputController.ts must own movement key interpretation');
+requireText(explorationLoop.includes('class ExplorationLoop') && explorationLoop.includes('port.updateNpcs') && explorationLoop.includes('port.persistState'), 'ExplorationLoop.ts must own frame ordering and autosave timing');
+requireText(npcController.includes('planNpcFrame'), 'ExplorationNpcController.ts must own NPC frame planning');
+requireText(npcController.includes('resolveScheduleEntry') && npcController.includes('findNavigationPath') && npcController.includes('moveTowardPoint'), 'ExplorationNpcController.ts must compose schedule/navigation/movement rules');
+requireText(inputAdapter.includes("from './ExplorationInputController'"), 'Input adapter must delegate to ExplorationInputController');
+requireText(loopAdapter.includes("from './ExplorationLoop'"), 'Loop adapter must delegate to ExplorationLoop');
+requireText(npcAdapter.includes("from './ExplorationNpcController'"), 'NPC adapter must delegate to ExplorationNpcController');
+requireText(actorViewAdapter.includes("from './ExplorationActorViewFactory'"), 'Actor view adapter must delegate to ExplorationActorViewFactory');
+requireText(worldViewAdapter.includes("from './ExplorationWorldPresentation'"), 'World view adapter must delegate to ExplorationWorldPresentation');
+requireText(movementAdapter.includes("from './MovementSystem'"), 'Movement adapter must delegate to MovementSystem');
+requireText(interactionAdapter.includes("from './InteractionSystem'"), 'Interaction adapter must delegate to InteractionSystem');
+requireText(presentationAdapter.includes("from './ExplorationDialoguePresentation'") && presentationAdapter.includes("from './ExplorationHudPresentation'") && presentationAdapter.includes("from './ExplorationObjectivePresentation'"), 'Presentation adapter must delegate HUD/dialogue/objective presentation');
+requireText(rendererAdapter.includes("from './ExplorationRenderer'"), 'Renderer adapter must delegate to ExplorationRenderer');
 
-if (!actorViewFactory.includes('createPlayer') || !actorViewFactory.includes('createNpc')) failures.push('ExplorationActorViewFactory.ts must own player/NPC Pixi construction');
-if (!worldPresentation.includes('buildEnvironment')) failures.push('ExplorationWorldPresentation.ts must own world background/debug construction');
-if (!dialoguePresentation.includes('class ExplorationDialoguePresentation')) failures.push('ExplorationDialoguePresentation.ts must own dialogue state/panel');
-if (!hudPresentation.includes('class ExplorationHudPresentation')) failures.push('ExplorationHudPresentation.ts must own HUD Pixi objects');
-if (!objectivePresentation.includes('class ExplorationObjectivePresentation')) failures.push('ExplorationObjectivePresentation.ts must own objective marker/highlight');
+requireText(actorViewFactory.includes('createPlayer') && actorViewFactory.includes('createNpc'), 'ExplorationActorViewFactory.ts must own player/NPC Pixi construction');
+requireText(worldPresentation.includes('buildEnvironment'), 'ExplorationWorldPresentation.ts must own world construction');
+requireText(dialoguePresentation.includes('class ExplorationDialoguePresentation'), 'Dialogue presentation must own dialogue state/panel');
+requireText(hudPresentation.includes('class ExplorationHudPresentation'), 'HUD presentation must own HUD Pixi objects');
+requireText(objectivePresentation.includes('class ExplorationObjectivePresentation'), 'Objective presentation must own marker/highlight');
 
-if (!legacyPathfinding.includes('../simulation/exploration/NavigationSystem')) failures.push('legacy pathfinding.ts must delegate to NavigationSystem');
-if (legacyPathfinding.includes('const queue: string[]')) failures.push('legacy pathfinding.ts must not own graph traversal logic');
-if (!legacyQuestState.includes('../simulation/quest/QuestSystem')) failures.push('legacy questState.ts must delegate to QuestSystem');
-if (legacyQuestState.includes('completedQuestIds.includes')) failures.push('legacy questState.ts must not own quest transition rules');
-if (!legacySchedule.includes('../simulation/runtime/SimulationClock')) failures.push('legacy npcSchedule.ts must delegate time advancement to SimulationClock');
-if (!legacySchedule.includes('../simulation/agent/ScheduleSystem')) failures.push('legacy npcSchedule.ts must delegate schedule resolution to ScheduleSystem');
-if (!legacyRegionRegistry.includes('../simulation/exploration/RegionSystem')) failures.push('legacy regionRegistry.ts must delegate lookup to RegionSystem');
-if (!legacyActorMotion.includes('../simulation/exploration/ActorMotionSystem')) failures.push('legacy actorMotion.ts must delegate motion math to ActorMotionSystem');
+requireText(legacyPathfinding.includes('../simulation/exploration/NavigationSystem') && !legacyPathfinding.includes('const queue: string[]'), 'legacy pathfinding must delegate graph traversal');
+requireText(legacyQuestState.includes('../simulation/quest/QuestSystem') && !legacyQuestState.includes('completedQuestIds.includes'), 'legacy questState must delegate quest transitions');
+requireText(legacySchedule.includes('../simulation/runtime/SimulationClock') && legacySchedule.includes('../simulation/agent/ScheduleSystem'), 'legacy schedule must delegate clock/schedule logic');
+requireText(legacyRegionRegistry.includes('../simulation/exploration/RegionSystem'), 'legacy region registry must delegate lookup');
+requireText(legacyActorMotion.includes('../simulation/exploration/ActorMotionSystem'), 'legacy actor motion must delegate motion math');
 
-if (!collisionSystem.includes('moveCircleWithAxisCollision')) failures.push('CollisionSystem.ts must own axis-separated circle collision');
-if (!movementSystem.includes('moveActorByDelta')) failures.push('MovementSystem.ts must expose deterministic actor movement');
-if (!interactionSystem.includes('findNearestInteractionActor')) failures.push('InteractionSystem.ts must own nearby actor selection');
-if (!interactionSystem.includes('evaluateQuestInteractionGate')) failures.push('InteractionSystem.ts must own quest interaction gating');
-if (!explorationRenderer.includes('computeCameraOffset') || !explorationRenderer.includes('computeHudLayout')) failures.push('ExplorationRenderer.ts must own camera/HUD layout math');
-if (!actorMotionSystem.includes('stepActorMotion')) failures.push('ActorMotionSystem.ts must own renderer-independent walk motion math');
-if (!navigationSystem.includes('findNavigationPath')) failures.push('NavigationSystem.ts must own navigation graph traversal');
-if (!regionSystem.includes('createRegionRegistry')) failures.push('RegionSystem.ts must own region lookup/indexing');
-if (!questSystem.includes('canCompleteQuest')) failures.push('QuestSystem.ts must own quest transition validation');
-if (!simulationClock.includes('advanceSimulationClock')) failures.push('SimulationClock.ts must own accelerated game time');
-if (!scheduleSystem.includes('resolveScheduleEntry')) failures.push('ScheduleSystem.ts must own npc schedule selection');
+requireText(collisionSystem.includes('moveCircleWithAxisCollision'), 'CollisionSystem.ts must own collision');
+requireText(movementSystem.includes('moveActorByDelta'), 'MovementSystem.ts must own deterministic movement');
+requireText(interactionSystem.includes('findNearestInteractionActor') && interactionSystem.includes('evaluateQuestInteractionGate'), 'InteractionSystem.ts must own proximity/gating');
+requireText(explorationRenderer.includes('computeCameraOffset') && explorationRenderer.includes('computeHudLayout'), 'ExplorationRenderer.ts must own camera/HUD layout math');
+requireText(actorMotionSystem.includes('stepActorMotion'), 'ActorMotionSystem.ts must own motion math');
+requireText(navigationSystem.includes('findNavigationPath'), 'NavigationSystem.ts must own navigation');
+requireText(regionSystem.includes('createRegionRegistry'), 'RegionSystem.ts must own region indexing');
+requireText(questSystem.includes('canCompleteQuest'), 'QuestSystem.ts must own quest validation');
+requireText(simulationClock.includes('advanceSimulationClock'), 'SimulationClock.ts must own game time');
+requireText(scheduleSystem.includes('resolveScheduleEntry'), 'ScheduleSystem.ts must own schedule selection');
 
 if (failures.length) {
   console.error('Simulation architecture guard failed:');
