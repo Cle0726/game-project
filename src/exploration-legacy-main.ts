@@ -1,4 +1,3 @@
-import { FreeRoamPrototype } from './exploration/FreeRoamPrototype';
 import type { ExplorationRegionDefinition } from './exploration/explorationTypes';
 import { resolveProtagonistExplorationSprite } from './exploration/explorationAssets';
 import {
@@ -8,9 +7,7 @@ import {
 } from './exploration/regionRegistry';
 import { getSimulationRuntime } from './simulation/runtime/SimulationRuntime';
 import type { GameCommandSource } from './simulation/command/GameCommand';
-import { wireLegacyFreeRoamMovement } from './simulation/exploration/LegacyFreeRoamMovementAdapter';
-import { wireLegacyFreeRoamInteraction } from './simulation/exploration/LegacyFreeRoamInteractionAdapter';
-import { wireLegacyFreeRoamRenderer } from './simulation/exploration/LegacyFreeRoamRendererAdapter';
+import { ExplorationRuntime } from './simulation/exploration/ExplorationRuntime';
 
 declare global {
   interface Window {
@@ -25,7 +22,7 @@ const originalShowScene = typeof window.showScene === 'function' ? window.showSc
 const originalGoToScene = typeof window.goToScene === 'function' ? window.goToScene.bind(window) : undefined;
 const simulationRuntime = getSimulationRuntime();
 
-let runtime: FreeRoamPrototype | undefined;
+let runtime: ExplorationRuntime | undefined;
 let host: HTMLDivElement | undefined;
 let mounting = false;
 let bypassInterception = false;
@@ -116,9 +113,10 @@ async function enterExploration(
 
   const playerSpriteSrc = resolveProtagonistExplorationSprite(window.GameState?.['奏者性别']);
 
-  // Construct first: its compatibility load performs one-time migration of the old
-  // single-region localStorage snapshot before region.enter can create a fresh slot.
-  runtime = new FreeRoamPrototype(region, {
+  // ExplorationRuntime is now the stable boundary. During Phase A it internally
+  // composes the legacy Pixi renderer while routing deterministic rules through the
+  // formal Simulation systems.
+  runtime = new ExplorationRuntime(region, {
     playerSpriteSrc,
     onStoryScene: (sceneId) => {
       window.openStoryFromExploration?.(sceneId);
@@ -128,13 +126,6 @@ async function enterExploration(
       window.showMainMenu?.();
     },
   });
-
-  // Phase-A migration bridges: FreeRoam still owns Pixi object creation and dialogue
-  // presentation, while deterministic movement/collision, interaction rules and
-  // camera/HUD layout now resolve through formal Simulation systems.
-  wireLegacyFreeRoamMovement(runtime, region);
-  wireLegacyFreeRoamInteraction(runtime, region);
-  wireLegacyFreeRoamRenderer(runtime, region);
 
   const savedPosition = simulationRuntime.state.regions[region.id]?.playerPosition;
 
