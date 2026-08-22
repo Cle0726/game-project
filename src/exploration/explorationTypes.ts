@@ -11,9 +11,15 @@ export interface RectZone {
   height: number;
 }
 
+export interface ExplorationWaypoint {
+  id: string;
+  position: Vec2;
+  links: string[];
+}
+
 export interface ExplorationNpcScheduleEntry {
   minuteOfDay: number;
-  position: Vec2;
+  targetWaypointId: string;
   activity: string;
 }
 
@@ -34,5 +40,6 @@ export interface ExplorationRegionDefinition {
   height: number;
   playerSpawn: Vec2;
   collisionZones: RectZone[];
+  waypoints: ExplorationWaypoint[];
   npcs: ExplorationNpcDefinition[];
 }
