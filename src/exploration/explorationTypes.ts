@@ -31,6 +31,33 @@ export interface ExplorationNpcDefinition {
   storySceneId?: string;
   interactionText: string;
   schedule?: ExplorationNpcScheduleEntry[];
+  spriteSrc?: string;
+  spriteScale?: number;
+  questCompleteId?: string;
+}
+
+export interface ExplorationInteractionZone {
+  id: string;
+  name: string;
+  area: Omit<RectZone, 'id'>;
+  interactionText: string;
+  storySceneId?: string;
+  statusText?: string;
+  questCompleteId?: string;
+}
+
+export interface ExplorationQuestDefinition {
+  id: string;
+  title: string;
+  description: string;
+  completionText: string;
+  nextQuestId?: string;
+}
+
+export interface ExplorationRegionAssets {
+  backgroundSrc?: string;
+  playerSpriteSrc?: string;
+  playerSpriteScale?: number;
 }
 
 export interface ExplorationRegionDefinition {
@@ -42,4 +69,8 @@ export interface ExplorationRegionDefinition {
   collisionZones: RectZone[];
   waypoints: ExplorationWaypoint[];
   npcs: ExplorationNpcDefinition[];
+  interactionZones?: ExplorationInteractionZone[];
+  quests?: ExplorationQuestDefinition[];
+  initialQuestId?: string;
+  assets?: ExplorationRegionAssets;
 }
