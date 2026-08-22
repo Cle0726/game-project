@@ -10,7 +10,6 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
   assets: {
     backgroundSrc: WHITE_ACADEMY_PLAZA_ASSETS.backgroundSrc,
     playerSpriteSrc: WHITE_ACADEMY_PLAZA_ASSETS.protagonistFallbackSrc,
-    playerSpriteScale: 1,
   },
   collisionZones: [
     { id: 'academy-north-wing', x: 250, y: 90, width: 690, height: 300 },
@@ -72,7 +71,6 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
       position: { x: 930, y: 990 },
       speed: 95,
       spriteSrc: WHITE_ACADEMY_PLAZA_ASSETS.atyaSrc,
-      spriteScale: 1,
       interactionText: '按 E 与阿缇娅交谈',
       schedule: [
         { minuteOfDay: 480, targetWaypointId: 'atya_rest', activity: '观察白谱院' },
@@ -87,7 +85,6 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
       position: { x: 1500, y: 940 },
       speed: 105,
       spriteSrc: WHITE_ACADEMY_PLAZA_ASSETS.miloSrc,
-      spriteScale: 1,
       interactionText: '按 E 与弥洛交谈',
       questCompleteId: 'find_milo',
       schedule: [
