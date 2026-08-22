@@ -5,6 +5,8 @@ const read = (path) => fs.readFileSync(path, 'utf8');
 const explorationSave = read('src/exploration/explorationSave.ts');
 const legacyPathfinding = read('src/exploration/pathfinding.ts');
 const legacyQuestState = read('src/exploration/questState.ts');
+const legacySchedule = read('src/exploration/npcSchedule.ts');
+const legacyRegionRegistry = read('src/exploration/regionRegistry.ts');
 const persistence = read('src/simulation/state/SimulationPersistence.ts');
 const adapter = read('src/simulation/state/LegacyGameStateAdapter.ts');
 const runtime = read('src/simulation/runtime/SimulationRuntime.ts');
@@ -12,7 +14,10 @@ const freeRoam = read('src/exploration/FreeRoamPrototype.ts');
 const collisionSystem = read('src/simulation/exploration/CollisionSystem.ts');
 const movementSystem = read('src/simulation/exploration/MovementSystem.ts');
 const navigationSystem = read('src/simulation/exploration/NavigationSystem.ts');
+const regionSystem = read('src/simulation/exploration/RegionSystem.ts');
 const questSystem = read('src/simulation/quest/QuestSystem.ts');
+const simulationClock = read('src/simulation/runtime/SimulationClock.ts');
+const scheduleSystem = read('src/simulation/agent/ScheduleSystem.ts');
 
 const failures = [];
 
@@ -46,6 +51,15 @@ if (!legacyQuestState.includes('../simulation/quest/QuestSystem')) {
 if (legacyQuestState.includes('completedQuestIds.includes')) {
   failures.push('legacy questState.ts must not own quest transition rules');
 }
+if (!legacySchedule.includes('../simulation/runtime/SimulationClock')) {
+  failures.push('legacy npcSchedule.ts must delegate time advancement to SimulationClock');
+}
+if (!legacySchedule.includes('../simulation/agent/ScheduleSystem')) {
+  failures.push('legacy npcSchedule.ts must delegate schedule resolution to ScheduleSystem');
+}
+if (!legacyRegionRegistry.includes('../simulation/exploration/RegionSystem')) {
+  failures.push('legacy regionRegistry.ts must delegate lookup to RegionSystem');
+}
 if (!collisionSystem.includes('moveCircleWithAxisCollision')) {
   failures.push('CollisionSystem.ts must own axis-separated circle collision');
 }
@@ -55,8 +69,17 @@ if (!movementSystem.includes('moveActorByDelta')) {
 if (!navigationSystem.includes('findNavigationPath')) {
   failures.push('NavigationSystem.ts must own navigation graph traversal');
 }
+if (!regionSystem.includes('createRegionRegistry')) {
+  failures.push('RegionSystem.ts must own region lookup/indexing');
+}
 if (!questSystem.includes('canCompleteQuest')) {
   failures.push('QuestSystem.ts must own quest transition validation');
+}
+if (!simulationClock.includes('advanceSimulationClock')) {
+  failures.push('SimulationClock.ts must own accelerated game time');
+}
+if (!scheduleSystem.includes('resolveScheduleEntry')) {
+  failures.push('ScheduleSystem.ts must own npc schedule selection');
 }
 
 if (failures.length) {
