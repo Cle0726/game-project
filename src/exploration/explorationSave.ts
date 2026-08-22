@@ -2,6 +2,7 @@ import {
   loadRegionExplorationSnapshot,
   saveRegionExplorationSnapshot,
 } from '../simulation/state/SimulationPersistence';
+import { getSimulationRuntime } from '../simulation/runtime/SimulationRuntime';
 
 export interface ExplorationSaveState {
   version: 1;
@@ -23,5 +24,21 @@ export function loadExplorationSave(regionId: string): ExplorationSaveState | un
 }
 
 export function saveExplorationState(state: ExplorationSaveState): void {
-  saveRegionExplorationSnapshot(state);
+  const newlyCompletedQuestIds = saveRegionExplorationSnapshot(state);
+  if (!newlyCompletedQuestIds.length) return;
+
+  const runtime = getSimulationRuntime();
+  const simulationState = runtime.start();
+  const issuedAt =
+    Math.max(0, simulationState.clock.day - 1) * 1440 + simulationState.clock.minuteOfDay;
+
+  for (const questId of newlyCompletedQuestIds) {
+    runtime.commands.dispatch({
+      type: 'quest.complete',
+      source: 'player',
+      actorId: 'player',
+      issuedAt,
+      payload: { questId },
+    });
+  }
 }
