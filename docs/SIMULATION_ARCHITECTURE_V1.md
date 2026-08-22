@@ -24,9 +24,7 @@ Player / Story / Agent Intent
 
 `game.js` 继续承担 `GameState / SCENES / choices / BATTLES / TeaBreak / save / showScene / goToScene`。Phase A 不进行全量 TypeScript 重写。
 
-新状态唯一挂载在 `window.GameState.simulationV1`，保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。
-
-旧 `cle.exploration.verticalSlice.v1` 只做一次迁移，之后探索数据进入现有主存档体系。
+新状态唯一挂载在 `window.GameState.simulationV1`，保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。旧 `cle.exploration.verticalSlice.v1` 只做一次迁移。
 
 ## Command / Event
 
@@ -49,19 +47,17 @@ legacy scene entry
 
 `FreeRoamPrototype` 仅是 Phase A 待删除兼容壳，不再是未来章节开发 API。
 
-## 已接入 live runtime 的确定性系统
+## 已接入 live runtime 的系统
 
-`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`
+确定性：`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`。
 
-## 已接入 live runtime 的 Presentation
+Presentation：`ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`。
 
-`ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`
+这些已经接管 Camera/HUD layout、地图背景与 debug overlay、玩家/NPC Sprite、HUD、地图对话、Quest marker/highlight，以及移动/碰撞/交互规则。
 
-已经接管 Camera/HUD layout、地图背景与 debug overlay、玩家/NPC Sprite、HUD、地图对话、Quest marker/highlight。
+## Phase A Migration Adapters
 
-## Phase A 迁移 Adapter
-
-`LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`
+`LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`。
 
 只用于保持当前第三章切片稳定；正式 Loop/Renderer 完成后全部删除。
 
