@@ -1,5 +1,7 @@
 export const WHITE_ACADEMY_PLAZA_ASSETS = {
-  backgroundSrc: '/assets/generated/exploration/white-academy-plaza/bg_white_academy_plaza_v01.webp',
+  // Live-game fallback that already exists in the repository. The dedicated walkable
+  // plaza painting can replace this path later without changing exploration logic.
+  backgroundSrc: '/assets/generated/chapter3/keyvisuals/cg_ch3_white_score_main_v01.png',
   protagonistMaleSrc: '/assets/generated/characters/char_protagonist_rinche_male_default_v01.png',
   protagonistFemaleSrc: '/assets/generated/characters/char_protagonist_rinsa_female_default_v01.png',
   protagonistFallbackSrc: '/assets/generated/characters/char_protagonist_initial_traveler_v01.png',
