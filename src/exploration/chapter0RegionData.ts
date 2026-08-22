@@ -12,6 +12,11 @@ const CH0_TIYA_SPRITE =
 const CH0_NOI_SPRITE =
   '/assets/generated/chapter0/sprites/characters/char_ch0_noi_sprite_default_v03.png';
 
+const CH0_PRE_CONTRACT_PLAYER_SPRITES = {
+  male: '/assets/generated/chapter0/sprites/characters/char_ch0_protagonist_rinche_sprite_pre_contract_v03.png',
+  female: '/assets/generated/chapter0/sprites/characters/char_ch0_protagonist_rinsa_sprite_pre_contract_v03.png',
+} as const;
+
 const MAP_WIDTH = 1600;
 const MAP_HEIGHT = 900;
 
@@ -31,6 +36,7 @@ export const CH0_MIANSHA_ALLEY_REGION: ExplorationRegionDefinition = {
   playerSpawn: { x: 800, y: 760 },
   assets: {
     backgroundSrc: CH0_ALLEY_BACKGROUND,
+    playerSpriteVariants: CH0_PRE_CONTRACT_PLAYER_SPRITES,
   },
   collisionZones: [
     { id: 'alley-left-facades', x: 0, y: 0, width: 300, height: 900 },
@@ -128,6 +134,7 @@ export const CH0_MIANSHA_PIANO_SQUARE_REGION: ExplorationRegionDefinition = {
   playerSpawn: { x: 800, y: 760 },
   assets: {
     backgroundSrc: CH0_PIANO_SQUARE_BACKGROUND,
+    playerSpriteVariants: CH0_PRE_CONTRACT_PLAYER_SPRITES,
   },
   collisionZones: [
     { id: 'square-west-edge', x: 0, y: 0, width: 230, height: 900 },
