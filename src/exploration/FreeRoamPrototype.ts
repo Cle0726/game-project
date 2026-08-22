@@ -1,15 +1,24 @@
 import { Application, Container, Graphics, Text } from 'pixi.js';
 import { PROTOTYPE_REGION } from './regionData';
 import type { ExplorationNpcDefinition, RectZone, Vec2 } from './explorationTypes';
+import {
+  advancePrototypeClock,
+  formatMinuteOfDay,
+  PROTOTYPE_DAY_START_MINUTE,
+  resolveScheduleEntry,
+} from './npcSchedule';
 import { openStoryScene } from './storyBridge';
 
 const PLAYER_RADIUS = 22;
+const NPC_RADIUS = 24;
 const MOVE_SPEED = 290;
 const INTERACTION_DISTANCE = 110;
 
 interface NpcRuntime {
   definition: ExplorationNpcDefinition;
   node: Container;
+  position: Vec2;
+  activityText: Text;
 }
 
 export class FreeRoamPrototype {
@@ -19,8 +28,10 @@ export class FreeRoamPrototype {
   private playerPosition: Vec2 = { ...PROTOTYPE_REGION.playerSpawn };
   private keys = new Set<string>();
   private npcs: NpcRuntime[] = [];
+  private clockMinute = PROTOTYPE_DAY_START_MINUTE;
   private prompt = new Text({ text: '', style: { fill: 0xffffff, fontSize: 18, fontFamily: 'sans-serif' } });
   private status = new Text({ text: '', style: { fill: 0xffffff, fontSize: 16, fontFamily: 'sans-serif' } });
+  private clockText = new Text({ text: '', style: { fill: 0xcbd5e1, fontSize: 15, fontFamily: 'sans-serif' } });
   private nearbyNpc?: NpcRuntime;
 
   async mount(host: HTMLElement): Promise<void> {
@@ -75,8 +86,10 @@ export class FreeRoamPrototype {
 
     for (const definition of PROTOTYPE_REGION.npcs) {
       const node = new Container();
-      node.position.set(definition.position.x, definition.position.y);
-      node.addChild(new Graphics().circle(0, 0, 24).fill(0x9fb7d5));
+      const position = { ...definition.position };
+      node.position.set(position.x, position.y);
+      node.addChild(new Graphics().circle(0, 0, NPC_RADIUS).fill(0x9fb7d5));
+
       const label = new Text({
         text: definition.name,
         style: { fill: 0xffffff, fontSize: 18, fontFamily: 'sans-serif' },
@@ -84,8 +97,17 @@ export class FreeRoamPrototype {
       label.anchor.set(0.5, 1);
       label.position.set(0, -34);
       node.addChild(label);
+
+      const activityText = new Text({
+        text: '',
+        style: { fill: 0xb9c9dc, fontSize: 13, fontFamily: 'sans-serif' },
+      });
+      activityText.anchor.set(0.5, 0);
+      activityText.position.set(0, 32);
+      node.addChild(activityText);
+
       this.world.addChild(node);
-      this.npcs.push({ definition, node });
+      this.npcs.push({ definition, node, position, activityText });
     }
   }
 
@@ -98,16 +120,19 @@ export class FreeRoamPrototype {
     this.app.stage.addChild(title);
 
     const controls = new Text({
-      text: 'WASD / 方向键移动 · E / 空格互动',
+      text: 'WASD / 方向键移动 · E / 空格互动 · NPC 按日程自主移动',
       style: { fill: 0xcbd5e1, fontSize: 15, fontFamily: 'sans-serif' },
     });
     controls.position.set(24, 54);
     this.app.stage.addChild(controls);
 
+    this.clockText.position.set(24, 84);
+    this.app.stage.addChild(this.clockText);
+
     this.prompt.anchor.set(0.5, 1);
     this.app.stage.addChild(this.prompt);
 
-    this.status.position.set(24, 86);
+    this.status.position.set(24, 112);
     this.app.stage.addChild(this.status);
   }
 
@@ -131,6 +156,9 @@ export class FreeRoamPrototype {
   };
 
   private update(deltaSeconds: number): void {
+    this.clockMinute = advancePrototypeClock(this.clockMinute, deltaSeconds);
+    this.updateNpcs(deltaSeconds);
+
     let dx = 0;
     let dy = 0;
 
@@ -143,30 +171,65 @@ export class FreeRoamPrototype {
       const length = Math.hypot(dx, dy);
       dx = (dx / length) * MOVE_SPEED * deltaSeconds;
       dy = (dy / length) * MOVE_SPEED * deltaSeconds;
-      this.tryMove(dx, dy);
+      this.tryMovePlayer(dx, dy);
     }
 
     this.updateNearbyNpc();
     this.updateCamera();
     this.updatePrompt();
+    this.clockText.text = `模拟时间 ${formatMinuteOfDay(this.clockMinute)} · 1 秒 = 20 游戏分钟`;
   }
 
-  private tryMove(dx: number, dy: number): void {
+  private updateNpcs(deltaSeconds: number): void {
+    for (const npc of this.npcs) {
+      const scheduleEntry = resolveScheduleEntry(npc.definition.schedule, this.clockMinute);
+      if (!scheduleEntry) {
+        npc.activityText.text = '自由行动';
+        continue;
+      }
+
+      npc.activityText.text = scheduleEntry.activity;
+      const dx = scheduleEntry.position.x - npc.position.x;
+      const dy = scheduleEntry.position.y - npc.position.y;
+      const distance = Math.hypot(dx, dy);
+      if (distance < 2) continue;
+
+      const speed = npc.definition.speed ?? 100;
+      const step = Math.min(speed * deltaSeconds, distance);
+      this.tryMoveNpc(npc, (dx / distance) * step, (dy / distance) * step);
+    }
+  }
+
+  private tryMovePlayer(dx: number, dy: number): void {
     const nextX = this.clamp(this.playerPosition.x + dx, PLAYER_RADIUS, PROTOTYPE_REGION.width - PLAYER_RADIUS);
-    if (!this.collides(nextX, this.playerPosition.y)) {
+    if (!this.collidesCircle(nextX, this.playerPosition.y, PLAYER_RADIUS)) {
       this.playerPosition.x = nextX;
     }
 
     const nextY = this.clamp(this.playerPosition.y + dy, PLAYER_RADIUS, PROTOTYPE_REGION.height - PLAYER_RADIUS);
-    if (!this.collides(this.playerPosition.x, nextY)) {
+    if (!this.collidesCircle(this.playerPosition.x, nextY, PLAYER_RADIUS)) {
       this.playerPosition.y = nextY;
     }
 
     this.player.position.set(this.playerPosition.x, this.playerPosition.y);
   }
 
-  private collides(x: number, y: number): boolean {
-    return PROTOTYPE_REGION.collisionZones.some((zone) => this.circleIntersectsRect(x, y, PLAYER_RADIUS, zone));
+  private tryMoveNpc(npc: NpcRuntime, dx: number, dy: number): void {
+    const nextX = this.clamp(npc.position.x + dx, NPC_RADIUS, PROTOTYPE_REGION.width - NPC_RADIUS);
+    if (!this.collidesCircle(nextX, npc.position.y, NPC_RADIUS)) {
+      npc.position.x = nextX;
+    }
+
+    const nextY = this.clamp(npc.position.y + dy, NPC_RADIUS, PROTOTYPE_REGION.height - NPC_RADIUS);
+    if (!this.collidesCircle(npc.position.x, nextY, NPC_RADIUS)) {
+      npc.position.y = nextY;
+    }
+
+    npc.node.position.set(npc.position.x, npc.position.y);
+  }
+
+  private collidesCircle(x: number, y: number, radius: number): boolean {
+    return PROTOTYPE_REGION.collisionZones.some((zone) => this.circleIntersectsRect(x, y, radius, zone));
   }
 
   private circleIntersectsRect(cx: number, cy: number, radius: number, rect: RectZone): boolean {
@@ -183,8 +246,8 @@ export class FreeRoamPrototype {
 
     for (const npc of this.npcs) {
       const distance = Math.hypot(
-        npc.definition.position.x - this.playerPosition.x,
-        npc.definition.position.y - this.playerPosition.y,
+        npc.position.x - this.playerPosition.x,
+        npc.position.y - this.playerPosition.y,
       );
       if (distance < nearestDistance) {
         nearest = npc;
@@ -215,9 +278,9 @@ export class FreeRoamPrototype {
   private interact(): void {
     if (!this.nearbyNpc) return;
 
-    const { definition } = this.nearbyNpc;
+    const { definition, activityText } = this.nearbyNpc;
     if (!definition.storySceneId) {
-      this.status.text = `${definition.name}：自由探索对话接口已触发。`;
+      this.status.text = `${definition.name}：${activityText.text}。自由探索对话接口已触发。`;
       return;
     }
 
