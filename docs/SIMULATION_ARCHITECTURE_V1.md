@@ -25,12 +25,7 @@
 
 章节和 WorldMap 入口只依赖 `src/simulation/exploration/ExplorationRuntime.ts`。
 
-```text
-legacy scene entry
-→ ExplorationRuntime
-→ FreeRoamPrototype compatibility shell
-→ formal Simulation / Presentation modules
-```
+`legacy scene entry → ExplorationRuntime → FreeRoamPrototype compatibility shell → formal Simulation / Presentation modules`。
 
 `FreeRoamPrototype` 仅是 Phase A 待删除兼容壳。
 
@@ -42,21 +37,11 @@ Presentation：`ExplorationRenderer / ExplorationWorldPresentation / Exploration
 
 Phase A Adapter：`LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`。
 
-这些已经接管现有第三章切片的移动、碰撞、交互、地图背景/debug overlay、Actor View、HUD、地图对话和 Quest marker/highlight。
-
 ## 剩余 Phase A
 
-Compatibility shell 还负责：`keyboard input / frame update orchestration / NPC orchestration / interaction dispatch / story-exit lifecycle / periodic persistence / Pixi Application lifecycle`。
+`keyboard input / frame update orchestration / NPC orchestration / interaction dispatch / story-exit lifecycle / periodic persistence / Pixi Application lifecycle`。
 
-下一阶段：
-
-```text
-InputController
-→ ExplorationLoop / NPC orchestration
-→ Story/Exit lifecycle cleanup
-→ remove FreeRoamPrototype
-→ chapter0_start
-```
+下一阶段：`InputController → ExplorationLoop/NPC orchestration → lifecycle cleanup → remove FreeRoamPrototype → chapter0_start`。
 
 ## AI 后续边界
 
