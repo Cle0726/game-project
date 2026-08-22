@@ -25,17 +25,37 @@
 
 `legacy scene entry → ExplorationRuntime → FreeRoamPrototype compatibility shell → formal Simulation / Presentation modules`。
 
-确定性系统已接入：`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`。
+确定性系统已接入：`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem / ExplorationInputController / ExplorationLoop / ExplorationNpcController`。
 
 Presentation 已接入：`ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`。
 
-Phase A Adapter：`LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`。
+Phase A Adapter 负责把当前第三章兼容壳路由到上述正式模块；外层剧情入口不得直接依赖 Adapter。
+
+## 当前已由新 Runtime 控制
+
+- 玩家/NPC 移动与碰撞
+- Waypoint 导航与 NPC 日程
+- NPC 靠近玩家/对话暂停与每帧行动规划
+- Keyboard 输入语义与按键状态
+- 每帧执行顺序与 autosave 时机
+- 附近 NPC / interaction zone / Quest gate
+- Camera / HUD layout
+- 地图背景、fallback grid、debug overlay
+- Actor Sprite、名字、活动文字
+- HUD、地图对话、Quest marker/highlight
 
 ## 剩余 Phase A
 
-`keyboard input / frame update orchestration / NPC orchestration / interaction dispatch / story-exit lifecycle / periodic persistence / Pixi Application lifecycle`。
+`interaction dispatch orchestration / story-exit lifecycle / persistence snapshot assembly / Pixi Application lifecycle / final removal of FreeRoamPrototype compatibility shell`。
 
-下一阶段：`InputController → ExplorationLoop/NPC orchestration → lifecycle cleanup → remove FreeRoamPrototype → chapter0_start`。
+下一阶段：`lifecycle cleanup → remove FreeRoamPrototype → chapter0_start`。
+
+## 质量门槛
+
+- `npm run simulation:guard`：架构依赖边界。
+- `npm run simulation:typecheck`：TypeScript 5.8.3 strict/noUnused，范围为 Simulation + Exploration。
+
+当前执行环境没有仓库副本，且 shell 无法解析 github.com，因此新 `simulation:typecheck` 尚未在此环境实际执行；不得把它记录为已通过。
 
 ## AI 边界
 
