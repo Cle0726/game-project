@@ -19,8 +19,14 @@ const collisionSystem = read('src/simulation/exploration/CollisionSystem.ts');
 const movementSystem = read('src/simulation/exploration/MovementSystem.ts');
 const interactionSystem = read('src/simulation/exploration/InteractionSystem.ts');
 const explorationRenderer = read('src/simulation/exploration/ExplorationRenderer.ts');
+const actorViewFactory = read('src/simulation/exploration/ExplorationActorViewFactory.ts');
+const dialoguePresentation = read('src/simulation/exploration/ExplorationDialoguePresentation.ts');
+const hudPresentation = read('src/simulation/exploration/ExplorationHudPresentation.ts');
+const objectivePresentation = read('src/simulation/exploration/ExplorationObjectivePresentation.ts');
+const actorViewAdapter = read('src/simulation/exploration/LegacyFreeRoamActorViewAdapter.ts');
 const movementAdapter = read('src/simulation/exploration/LegacyFreeRoamMovementAdapter.ts');
 const interactionAdapter = read('src/simulation/exploration/LegacyFreeRoamInteractionAdapter.ts');
+const presentationAdapter = read('src/simulation/exploration/LegacyFreeRoamPresentationAdapter.ts');
 const rendererAdapter = read('src/simulation/exploration/LegacyFreeRoamRendererAdapter.ts');
 const actorMotionSystem = read('src/simulation/exploration/ActorMotionSystem.ts');
 const navigationSystem = read('src/simulation/exploration/NavigationSystem.ts');
@@ -61,8 +67,11 @@ if (/window\.GameState/.test(freeRoam)) {
 if (!legacyMain.includes("./simulation/exploration/ExplorationRuntime")) {
   failures.push('exploration-legacy-main.ts must depend on the stable ExplorationRuntime boundary');
 }
-if (legacyMain.includes('LegacyFreeRoamMovementAdapter') || legacyMain.includes('LegacyFreeRoamInteractionAdapter')) {
-  failures.push('exploration-legacy-main.ts must not know individual legacy adapters');
+if (/LegacyFreeRoam(?:ActorView|Movement|Interaction|Presentation|Renderer)Adapter/.test(legacyMain)) {
+  failures.push('exploration-legacy-main.ts must not know individual migration adapters');
+}
+if (!explorationRuntime.includes('wireLegacyFreeRoamActorViews')) {
+  failures.push('ExplorationRuntime.ts must wire actor views through the presentation boundary');
 }
 if (!explorationRuntime.includes('wireLegacyFreeRoamMovement')) {
   failures.push('ExplorationRuntime.ts must wire live movement through Simulation systems');
@@ -70,8 +79,14 @@ if (!explorationRuntime.includes('wireLegacyFreeRoamMovement')) {
 if (!explorationRuntime.includes('wireLegacyFreeRoamInteraction')) {
   failures.push('ExplorationRuntime.ts must wire live interaction through Simulation systems');
 }
+if (!explorationRuntime.includes('wireLegacyFreeRoamPresentation')) {
+  failures.push('ExplorationRuntime.ts must wire HUD/dialogue/objective presentation externally');
+}
 if (!explorationRuntime.includes('wireLegacyFreeRoamRenderer')) {
   failures.push('ExplorationRuntime.ts must wire live renderer layout through Simulation systems');
+}
+if (!actorViewAdapter.includes("from './ExplorationActorViewFactory'")) {
+  failures.push('LegacyFreeRoamActorViewAdapter.ts must delegate to ExplorationActorViewFactory');
 }
 if (!movementAdapter.includes("from './MovementSystem'")) {
   failures.push('LegacyFreeRoamMovementAdapter.ts must delegate to MovementSystem');
@@ -79,8 +94,29 @@ if (!movementAdapter.includes("from './MovementSystem'")) {
 if (!interactionAdapter.includes("from './InteractionSystem'")) {
   failures.push('LegacyFreeRoamInteractionAdapter.ts must delegate to InteractionSystem');
 }
+if (!presentationAdapter.includes("from './ExplorationDialoguePresentation'")) {
+  failures.push('LegacyFreeRoamPresentationAdapter.ts must delegate dialogue presentation');
+}
+if (!presentationAdapter.includes("from './ExplorationHudPresentation'")) {
+  failures.push('LegacyFreeRoamPresentationAdapter.ts must delegate HUD presentation');
+}
+if (!presentationAdapter.includes("from './ExplorationObjectivePresentation'")) {
+  failures.push('LegacyFreeRoamPresentationAdapter.ts must delegate objective presentation');
+}
 if (!rendererAdapter.includes("from './ExplorationRenderer'")) {
   failures.push('LegacyFreeRoamRendererAdapter.ts must delegate to ExplorationRenderer');
+}
+if (!actorViewFactory.includes('createPlayer') || !actorViewFactory.includes('createNpc')) {
+  failures.push('ExplorationActorViewFactory.ts must own player/NPC Pixi construction');
+}
+if (!dialoguePresentation.includes('class ExplorationDialoguePresentation')) {
+  failures.push('ExplorationDialoguePresentation.ts must own dialogue state/panel');
+}
+if (!hudPresentation.includes('class ExplorationHudPresentation')) {
+  failures.push('ExplorationHudPresentation.ts must own HUD Pixi objects');
+}
+if (!objectivePresentation.includes('class ExplorationObjectivePresentation')) {
+  failures.push('ExplorationObjectivePresentation.ts must own objective marker/highlight');
 }
 if (!legacyPathfinding.includes('../simulation/exploration/NavigationSystem')) {
   failures.push('legacy pathfinding.ts must delegate to NavigationSystem');
