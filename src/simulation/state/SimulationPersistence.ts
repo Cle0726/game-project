@@ -94,8 +94,16 @@ export function loadRegionExplorationSnapshot(
 
 export function saveRegionExplorationSnapshot(
   snapshot: RegionExplorationSnapshotV1,
-): void {
+): string[] {
+  let newlyCompletedQuestIds: string[] = [];
+
   mutateSimulationStateV1((state) => {
+    const previousRegion = state.regions[snapshot.regionId];
+    const previousCompleted = new Set(previousRegion?.completedQuestIds ?? []);
+    newlyCompletedQuestIds = snapshot.completedQuestIds.filter(
+      (questId) => !previousCompleted.has(questId),
+    );
+
     state.currentRegionId = snapshot.regionId;
     state.clock.minuteOfDay = snapshot.clockMinute;
     state.regions[snapshot.regionId] = {
@@ -103,9 +111,12 @@ export function saveRegionExplorationSnapshot(
       activeQuestId: snapshot.activeQuestId,
       completedQuestIds: [...snapshot.completedQuestIds],
       npcPositions: clonePositions(snapshot.npcPositions),
-      lastVisitedGameTime: state.clock.day * 1440 + snapshot.clockMinute,
+      lastVisitedGameTime:
+        Math.max(0, state.clock.day - 1) * 1440 + snapshot.clockMinute,
     };
   });
+
+  return newlyCompletedQuestIds;
 }
 
 export function setSimulationReturnPoint(
