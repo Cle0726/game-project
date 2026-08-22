@@ -1,6 +1,11 @@
 import { FreeRoamPrototype } from './exploration/FreeRoamPrototype';
-import { PROTOTYPE_REGION } from './exploration/regionData';
+import type { ExplorationRegionDefinition } from './exploration/explorationTypes';
 import { resolveProtagonistExplorationSprite } from './exploration/explorationAssets';
+import {
+  getDefaultExplorationRegion,
+  getExplorationEntry,
+  getExplorationRegion,
+} from './exploration/regionRegistry';
 
 declare global {
   interface Window {
@@ -11,7 +16,6 @@ declare global {
   }
 }
 
-const EXPLORATION_ENTRY_SCENES = new Set(['chapter3_white_start']);
 const originalShowScene = typeof window.showScene === 'function' ? window.showScene.bind(window) : undefined;
 const originalGoToScene = typeof window.goToScene === 'function' ? window.goToScene.bind(window) : undefined;
 
@@ -65,7 +69,10 @@ function callOriginalScene(sceneId: string): boolean {
   }
 }
 
-async function enterWhiteAcademyExploration(): Promise<void> {
+async function enterExploration(
+  region: ExplorationRegionDefinition,
+  fallbackSceneId?: string,
+): Promise<void> {
   if (runtime || mounting) return;
   mounting = true;
 
@@ -74,7 +81,7 @@ async function enterWhiteAcademyExploration(): Promise<void> {
   host = createHost();
 
   const playerSpriteSrc = resolveProtagonistExplorationSprite(window.GameState?.['奏者性别']);
-  runtime = new FreeRoamPrototype(PROTOTYPE_REGION, {
+  runtime = new FreeRoamPrototype(region, {
     playerSpriteSrc,
     onStoryScene: (sceneId) => {
       window.openStoryFromExploration?.(sceneId);
@@ -88,17 +95,25 @@ async function enterWhiteAcademyExploration(): Promise<void> {
   try {
     await runtime.mount(host);
   } catch (error) {
-    console.error('[exploration] failed to mount live exploration', error);
+    console.error(`[exploration] failed to mount region ${region.id}`, error);
     destroyRuntime();
-    callOriginalScene('chapter3_white_start');
+    if (fallbackSceneId) {
+      callOriginalScene(fallbackSceneId);
+    } else {
+      window.showMainMenu?.();
+    }
   } finally {
     mounting = false;
   }
 }
 
-window.enterExplorationRegion = (regionId = PROTOTYPE_REGION.id) => {
-  if (regionId !== PROTOTYPE_REGION.id) return;
-  void enterWhiteAcademyExploration();
+window.enterExplorationRegion = (regionId = getDefaultExplorationRegion().id) => {
+  const region = getExplorationRegion(regionId);
+  if (!region) {
+    console.warn('[exploration] unknown region', regionId);
+    return;
+  }
+  void enterExploration(region);
 };
 
 window.leaveExplorationRegion = () => {
@@ -112,22 +127,24 @@ window.openStoryFromExploration = (sceneId: string): boolean => {
   return callOriginalScene(sceneId);
 };
 
+function tryInterceptScene(sceneId: string): boolean {
+  if (bypassInterception) return false;
+  const entry = getExplorationEntry(sceneId);
+  if (!entry) return false;
+  void enterExploration(entry.region, entry.sceneId);
+  return true;
+}
+
 if (originalShowScene) {
   window.showScene = (sceneId: string) => {
-    if (!bypassInterception && EXPLORATION_ENTRY_SCENES.has(sceneId)) {
-      void enterWhiteAcademyExploration();
-      return;
-    }
+    if (tryInterceptScene(sceneId)) return;
     originalShowScene(sceneId);
   };
 }
 
 if (originalGoToScene) {
   window.goToScene = (sceneId: string) => {
-    if (!bypassInterception && EXPLORATION_ENTRY_SCENES.has(sceneId)) {
-      void enterWhiteAcademyExploration();
-      return;
-    }
+    if (tryInterceptScene(sceneId)) return;
     originalGoToScene(sceneId);
   };
 }
