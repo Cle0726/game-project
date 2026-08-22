@@ -1,0 +1,50 @@
+name: Simulation Runtime
+
+on:
+  pull_request:
+    paths:
+      - 'src/simulation/**'
+      - 'src/exploration/**'
+      - 'src/exploration-legacy-main.ts'
+      - 'src/worldmap/worldMapBridge.ts'
+      - 'scripts/assert-simulation-boundaries.mjs'
+      - 'tsconfig.simulation.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/simulation-runtime.yml'
+  push:
+    branches:
+      - feat/simulation-runtime-v1
+    paths:
+      - 'src/simulation/**'
+      - 'src/exploration/**'
+      - 'src/exploration-legacy-main.ts'
+      - 'src/worldmap/worldMapBridge.ts'
+      - 'scripts/assert-simulation-boundaries.mjs'
+      - 'tsconfig.simulation.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/simulation-runtime.yml'
+
+jobs:
+  simulation-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Architecture guard
+        run: npm run simulation:guard
+
+      - name: Strict typecheck
+        run: npm run simulation:typecheck
