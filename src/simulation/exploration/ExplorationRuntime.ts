@@ -8,6 +8,7 @@ import { wireLegacyFreeRoamInput } from './LegacyFreeRoamInputAdapter';
 import { wireLegacyFreeRoamInteraction } from './LegacyFreeRoamInteractionAdapter';
 import { wireLegacyFreeRoamLoop } from './LegacyFreeRoamLoopAdapter';
 import { wireLegacyFreeRoamMovement } from './LegacyFreeRoamMovementAdapter';
+import { wireLegacyFreeRoamNpcs } from './LegacyFreeRoamNpcAdapter';
 import { wireLegacyFreeRoamPresentation } from './LegacyFreeRoamPresentationAdapter';
 import { wireLegacyFreeRoamRenderer } from './LegacyFreeRoamRendererAdapter';
 import { wireLegacyFreeRoamWorldView } from './LegacyFreeRoamWorldViewAdapter';
@@ -17,10 +18,9 @@ export type ExplorationRuntimeOptions = FreeRoamPrototypeOptions;
 /**
  * Stable exploration runtime boundary used by story/world-map bridges.
  *
- * During Phase A it composes the existing Pixi FreeRoamPrototype as a renderer shell,
- * then replaces legacy rule/presentation/input/loop methods with formal Runtime systems.
- * Callers no longer need to know which parts are still legacy. The wrapped renderer
- * can be replaced later without changing chapter entry code.
+ * During Phase A it composes the existing Pixi FreeRoamPrototype as a compatibility
+ * shell, then replaces legacy rules, presentation, input and frame/NPC orchestration
+ * with formal Runtime systems. Chapter callers only depend on this boundary.
  */
 export class ExplorationRuntime {
   private readonly renderer: FreeRoamPrototype;
@@ -35,6 +35,7 @@ export class ExplorationRuntime {
     wireLegacyFreeRoamMovement(this.renderer, region);
     wireLegacyFreeRoamInteraction(this.renderer, region);
     wireLegacyFreeRoamPresentation(this.renderer, region);
+    wireLegacyFreeRoamNpcs(this.renderer, region);
     const input = wireLegacyFreeRoamInput(this.renderer);
     wireLegacyFreeRoamRenderer(this.renderer, region);
     wireLegacyFreeRoamLoop(this.renderer, region, input);
