@@ -7,12 +7,15 @@ const legacyPathfinding = read('src/exploration/pathfinding.ts');
 const legacyQuestState = read('src/exploration/questState.ts');
 const legacySchedule = read('src/exploration/npcSchedule.ts');
 const legacyRegionRegistry = read('src/exploration/regionRegistry.ts');
+const legacyActorMotion = read('src/exploration/actorMotion.ts');
 const persistence = read('src/simulation/state/SimulationPersistence.ts');
 const adapter = read('src/simulation/state/LegacyGameStateAdapter.ts');
 const runtime = read('src/simulation/runtime/SimulationRuntime.ts');
+const coreCommands = read('src/simulation/command/CoreCommandHandlers.ts');
 const freeRoam = read('src/exploration/FreeRoamPrototype.ts');
 const collisionSystem = read('src/simulation/exploration/CollisionSystem.ts');
 const movementSystem = read('src/simulation/exploration/MovementSystem.ts');
+const actorMotionSystem = read('src/simulation/exploration/ActorMotionSystem.ts');
 const navigationSystem = read('src/simulation/exploration/NavigationSystem.ts');
 const regionSystem = read('src/simulation/exploration/RegionSystem.ts');
 const questSystem = read('src/simulation/quest/QuestSystem.ts');
@@ -33,8 +36,17 @@ if (!persistence.includes('cle.exploration.verticalSlice.v1')) {
 if (!adapter.includes('simulationV1')) {
   failures.push('LegacyGameStateAdapter.ts must own the GameState.simulationV1 bridge');
 }
-if (!runtime.includes('CommandBus')) {
-  failures.push('SimulationRuntime.ts must own a validated CommandBus');
+if (!runtime.includes('CommandBus') || !runtime.includes('registerCoreCommandHandlers')) {
+  failures.push('SimulationRuntime.ts must own a validated CommandBus with core handlers');
+}
+if (!coreCommands.includes("command.source === 'agent'")) {
+  failures.push('CoreCommandHandlers.ts must explicitly block agent quest completion');
+}
+if (!coreCommands.includes("type: 'region.entered'")) {
+  failures.push('CoreCommandHandlers.ts must emit canonical region entry events');
+}
+if (!coreCommands.includes("type: 'quest.completed'")) {
+  failures.push('CoreCommandHandlers.ts must emit canonical quest completion events');
 }
 if (/window\.GameState/.test(freeRoam)) {
   failures.push('FreeRoamPrototype.ts must not directly mutate window.GameState');
@@ -60,11 +72,17 @@ if (!legacySchedule.includes('../simulation/agent/ScheduleSystem')) {
 if (!legacyRegionRegistry.includes('../simulation/exploration/RegionSystem')) {
   failures.push('legacy regionRegistry.ts must delegate lookup to RegionSystem');
 }
+if (!legacyActorMotion.includes('../simulation/exploration/ActorMotionSystem')) {
+  failures.push('legacy actorMotion.ts must delegate motion math to ActorMotionSystem');
+}
 if (!collisionSystem.includes('moveCircleWithAxisCollision')) {
   failures.push('CollisionSystem.ts must own axis-separated circle collision');
 }
 if (!movementSystem.includes('moveActorByDelta')) {
   failures.push('MovementSystem.ts must expose deterministic actor movement');
+}
+if (!actorMotionSystem.includes('stepActorMotion')) {
+  failures.push('ActorMotionSystem.ts must own renderer-independent walk motion math');
 }
 if (!navigationSystem.includes('findNavigationPath')) {
   failures.push('NavigationSystem.ts must own navigation graph traversal');
