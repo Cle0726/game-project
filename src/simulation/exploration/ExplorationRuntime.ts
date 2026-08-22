@@ -3,6 +3,7 @@ import type {
   FreeRoamPrototypeOptions,
 } from '../../exploration/FreeRoamPrototype';
 import type { ExplorationRegionDefinition } from '../../exploration/explorationTypes';
+import { wireLegacyFreeRoamActorViews } from './LegacyFreeRoamActorViewAdapter';
 import { wireLegacyFreeRoamInteraction } from './LegacyFreeRoamInteractionAdapter';
 import { wireLegacyFreeRoamMovement } from './LegacyFreeRoamMovementAdapter';
 import { wireLegacyFreeRoamPresentation } from './LegacyFreeRoamPresentationAdapter';
@@ -26,6 +27,7 @@ export class ExplorationRuntime {
     options: ExplorationRuntimeOptions = {},
   ) {
     this.renderer = new FreeRoamPrototype(region, options);
+    wireLegacyFreeRoamActorViews(this.renderer, region);
     wireLegacyFreeRoamMovement(this.renderer, region);
     wireLegacyFreeRoamInteraction(this.renderer, region);
     wireLegacyFreeRoamPresentation(this.renderer, region);
