@@ -65,9 +65,17 @@ export interface ExplorationQuestDefinition {
   target?: ExplorationQuestTarget;
 }
 
+export interface ExplorationPlayerSpriteVariants {
+  male?: string;
+  female?: string;
+  fallback?: string;
+}
+
 export interface ExplorationRegionAssets {
   backgroundSrc?: string;
   playerSpriteSrc?: string;
+  /** Optional chapter/region-specific actor state, e.g. chapter-0 pre-contract art. */
+  playerSpriteVariants?: ExplorationPlayerSpriteVariants;
 }
 
 export interface ExplorationRegionDefinition {
