@@ -15,6 +15,7 @@
     "video:gemini:auto": "node scripts/gemini-web-video-assets.mjs --auto --wait-minutes 45",
     "video:gemini:web": "node scripts/gemini-web-video-assets.mjs",
     "worldmap:test": "vite --open /tests/worldmap-test.html",
+    "exploration:test": "vite --open /tests/exploration-test.html",
     "assets:guard": "node scripts/assert-assets-externalized.mjs",
     "musicart:guard": "node scripts/assert-musicart-data-externalized.mjs",
     "musicart-detail:guard": "node scripts/assert-musicart-detail-data-externalized.mjs",
