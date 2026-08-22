@@ -58,8 +58,9 @@ function validateReturnPoint(command: GameCommand) {
   if (!isRecord(payload) || typeof payload.regionId !== 'string' || !payload.regionId.trim()) {
     return { accepted: false, reason: 'return_point_requires_region_id' };
   }
+  const facing = payload.facing;
   if (!isFinitePoint(payload)) return { accepted: false, reason: 'return_point_invalid_position' };
-  if (!['up', 'down', 'left', 'right'].includes(String(payload.facing))) {
+  if (!['up', 'down', 'left', 'right'].includes(String(facing))) {
     return { accepted: false, reason: 'return_point_invalid_facing' };
   }
   return { accepted: true };
