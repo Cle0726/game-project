@@ -8,6 +8,7 @@ on:
       - 'src/exploration-legacy-main.ts'
       - 'src/worldmap/worldMapBridge.ts'
       - 'scripts/assert-simulation-boundaries.mjs'
+      - 'scripts/assert-chapter0-exploration.mjs'
       - 'tsconfig.simulation.json'
       - 'package.json'
       - 'package-lock.json'
@@ -15,12 +16,14 @@ on:
   push:
     branches:
       - feat/simulation-runtime-v1
+      - feat/chapter0-exploration
     paths:
       - 'src/simulation/**'
       - 'src/exploration/**'
       - 'src/exploration-legacy-main.ts'
       - 'src/worldmap/worldMapBridge.ts'
       - 'scripts/assert-simulation-boundaries.mjs'
+      - 'scripts/assert-chapter0-exploration.mjs'
       - 'tsconfig.simulation.json'
       - 'package.json'
       - 'package-lock.json'
@@ -48,6 +51,9 @@ jobs:
 
       - name: Strict typecheck
         run: npm run simulation:typecheck
+
+      - name: Chapter 0 exploration guard
+        run: npm run chapter0:guard
 
       - name: Production build
         run: npm run simulation:build
