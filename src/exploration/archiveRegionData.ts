@@ -80,7 +80,7 @@ export const WHITE_ACADEMY_ARCHIVE_MILO_REGION: ExplorationRegionDefinition = {
     {
       id: 'sealed-cabinet',
       name: '封存档案柜',
-      area: { x: 1110, y: 220, width: 160, height: 120 },
+      area: { x: 1080, y: 220, width: 150, height: 120 },
       interactionText: '按 E 查看封条',
       statusText: '封条上的日期比零号奏者计划终止时间晚了整整两年。',
     },
