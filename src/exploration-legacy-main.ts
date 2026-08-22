@@ -6,6 +6,7 @@ import {
   getExplorationEntry,
   getExplorationRegion,
 } from './exploration/regionRegistry';
+import { getSimulationRuntime } from './simulation/runtime/SimulationRuntime';
 
 declare global {
   interface Window {
@@ -18,6 +19,7 @@ declare global {
 
 const originalShowScene = typeof window.showScene === 'function' ? window.showScene.bind(window) : undefined;
 const originalGoToScene = typeof window.goToScene === 'function' ? window.goToScene.bind(window) : undefined;
+const simulationRuntime = getSimulationRuntime();
 
 let runtime: FreeRoamPrototype | undefined;
 let host: HTMLDivElement | undefined;
@@ -75,6 +77,7 @@ async function enterExploration(
 ): Promise<void> {
   if (runtime || mounting) return;
   mounting = true;
+  simulationRuntime.start();
 
   window.clearReactWorldMapScreen?.();
   window.gamePhase = 'exploration';
