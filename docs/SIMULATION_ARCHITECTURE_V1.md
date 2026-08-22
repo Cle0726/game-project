@@ -41,18 +41,7 @@ Quest / Story / Witness / Memory / Relationship / Agent
 window.GameState.simulationV1
 ```
 
-保存：
-
-```text
-clock
-currentRegionId
-returnPoint
-regions
-quests
-agents
-eventCursor
-eventLedger
-```
+保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。
 
 `LegacyGameStateAdapter` 每次从当前 `window.GameState` 读取，避免 `loadGame()` 整体替换对象后引用失效。
 
@@ -74,33 +63,15 @@ WorldEvent
 EventLedger / WorldEventBus
 ```
 
-当前核心命令：
+当前核心命令：`region.enter / exploration.return_point.set / quest.complete`。
 
-```text
-region.enter
-exploration.return_point.set
-quest.complete
-```
-
-当前核心事件：
-
-```text
-region.entered
-exploration.return_point_set
-quest.completed
-```
+当前核心事件：`region.entered / exploration.return_point_set / quest.completed`。
 
 `source: agent` 已被代码规则禁止直接完成 Quest。
 
 ## ExplorationRuntime 边界
 
-章节/WorldMap 入口现在只依赖：
-
-```text
-src/simulation/exploration/ExplorationRuntime.ts
-```
-
-当前 Phase A 结构：
+章节/WorldMap 入口现在只依赖 `src/simulation/exploration/ExplorationRuntime.ts`。
 
 ```text
 legacy scene entry
@@ -116,52 +87,21 @@ formal Simulation / Presentation modules
 
 ## 已接入 live runtime 的确定性系统
 
-```text
-NavigationSystem
-QuestSystem
-SimulationClock
-ScheduleSystem
-RegionSystem
-ActorMotionSystem
-CollisionSystem
-MovementSystem
-InteractionSystem
-```
+`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`
 
-分别负责 Waypoint 路径、Quest 转换、游戏时间、NPC 日程、Region 注册、运动姿态、碰撞、玩家/NPC 位移、附近交互与 Quest 门槛。
+它们负责 Waypoint 路径、Quest 转换、游戏时间、NPC 日程、Region 注册、运动姿态、碰撞、玩家/NPC 位移、附近交互与 Quest 门槛。
 
 ## 已接入 live runtime 的 Renderer / Presentation
 
-```text
-ExplorationRenderer
-ExplorationWorldPresentation
-ExplorationActorViewFactory
-ExplorationHudPresentation
-ExplorationDialoguePresentation
-ExplorationObjectivePresentation
-```
+`ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`
 
-分别负责：
-
-- Camera / HUD layout 数学
-- 地图背景、fallback floor/grid、debug navigation overlay
-- 玩家/NPC Sprite、阴影、名字、活动文字
-- HUD Pixi 对象
-- 地图内对话状态与 panel
-- Quest marker / zone highlight / pulse
+它们负责 Camera/HUD layout、地图背景/fallback/debug overlay、玩家/NPC Sprite、HUD、地图内对话、Quest marker/highlight。
 
 这些模块都已由 `ExplorationRuntime` 接管当前可玩第三章切片，不是未使用的空接口。
 
 ## Phase A Migration Adapters
 
-```text
-LegacyFreeRoamActorViewAdapter
-LegacyFreeRoamWorldViewAdapter
-LegacyFreeRoamMovementAdapter
-LegacyFreeRoamInteractionAdapter
-LegacyFreeRoamPresentationAdapter
-LegacyFreeRoamRendererAdapter
-```
+`LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`
 
 Adapter 只用于迁移期：保持现有玩法稳定，同时把旧实例方法逐项重定向到新系统。等正式 Loop/Renderer 完成后整体删除。
 
@@ -177,43 +117,17 @@ periodic persistence trigger
 Pixi Application lifecycle
 ```
 
-实际规则基本已经抽出。下一阶段重点不是新增功能，而是把这些调用时序整理成正式 `InputController + ExplorationLoop`。
+实际规则基本已经抽出。下一阶段只处理调用时序：建立 `InputController + ExplorationLoop`，然后移除 `FreeRoamPrototype` compatibility shell。
 
 ## Story / AI 长期边界
 
-剧情仍分：
-
-```text
-Canonical Beat
-Authored Dynamic Beat
-Emergent Beat
-```
-
-AI 可以帮助对白、解释和 Intent，但不能改 Canon。
+剧情分 `Canonical Beat / Authored Dynamic Beat / Emergent Beat`。AI 可以帮助对白、解释和 Intent，但不能改 Canon。
 
 Fast Loop（30~60 FPS）永不调用 LLM；Simulation Loop 主要是 TypeScript 规则；Cognitive Loop 只在重要事件异步调用模型。
 
-模型只允许输出：
+模型只允许输出 `dialogue / interpretation / intent / mood`，不得输出 `relationship delta / canonical flag / quest completion / reward / battle result / coordinates`。
 
-```text
-dialogue
-interpretation
-intent
-mood
-```
-
-模型不得输出：
-
-```text
-relationship delta
-canonical flag
-quest completion
-reward
-battle result
-coordinates
-```
-
-Relationship / Emotion / Knowledge / Memory 长期保持分离；Memory append-only；Knowledge 后续记录 witness / told / rumor / document / inference 来源。
+Relationship / Emotion / Knowledge / Memory 长期保持分离；Memory append-only；Knowledge 后续记录 `witness / told / rumor / document / inference` 来源。
 
 ## NPC Simulation LOD
 
@@ -251,12 +165,6 @@ Story/Exit lifecycle cleanup
 remove FreeRoamPrototype compatibility shell
 ```
 
-然后正式进入：
-
-```text
-chapter0_start
-↓
-第0章自由移动改造
-```
+然后正式进入 `chapter0_start` 的第0章自由移动改造。
 
 第0章第一阶段保持 **LLM OFF**，先确保玩法、存档、回滚、剧情桥和战斗返回可靠。
