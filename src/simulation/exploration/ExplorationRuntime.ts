@@ -1,51 +1,24 @@
-import { FreeRoamPrototype } from '../../exploration/FreeRoamPrototype';
-import type {
-  FreeRoamPrototypeOptions,
-} from '../../exploration/FreeRoamPrototype';
 import type { ExplorationRegionDefinition } from '../../exploration/explorationTypes';
-import { wireLegacyFreeRoamActorViews } from './LegacyFreeRoamActorViewAdapter';
-import { wireLegacyFreeRoamInput } from './LegacyFreeRoamInputAdapter';
-import { wireLegacyFreeRoamInteraction } from './LegacyFreeRoamInteractionAdapter';
-import { wireLegacyFreeRoamLoop } from './LegacyFreeRoamLoopAdapter';
-import { wireLegacyFreeRoamMovement } from './LegacyFreeRoamMovementAdapter';
-import { wireLegacyFreeRoamNpcs } from './LegacyFreeRoamNpcAdapter';
-import { wireLegacyFreeRoamPresentation } from './LegacyFreeRoamPresentationAdapter';
-import { wireLegacyFreeRoamRenderer } from './LegacyFreeRoamRendererAdapter';
-import { wireLegacyFreeRoamWorldView } from './LegacyFreeRoamWorldViewAdapter';
+import { ExplorationHost, type ExplorationHostOptions } from './ExplorationHost';
 
-export type ExplorationRuntimeOptions = FreeRoamPrototypeOptions;
+export type ExplorationRuntimeOptions = ExplorationHostOptions;
 
-/**
- * Stable exploration runtime boundary used by story/world-map bridges.
- *
- * During Phase A it composes the existing Pixi FreeRoamPrototype as a compatibility
- * shell, then replaces legacy rules, presentation, input and frame/NPC orchestration
- * with formal Runtime systems. Chapter callers only depend on this boundary.
- */
+/** Stable exploration boundary used by story/world-map bridges. */
 export class ExplorationRuntime {
-  private readonly renderer: FreeRoamPrototype;
+  private readonly host: ExplorationHost;
 
   constructor(
     readonly region: ExplorationRegionDefinition,
     options: ExplorationRuntimeOptions = {},
   ) {
-    this.renderer = new FreeRoamPrototype(region, options);
-    wireLegacyFreeRoamActorViews(this.renderer, region);
-    wireLegacyFreeRoamWorldView(this.renderer, region);
-    wireLegacyFreeRoamMovement(this.renderer, region);
-    wireLegacyFreeRoamInteraction(this.renderer, region);
-    wireLegacyFreeRoamPresentation(this.renderer, region);
-    wireLegacyFreeRoamNpcs(this.renderer, region);
-    const input = wireLegacyFreeRoamInput(this.renderer);
-    wireLegacyFreeRoamRenderer(this.renderer, region);
-    wireLegacyFreeRoamLoop(this.renderer, region, input);
+    this.host = new ExplorationHost(region, options);
   }
 
-  mount(host: HTMLElement): Promise<void> {
-    return this.renderer.mount(host);
+  mount(container: HTMLElement): Promise<void> {
+    return this.host.mount(container);
   }
 
   destroy(): void {
-    this.renderer.destroy();
+    this.host.destroy();
   }
 }
