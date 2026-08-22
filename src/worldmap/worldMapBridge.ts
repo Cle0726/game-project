@@ -5,7 +5,8 @@ export type GamePhase =
   | 'battle'
   | 'tea_break'
   | 'world_map'
-  | 'region_map';
+  | 'region_map'
+  | 'exploration';
 
 export type WorldMapPhase = Extract<GamePhase, 'world_map' | 'region_map'>;
 
