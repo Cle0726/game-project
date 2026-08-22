@@ -10,6 +10,7 @@ import { getSimulationRuntime } from './simulation/runtime/SimulationRuntime';
 import type { GameCommandSource } from './simulation/command/GameCommand';
 import { wireLegacyFreeRoamMovement } from './simulation/exploration/LegacyFreeRoamMovementAdapter';
 import { wireLegacyFreeRoamInteraction } from './simulation/exploration/LegacyFreeRoamInteractionAdapter';
+import { wireLegacyFreeRoamRenderer } from './simulation/exploration/LegacyFreeRoamRendererAdapter';
 
 declare global {
   interface Window {
@@ -128,11 +129,12 @@ async function enterExploration(
     },
   });
 
-  // Phase-A migration bridges: FreeRoam still owns Pixi/UI, while deterministic
-  // displacement, collision, proximity selection and quest-zone gating are now
-  // resolved by the formal Simulation systems.
+  // Phase-A migration bridges: FreeRoam still owns Pixi object creation and dialogue
+  // presentation, while deterministic movement/collision, interaction rules and
+  // camera/HUD layout now resolve through formal Simulation systems.
   wireLegacyFreeRoamMovement(runtime, region);
   wireLegacyFreeRoamInteraction(runtime, region);
+  wireLegacyFreeRoamRenderer(runtime, region);
 
   const savedPosition = simulationRuntime.state.regions[region.id]?.playerPosition;
 
