@@ -7,6 +7,7 @@ import {
   PROTOTYPE_DAY_START_MINUTE,
   resolveScheduleEntry,
 } from './npcSchedule';
+import { findWaypointPath } from './pathfinding';
 import { openStoryScene } from './storyBridge';
 
 const PLAYER_RADIUS = 22;
@@ -19,6 +20,8 @@ interface NpcRuntime {
   node: Container;
   position: Vec2;
   activityText: Text;
+  activeTargetWaypointId?: string;
+  route: Vec2[];
 }
 
 export class FreeRoamPrototype {
@@ -79,6 +82,8 @@ export class FreeRoamPrototype {
       this.world.addChild(obstacle);
     }
 
+    this.buildWaypointOverlay();
+
     this.player.addChild(new Graphics().circle(0, 0, PLAYER_RADIUS).fill(0xe5e7eb));
     this.player.addChild(new Graphics().circle(8, -5, 5).fill(0x111827));
     this.player.position.set(this.playerPosition.x, this.playerPosition.y);
@@ -107,8 +112,34 @@ export class FreeRoamPrototype {
       node.addChild(activityText);
 
       this.world.addChild(node);
-      this.npcs.push({ definition, node, position, activityText });
+      this.npcs.push({ definition, node, position, activityText, route: [] });
     }
+  }
+
+  private buildWaypointOverlay(): void {
+    const overlay = new Graphics();
+    const waypointMap = new Map(PROTOTYPE_REGION.waypoints.map((waypoint) => [waypoint.id, waypoint]));
+    const drawnEdges = new Set<string>();
+
+    for (const waypoint of PROTOTYPE_REGION.waypoints) {
+      for (const linkedId of waypoint.links) {
+        const linked = waypointMap.get(linkedId);
+        if (!linked) continue;
+        const edgeKey = [waypoint.id, linked.id].sort().join('::');
+        if (drawnEdges.has(edgeKey)) continue;
+        drawnEdges.add(edgeKey);
+        overlay
+          .moveTo(waypoint.position.x, waypoint.position.y)
+          .lineTo(linked.position.x, linked.position.y);
+      }
+    }
+    overlay.stroke({ width: 3, color: 0x6f91ba, alpha: 0.28 });
+
+    for (const waypoint of PROTOTYPE_REGION.waypoints) {
+      overlay.circle(waypoint.position.x, waypoint.position.y, 7).fill({ color: 0x9fb7d5, alpha: 0.55 });
+    }
+
+    this.world.addChild(overlay);
   }
 
   private buildHud(): void {
@@ -120,7 +151,7 @@ export class FreeRoamPrototype {
     this.app.stage.addChild(title);
 
     const controls = new Text({
-      text: 'WASD / 方向键移动 · E / 空格互动 · NPC 按日程自主移动',
+      text: 'WASD / 方向键移动 · E / 空格互动 · NPC 按日程沿路径点自主移动',
       style: { fill: 0xcbd5e1, fontSize: 15, fontFamily: 'sans-serif' },
     });
     controls.position.set(24, 54);
@@ -189,10 +220,28 @@ export class FreeRoamPrototype {
       }
 
       npc.activityText.text = scheduleEntry.activity;
-      const dx = scheduleEntry.position.x - npc.position.x;
-      const dy = scheduleEntry.position.y - npc.position.y;
+      if (npc.activeTargetWaypointId !== scheduleEntry.targetWaypointId) {
+        npc.activeTargetWaypointId = scheduleEntry.targetWaypointId;
+        npc.route = findWaypointPath(
+          PROTOTYPE_REGION.waypoints,
+          npc.position,
+          scheduleEntry.targetWaypointId,
+        );
+      }
+
+      const nextPoint = npc.route[0];
+      if (!nextPoint) continue;
+
+      const dx = nextPoint.x - npc.position.x;
+      const dy = nextPoint.y - npc.position.y;
       const distance = Math.hypot(dx, dy);
-      if (distance < 2) continue;
+      if (distance < 2) {
+        npc.position.x = nextPoint.x;
+        npc.position.y = nextPoint.y;
+        npc.node.position.set(npc.position.x, npc.position.y);
+        npc.route.shift();
+        continue;
+      }
 
       const speed = npc.definition.speed ?? 100;
       const step = Math.min(speed * deltaSeconds, distance);
