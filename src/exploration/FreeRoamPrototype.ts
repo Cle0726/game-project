@@ -18,11 +18,17 @@ import { findWaypointPath } from './pathfinding';
 import { openStoryScene } from './storyBridge';
 import { completeQuest, findQuestById } from './questState';
 import { loadExplorationSave, saveExplorationState } from './explorationSave';
+import {
+  createActorMotionState,
+  updateActorMotion,
+  type ActorMotionState,
+} from './actorMotion';
 
 const PLAYER_RADIUS = 24;
 const NPC_RADIUS = 24;
 const MOVE_SPEED = 290;
 const INTERACTION_DISTANCE = 120;
+const NPC_CONVERSATION_PAUSE_DISTANCE = 105;
 const AUTOSAVE_SECONDS = 3;
 
 export interface FreeRoamPrototypeOptions {
@@ -32,11 +38,19 @@ export interface FreeRoamPrototypeOptions {
   onExit?: () => void;
 }
 
+interface LoadedActorSprite {
+  sprite: Sprite;
+  baseScale: number;
+}
+
 interface NpcRuntime {
   definition: ExplorationNpcDefinition;
   node: Container;
   position: Vec2;
   activityText: Text;
+  sprite?: Sprite;
+  spriteBaseScale: number;
+  motion: ActorMotionState;
   activeTargetWaypointId?: string;
   route: Vec2[];
 }
@@ -46,6 +60,9 @@ export class FreeRoamPrototype {
   private world = new Container();
   private player = new Container();
   private playerPosition: Vec2;
+  private playerSprite?: Sprite;
+  private playerSpriteBaseScale = 1;
+  private playerMotion = createActorMotionState();
   private keys = new Set<string>();
   private npcs: NpcRuntime[] = [];
   private clockMinute = PROTOTYPE_DAY_START_MINUTE;
@@ -67,14 +84,23 @@ export class FreeRoamPrototype {
       stroke: { color: 0x020617, width: 4 },
     },
   });
-  private clockText = new Text({ text: '', style: { fill: 0xd7e1ef, fontSize: 14, fontFamily: 'sans-serif' } });
+  private clockText = new Text({
+    text: '',
+    style: { fill: 0xd7e1ef, fontSize: 14, fontFamily: 'sans-serif' },
+  });
   private questTitle = new Text({
     text: '',
     style: { fill: 0xf3e4b3, fontSize: 18, fontWeight: '600', fontFamily: 'sans-serif' },
   });
   private questDescription = new Text({
     text: '',
-    style: { fill: 0xe2e8f0, fontSize: 14, fontFamily: 'sans-serif', wordWrap: true, wordWrapWidth: 340 },
+    style: {
+      fill: 0xe2e8f0,
+      fontSize: 14,
+      fontFamily: 'sans-serif',
+      wordWrap: true,
+      wordWrapWidth: 340,
+    },
   });
   private clockPanel?: Graphics;
   private controlsText?: Text;
@@ -131,7 +157,9 @@ export class FreeRoamPrototype {
     const backgroundLoaded = await this.addBackground();
 
     if (!backgroundLoaded) {
-      const floor = new Graphics().rect(0, 0, this.region.width, this.region.height).fill(0x1a2638);
+      const floor = new Graphics()
+        .rect(0, 0, this.region.width, this.region.height)
+        .fill(0x1a2638);
       floor.zIndex = 0;
       this.world.addChild(floor);
 
@@ -147,7 +175,10 @@ export class FreeRoamPrototype {
       this.world.addChild(grid);
     }
 
-    if (this.options.debugNavigation || new URLSearchParams(window.location.search).get('debugNav') === '1') {
+    if (
+      this.options.debugNavigation ||
+      new URLSearchParams(window.location.search).get('debugNav') === '1'
+    ) {
       this.buildDebugOverlay();
     }
 
@@ -182,9 +213,11 @@ export class FreeRoamPrototype {
     this.player.addChild(shadow);
 
     const src = this.options.playerSpriteSrc ?? this.region.assets?.playerSpriteSrc;
-    const sprite = await this.loadActorSprite(src, 165);
-    if (sprite) {
-      this.player.addChild(sprite);
+    const loaded = await this.loadActorSprite(src, 165);
+    if (loaded) {
+      this.playerSprite = loaded.sprite;
+      this.playerSpriteBaseScale = loaded.baseScale;
+      this.player.addChild(loaded.sprite);
     } else {
       this.player.addChild(new Graphics().circle(0, -24, PLAYER_RADIUS).fill(0xe5e7eb));
     }
@@ -204,10 +237,13 @@ export class FreeRoamPrototype {
       node.position.set(position.x, position.y);
       node.zIndex = position.y + 100;
 
-      node.addChild(new Graphics().ellipse(0, 0, 30, 12).fill({ color: 0x0b1220, alpha: 0.25 }));
-      const sprite = await this.loadActorSprite(definition.spriteSrc, 155);
-      if (sprite) {
-        node.addChild(sprite);
+      node.addChild(
+        new Graphics().ellipse(0, 0, 30, 12).fill({ color: 0x0b1220, alpha: 0.25 }),
+      );
+
+      const loaded = await this.loadActorSprite(definition.spriteSrc, 155);
+      if (loaded) {
+        node.addChild(loaded.sprite);
       } else {
         node.addChild(new Graphics().circle(0, -22, NPC_RADIUS).fill(0x9fb7d5));
       }
@@ -240,11 +276,23 @@ export class FreeRoamPrototype {
       node.addChild(activityText);
 
       this.world.addChild(node);
-      this.npcs.push({ definition, node, position, activityText, route: [] });
+      this.npcs.push({
+        definition,
+        node,
+        position,
+        activityText,
+        sprite: loaded?.sprite,
+        spriteBaseScale: loaded?.baseScale ?? 1,
+        motion: createActorMotionState(),
+        route: [],
+      });
     }
   }
 
-  private async loadActorSprite(src: string | undefined, targetHeight: number): Promise<Sprite | undefined> {
+  private async loadActorSprite(
+    src: string | undefined,
+    targetHeight: number,
+  ): Promise<LoadedActorSprite | undefined> {
     if (!src) return undefined;
 
     try {
@@ -252,9 +300,9 @@ export class FreeRoamPrototype {
       const sprite = new Sprite(texture);
       sprite.anchor.set(0.5, 1);
       const textureHeight = Math.max(1, sprite.texture.height);
-      const scale = targetHeight / textureHeight;
-      sprite.scale.set(scale);
-      return sprite;
+      const baseScale = targetHeight / textureHeight;
+      sprite.scale.set(baseScale);
+      return { sprite, baseScale };
     } catch (error) {
       console.warn('[exploration] actor sprite failed to load', src, error);
       return undefined;
@@ -263,7 +311,9 @@ export class FreeRoamPrototype {
 
   private buildDebugOverlay(): void {
     const overlay = new Graphics();
-    const waypointMap = new Map(this.region.waypoints.map((waypoint) => [waypoint.id, waypoint]));
+    const waypointMap = new Map(
+      this.region.waypoints.map((waypoint) => [waypoint.id, waypoint]),
+    );
     const drawnEdges = new Set<string>();
 
     for (const zone of this.region.collisionZones) {
@@ -280,13 +330,17 @@ export class FreeRoamPrototype {
         const edgeKey = [waypoint.id, linked.id].sort().join('::');
         if (drawnEdges.has(edgeKey)) continue;
         drawnEdges.add(edgeKey);
-        overlay.moveTo(waypoint.position.x, waypoint.position.y).lineTo(linked.position.x, linked.position.y);
+        overlay
+          .moveTo(waypoint.position.x, waypoint.position.y)
+          .lineTo(linked.position.x, linked.position.y);
       }
     }
     overlay.stroke({ width: 3, color: 0x8ac7ff, alpha: 0.48 });
 
     for (const waypoint of this.region.waypoints) {
-      overlay.circle(waypoint.position.x, waypoint.position.y, 7).fill({ color: 0xcde9ff, alpha: 0.7 });
+      overlay
+        .circle(waypoint.position.x, waypoint.position.y, 7)
+        .fill({ color: 0xcde9ff, alpha: 0.7 });
     }
 
     overlay.zIndex = 50;
@@ -302,7 +356,12 @@ export class FreeRoamPrototype {
 
     const title = new Text({
       text: this.region.name,
-      style: { fill: 0xffffff, fontSize: 21, fontWeight: '600', fontFamily: 'sans-serif' },
+      style: {
+        fill: 0xffffff,
+        fontSize: 21,
+        fontWeight: '600',
+        fontFamily: 'sans-serif',
+      },
     });
     title.position.set(30, 27);
     this.app.stage.addChild(title);
@@ -374,20 +433,29 @@ export class FreeRoamPrototype {
     this.clockMinute = advancePrototypeClock(this.clockMinute, deltaSeconds);
     this.updateNpcs(deltaSeconds);
 
-    let dx = 0;
-    let dy = 0;
+    let inputX = 0;
+    let inputY = 0;
 
-    if (this.keys.has('w') || this.keys.has('arrowup')) dy -= 1;
-    if (this.keys.has('s') || this.keys.has('arrowdown')) dy += 1;
-    if (this.keys.has('a') || this.keys.has('arrowleft')) dx -= 1;
-    if (this.keys.has('d') || this.keys.has('arrowright')) dx += 1;
+    if (this.keys.has('w') || this.keys.has('arrowup')) inputY -= 1;
+    if (this.keys.has('s') || this.keys.has('arrowdown')) inputY += 1;
+    if (this.keys.has('a') || this.keys.has('arrowleft')) inputX -= 1;
+    if (this.keys.has('d') || this.keys.has('arrowright')) inputX += 1;
 
-    if (dx !== 0 || dy !== 0) {
-      const length = Math.hypot(dx, dy);
-      dx = (dx / length) * MOVE_SPEED * deltaSeconds;
-      dy = (dy / length) * MOVE_SPEED * deltaSeconds;
-      this.tryMovePlayer(dx, dy);
+    let playerMovement = { x: 0, y: 0 };
+    if (inputX !== 0 || inputY !== 0) {
+      const length = Math.hypot(inputX, inputY);
+      const dx = (inputX / length) * MOVE_SPEED * deltaSeconds;
+      const dy = (inputY / length) * MOVE_SPEED * deltaSeconds;
+      playerMovement = this.tryMovePlayer(dx, dy);
     }
+
+    updateActorMotion(this.playerSprite, this.playerMotion, {
+      dx: playerMovement.x,
+      dy: playerMovement.y,
+      deltaSeconds,
+      isMoving: Math.hypot(playerMovement.x, playerMovement.y) > 0.01,
+      baseScale: this.playerSpriteBaseScale,
+    });
 
     this.updateNearbyInteraction();
     this.updateCamera();
@@ -407,17 +475,37 @@ export class FreeRoamPrototype {
       const scheduleEntry = resolveScheduleEntry(npc.definition.schedule, this.clockMinute);
       if (!scheduleEntry) {
         npc.activityText.text = '自由行动';
+        this.setNpcIdle(npc, deltaSeconds);
+        continue;
+      }
+
+      const playerDistance = Math.hypot(
+        npc.position.x - this.playerPosition.x,
+        npc.position.y - this.playerPosition.y,
+      );
+
+      if (playerDistance <= NPC_CONVERSATION_PAUSE_DISTANCE) {
+        npc.activityText.text = `${scheduleEntry.activity} · 可交谈`;
+        npc.motion.facingX = this.playerPosition.x < npc.position.x ? -1 : 1;
+        this.setNpcIdle(npc, deltaSeconds);
         continue;
       }
 
       npc.activityText.text = scheduleEntry.activity;
       if (npc.activeTargetWaypointId !== scheduleEntry.targetWaypointId) {
         npc.activeTargetWaypointId = scheduleEntry.targetWaypointId;
-        npc.route = findWaypointPath(this.region.waypoints, npc.position, scheduleEntry.targetWaypointId);
+        npc.route = findWaypointPath(
+          this.region.waypoints,
+          npc.position,
+          scheduleEntry.targetWaypointId,
+        );
       }
 
       const nextPoint = npc.route[0];
-      if (!nextPoint) continue;
+      if (!nextPoint) {
+        this.setNpcIdle(npc, deltaSeconds);
+        continue;
+      }
 
       const dx = nextPoint.x - npc.position.x;
       const dy = nextPoint.y - npc.position.y;
@@ -428,50 +516,106 @@ export class FreeRoamPrototype {
         npc.node.position.set(npc.position.x, npc.position.y);
         npc.node.zIndex = npc.position.y + 100;
         npc.route.shift();
+        this.setNpcIdle(npc, deltaSeconds);
         continue;
       }
 
       const speed = npc.definition.speed ?? 100;
       const step = Math.min(speed * deltaSeconds, distance);
-      this.tryMoveNpc(npc, (dx / distance) * step, (dy / distance) * step);
+      const movement = this.tryMoveNpc(
+        npc,
+        (dx / distance) * step,
+        (dy / distance) * step,
+      );
+
+      updateActorMotion(npc.sprite, npc.motion, {
+        dx: movement.x,
+        dy: movement.y,
+        deltaSeconds,
+        isMoving: Math.hypot(movement.x, movement.y) > 0.01,
+        baseScale: npc.spriteBaseScale,
+      });
     }
   }
 
-  private tryMovePlayer(dx: number, dy: number): void {
-    const nextX = this.clamp(this.playerPosition.x + dx, PLAYER_RADIUS, this.region.width - PLAYER_RADIUS);
+  private setNpcIdle(npc: NpcRuntime, deltaSeconds: number): void {
+    updateActorMotion(npc.sprite, npc.motion, {
+      dx: 0,
+      dy: 0,
+      deltaSeconds,
+      isMoving: false,
+      baseScale: npc.spriteBaseScale,
+    });
+  }
+
+  private tryMovePlayer(dx: number, dy: number): Vec2 {
+    const before = { ...this.playerPosition };
+    const nextX = this.clamp(
+      this.playerPosition.x + dx,
+      PLAYER_RADIUS,
+      this.region.width - PLAYER_RADIUS,
+    );
     if (!this.collidesCircle(nextX, this.playerPosition.y, PLAYER_RADIUS)) {
       this.playerPosition.x = nextX;
     }
 
-    const nextY = this.clamp(this.playerPosition.y + dy, PLAYER_RADIUS, this.region.height - PLAYER_RADIUS);
+    const nextY = this.clamp(
+      this.playerPosition.y + dy,
+      PLAYER_RADIUS,
+      this.region.height - PLAYER_RADIUS,
+    );
     if (!this.collidesCircle(this.playerPosition.x, nextY, PLAYER_RADIUS)) {
       this.playerPosition.y = nextY;
     }
 
     this.player.position.set(this.playerPosition.x, this.playerPosition.y);
     this.player.zIndex = this.playerPosition.y + 100;
+    return {
+      x: this.playerPosition.x - before.x,
+      y: this.playerPosition.y - before.y,
+    };
   }
 
-  private tryMoveNpc(npc: NpcRuntime, dx: number, dy: number): void {
-    const nextX = this.clamp(npc.position.x + dx, NPC_RADIUS, this.region.width - NPC_RADIUS);
+  private tryMoveNpc(npc: NpcRuntime, dx: number, dy: number): Vec2 {
+    const before = { ...npc.position };
+    const nextX = this.clamp(
+      npc.position.x + dx,
+      NPC_RADIUS,
+      this.region.width - NPC_RADIUS,
+    );
     if (!this.collidesCircle(nextX, npc.position.y, NPC_RADIUS)) {
       npc.position.x = nextX;
     }
 
-    const nextY = this.clamp(npc.position.y + dy, NPC_RADIUS, this.region.height - NPC_RADIUS);
+    const nextY = this.clamp(
+      npc.position.y + dy,
+      NPC_RADIUS,
+      this.region.height - NPC_RADIUS,
+    );
     if (!this.collidesCircle(npc.position.x, nextY, NPC_RADIUS)) {
       npc.position.y = nextY;
     }
 
     npc.node.position.set(npc.position.x, npc.position.y);
     npc.node.zIndex = npc.position.y + 100;
+    return {
+      x: npc.position.x - before.x,
+      y: npc.position.y - before.y,
+    };
   }
 
   private collidesCircle(x: number, y: number, radius: number): boolean {
-    return this.region.collisionZones.some((zone) => this.circleIntersectsRect(x, y, radius, zone));
+    return this.region.collisionZones.some((zone) =>
+      this.circleIntersectsRect(x, y, radius, zone),
+    );
   }
 
-  private circleIntersectsRect(cx: number, cy: number, radius: number, rect: RectZone): boolean {
+  private circleIntersectsRect(
+    cx: number,
+    cy: number,
+    radius: number,
+    rect: RectZone,
+  ): boolean {
     const closestX = this.clamp(cx, rect.x, rect.x + rect.width);
     const closestY = this.clamp(cy, rect.y, rect.y + rect.height);
     const dx = cx - closestX;
@@ -484,7 +628,10 @@ export class FreeRoamPrototype {
     let nearestDistance = INTERACTION_DISTANCE;
 
     for (const npc of this.npcs) {
-      const distance = Math.hypot(npc.position.x - this.playerPosition.x, npc.position.y - this.playerPosition.y);
+      const distance = Math.hypot(
+        npc.position.x - this.playerPosition.x,
+        npc.position.y - this.playerPosition.y,
+      );
       if (distance < nearestDistance) {
         nearest = npc;
         nearestDistance = distance;
@@ -492,12 +639,19 @@ export class FreeRoamPrototype {
     }
 
     this.nearbyNpc = nearest;
-    this.nearbyZone = this.region.interactionZones?.find((zone) => this.pointInsideZone(this.playerPosition, zone));
+    this.nearbyZone = this.region.interactionZones?.find((zone) =>
+      this.pointInsideZone(this.playerPosition, zone),
+    );
   }
 
   private pointInsideZone(position: Vec2, zone: ExplorationInteractionZone): boolean {
     const { x, y, width, height } = zone.area;
-    return position.x >= x && position.x <= x + width && position.y >= y && position.y <= y + height;
+    return (
+      position.x >= x &&
+      position.x <= x + width &&
+      position.y >= y &&
+      position.y <= y + height
+    );
   }
 
   private updateCamera(): void {
@@ -515,12 +669,18 @@ export class FreeRoamPrototype {
   private updateHudPositions(): void {
     this.clockPanel?.position.set(this.app.screen.width - 208, 16);
     this.clockText.position.set(this.app.screen.width - 113, 37);
-    this.controlsText?.position.set(this.app.screen.width / 2, this.app.screen.height - 22);
+    this.controlsText?.position.set(
+      this.app.screen.width / 2,
+      this.app.screen.height - 22,
+    );
   }
 
   private updatePrompt(): void {
     this.prompt.position.set(this.app.screen.width / 2, this.app.screen.height - 54);
-    this.prompt.text = this.nearbyNpc?.definition.interactionText ?? this.nearbyZone?.interactionText ?? '';
+    this.prompt.text =
+      this.nearbyNpc?.definition.interactionText ??
+      this.nearbyZone?.interactionText ??
+      '';
   }
 
   private interact(): void {
@@ -536,6 +696,8 @@ export class FreeRoamPrototype {
 
   private interactWithNpc(npc: NpcRuntime): void {
     const { definition, activityText } = npc;
+    npc.motion.facingX = this.playerPosition.x < npc.position.x ? -1 : 1;
+    this.setNpcIdle(npc, 1 / 60);
     const questChanged = this.tryCompleteQuest(definition.questCompleteId);
 
     if (!definition.storySceneId) {
@@ -549,7 +711,11 @@ export class FreeRoamPrototype {
   }
 
   private interactWithZone(zone: ExplorationInteractionZone): void {
-    if (zone.questCompleteId && this.activeQuestId !== zone.questCompleteId && !this.completedQuestIds.includes(zone.questCompleteId)) {
+    if (
+      zone.questCompleteId &&
+      this.activeQuestId !== zone.questCompleteId &&
+      !this.completedQuestIds.includes(zone.questCompleteId)
+    ) {
       const currentQuest = findQuestById(this.region.quests, this.activeQuestId);
       this.status.text = currentQuest
         ? `当前目标：${currentQuest.title}。完成后再前往${zone.name}。`
@@ -563,10 +729,18 @@ export class FreeRoamPrototype {
   }
 
   private tryCompleteQuest(questId: string | undefined): boolean {
-    const result = completeQuest(this.region.quests, this.activeQuestId, this.completedQuestIds, questId);
+    const result = completeQuest(
+      this.region.quests,
+      this.activeQuestId,
+      this.completedQuestIds,
+      questId,
+    );
     if (!result.changed) return false;
 
-    const completedQuest = findQuestById<ExplorationQuestDefinition>(this.region.quests, questId);
+    const completedQuest = findQuestById<ExplorationQuestDefinition>(
+      this.region.quests,
+      questId,
+    );
     this.activeQuestId = result.activeQuestId;
     this.completedQuestIds = result.completedQuestIds;
     this.status.text = completedQuest?.completionText ?? '目标已完成。';
@@ -598,7 +772,10 @@ export class FreeRoamPrototype {
 
   private persistState(): void {
     const npcPositions = Object.fromEntries(
-      this.npcs.map((npc) => [npc.definition.id, { x: npc.position.x, y: npc.position.y }]),
+      this.npcs.map((npc) => [
+        npc.definition.id,
+        { x: npc.position.x, y: npc.position.y },
+      ]),
     );
 
     saveExplorationState({
