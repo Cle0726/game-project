@@ -1,9 +1,10 @@
 export const WHITE_ACADEMY_PLAZA_ASSETS = {
-  // The live branch uses an existing chapter-3 visual so the normal game never falls
-  // back to a programmer grid. Replace only this path when the dedicated walkable
-  // 白谱院前广场 background asset is committed; exploration code stays unchanged.
-  backgroundSrc: '/assets/generated/chapter3/keyvisuals/cg_ch3_white_score_main_v01.png',
-  generatedBackgroundTarget: '/assets/generated/exploration/white-academy-plaza/bg_white_academy_plaza_v01.webp',
+  // Dedicated walkable plaza background generated for the live exploration slice.
+  // The SVG embeds a compressed copy of the approved concept so the current GitHub
+  // connector can commit it as UTF-8 text. A full-resolution WebP can replace this
+  // path later without changing exploration runtime code.
+  backgroundSrc: '/assets/generated/exploration/white-academy-plaza/bg_white_academy_plaza_v01.svg',
+  fullResolutionTarget: '/assets/generated/exploration/white-academy-plaza/bg_white_academy_plaza_v01.webp',
   protagonistMaleSrc: '/assets/generated/characters/char_protagonist_rinche_male_default_v01.png',
   protagonistFemaleSrc: '/assets/generated/characters/char_protagonist_rinsa_female_default_v01.png',
   protagonistFallbackSrc: '/assets/generated/characters/char_protagonist_initial_traveler_v01.png',
