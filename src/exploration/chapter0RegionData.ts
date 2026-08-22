@@ -4,131 +4,125 @@ const CH0_ALLEY_BACKGROUND =
   '/assets/generated/chapter0/backgrounds/bg_ch0_miansha_residential_alley_v01.png';
 const CH0_PIANO_SQUARE_BACKGROUND =
   '/assets/generated/chapter0/backgrounds/bg_ch0_miansha_town_square_piano_v01.png';
-const ANNING_SPRITE =
-  '/assets/generated/character_states/sprites/char_anning_sprite_default_v04.png';
-const TIYA_SPRITE =
-  '/assets/generated/character_states/sprites/char_tiya_sprite_default_v04.png';
+
+const CH0_ANNING_SPRITE =
+  '/assets/generated/chapter0/sprites/characters/char_ch0_anning_sprite_default_v02.png';
+const CH0_TIYA_SPRITE =
+  '/assets/generated/chapter0/sprites/characters/char_ch0_tiya_sprite_default_ai_v01.png';
+const CH0_NOI_SPRITE =
+  '/assets/generated/chapter0/sprites/characters/char_ch0_noi_sprite_default_v03.png';
 
 const MAP_WIDTH = 1600;
 const MAP_HEIGHT = 900;
 
 /**
- * First chapter-0 exploration slice.
+ * Chapter 0 first exploration step.
  *
- * The authored opening scene remains canonical. ch0_001 and ch0_003 are intercepted
- * only when the story asks the player to perform a physical action: inspect the silent
- * street, then move toward the town centre. Completing an objective hands control back
- * to the original SCENES entry with interception bypassed.
+ * `chapter0_start` keeps all authored dialogue and its three canonical choices. Each
+ * choice already routes to `ch0_001_road_entrance`; that physical arrival is what this
+ * region replaces. Reaching the north end hands control back to the exact original
+ * scene, where Noi is introduced and all choice effects remain owned by game.js.
  */
 export const CH0_MIANSHA_ALLEY_REGION: ExplorationRegionDefinition = {
-  id: 'ch0_miansha_residential_alley',
-  name: '眠沙镇 · 住宅区小巷',
+  id: 'ch0_miansha_road_entrance',
+  name: '眠沙镇 · 入镇小巷',
   width: MAP_WIDTH,
   height: MAP_HEIGHT,
   playerSpawn: { x: 800, y: 760 },
   assets: {
     backgroundSrc: CH0_ALLEY_BACKGROUND,
   },
-  // Keep the first tutorial corridor intentionally forgiving. The background is a
-  // cinematic perspective illustration, so collision protects the building edges
-  // while leaving a broad central walking lane.
   collisionZones: [
     { id: 'alley-left-facades', x: 0, y: 0, width: 300, height: 900 },
     { id: 'alley-right-facades', x: 1300, y: 0, width: 300, height: 900 },
-    { id: 'alley-north-buildings', x: 300, y: 0, width: 1000, height: 150 },
+    { id: 'alley-north-block', x: 300, y: 0, width: 1000, height: 145 },
   ],
   waypoints: [
     { id: 'alley_entry', position: { x: 800, y: 760 }, links: ['alley_mid'] },
     {
       id: 'alley_mid',
-      position: { x: 800, y: 570 },
-      links: ['alley_entry', 'metal_plate', 'anning_wait', 'tiya_wait', 'town_exit'],
+      position: { x: 800, y: 555 },
+      links: ['alley_entry', 'anning_wait', 'tiya_wait', 'road_entrance'],
     },
-    { id: 'metal_plate', position: { x: 610, y: 430 }, links: ['alley_mid'] },
-    { id: 'anning_wait', position: { x: 930, y: 610 }, links: ['alley_mid'] },
-    { id: 'tiya_wait', position: { x: 1010, y: 650 }, links: ['alley_mid'] },
-    { id: 'town_exit', position: { x: 800, y: 225 }, links: ['alley_mid'] },
+    { id: 'anning_wait', position: { x: 980, y: 625 }, links: ['alley_mid'] },
+    { id: 'tiya_wait', position: { x: 1080, y: 665 }, links: ['alley_mid'] },
+    { id: 'road_entrance', position: { x: 800, y: 225 }, links: ['alley_mid'] },
   ],
   npcs: [
     {
-      id: 'anning_ch0_alley',
+      id: 'anning_ch0_road',
       name: '安柠',
-      position: { x: 930, y: 610 },
+      position: { x: 980, y: 625 },
       speed: 86,
       interactionText: '按 E 与安柠交谈',
-      spriteSrc: ANNING_SPRITE,
+      spriteSrc: CH0_ANNING_SPRITE,
       schedule: [
-        { minuteOfDay: 0, targetWaypointId: 'anning_wait', activity: '留意四周' },
+        { minuteOfDay: 0, targetWaypointId: 'anning_wait', activity: '警惕地观察街区' },
       ],
       mapDialogue: [
-        { speaker: '安柠', text: '先别走太远。这里安静得不太正常。' },
+        { speaker: '安柠', text: '补给、换胎、找地方睡觉。别在这里耽搁太久。' },
       ],
     },
     {
-      id: 'tiya_ch0_alley',
+      id: 'tiya_ch0_road',
       name: '缇雅',
-      position: { x: 1010, y: 650 },
+      position: { x: 1080, y: 665 },
       speed: 74,
       interactionText: '按 E 与缇雅交谈',
-      spriteSrc: TIYA_SPRITE,
+      spriteSrc: CH0_TIYA_SPRITE,
       schedule: [
-        { minuteOfDay: 0, targetWaypointId: 'tiya_wait', activity: '安静地跟着安柠' },
+        { minuteOfDay: 0, targetWaypointId: 'tiya_wait', activity: '听着街区里的寂静' },
       ],
       mapDialogue: [
-        { speaker: '缇雅', text: '……连钟声都没有。' },
+        { speaker: '缇雅', text: '这里不是没有歌……更像是都被关起来了。' },
       ],
     },
   ],
   quests: [
     {
-      id: 'ch0_inspect_silent_alley',
-      title: '调查寂静的街区',
-      description: '沿小巷查看异常。那块停在黑暗里的澪铁板似乎值得确认。',
-      completionText: '街区没有灯火，钟表也停了。先确认澪铁板上的状况。',
-      nextQuestId: 'ch0_follow_tiya_to_square',
-      target: { type: 'zone', id: 'ch0-metal-plate' },
-    },
-    {
-      id: 'ch0_follow_tiya_to_square',
-      title: '前往镇中心',
-      description: '沿住宅区小巷向北走，跟着缇雅前往老钢琴所在的广场。',
-      completionText: '已经走到通往镇中心的路口。',
-      target: { type: 'zone', id: 'ch0-town-exit' },
+      id: 'ch0_reach_road_entrance',
+      title: '走进眠沙镇',
+      description: '沿住宅区小巷前进，看看那片被命令保持安静的街区。',
+      completionText: '已经进入眠沙镇。街口似乎有人注意到了修理车。',
+      target: { type: 'zone', id: 'ch0-road-entrance' },
     },
   ],
-  initialQuestId: 'ch0_inspect_silent_alley',
+  initialQuestId: 'ch0_reach_road_entrance',
   interactionZones: [
     {
-      id: 'ch0-metal-plate',
-      name: '澪铁板',
-      area: { x: 500, y: 355, width: 225, height: 155 },
-      interactionText: '按 E 查看澪铁板',
-      statusText: '窗户紧闭，钟表停摆，街区里没有一盏灯亮着。',
-      questCompleteId: 'ch0_inspect_silent_alley',
-      storySceneId: 'ch0_001',
+      id: 'ch0-record-window',
+      name: '唱片店橱窗',
+      area: { x: 430, y: 340, width: 210, height: 150 },
+      interactionText: '按 E 查看唱片店橱窗',
+      statusText: '橱窗里摆着被刮花的黑胶。划痕几乎把音轨全部切断。',
     },
     {
-      id: 'ch0-dark-window',
-      name: '紧闭的窗户',
-      area: { x: 1040, y: 340, width: 180, height: 150 },
-      interactionText: '按 E 查看窗户',
-      statusText: '玻璃后没有灯，也没有人影。整条街像被夜色按下了静音。',
+      id: 'ch0-nailed-instrument-shop',
+      name: '被钉死的乐器行',
+      area: { x: 1010, y: 330, width: 220, height: 160 },
+      interactionText: '按 E 查看乐器行',
+      statusText: '木板和钉子把门封得严严实实，没有留下可以推开的缝隙。',
     },
     {
-      id: 'ch0-town-exit',
-      name: '通往镇中心的路',
-      area: { x: 650, y: 165, width: 300, height: 145 },
-      interactionText: '按 E 前往镇中心',
-      statusText: '前方就是眠沙镇中心。缇雅提到的老钢琴应该就在那边。',
-      questCompleteId: 'ch0_follow_tiya_to_square',
-      storySceneId: 'ch0_003',
+      id: 'ch0-road-entrance',
+      name: '眠沙镇街口',
+      area: { x: 650, y: 160, width: 300, height: 145 },
+      interactionText: '按 E 继续进入眠沙镇',
+      statusText: '半亮半灭的霓虹后，是一座主动压低了所有声音的镇子。',
+      questCompleteId: 'ch0_reach_road_entrance',
+      storySceneId: 'ch0_001_road_entrance',
     },
   ],
 };
 
+/**
+ * After the canonical road-entrance meeting with Noi, `ch0_002_silent_town` is the
+ * moment the party reaches the sealed piano. This region makes that approach physical
+ * while keeping the canonical "one note / silent keys / reseal" branch untouched.
+ */
 export const CH0_MIANSHA_PIANO_SQUARE_REGION: ExplorationRegionDefinition = {
-  id: 'ch0_miansha_piano_square',
-  name: '眠沙镇 · 老钢琴广场',
+  id: 'ch0_miansha_sealed_piano_square',
+  name: '眠沙镇 · 禁演钢琴广场',
   width: MAP_WIDTH,
   height: MAP_HEIGHT,
   playerSpawn: { x: 800, y: 760 },
@@ -138,46 +132,90 @@ export const CH0_MIANSHA_PIANO_SQUARE_REGION: ExplorationRegionDefinition = {
   collisionZones: [
     { id: 'square-west-edge', x: 0, y: 0, width: 230, height: 900 },
     { id: 'square-east-edge', x: 1370, y: 0, width: 230, height: 900 },
-    { id: 'square-north-buildings', x: 230, y: 0, width: 1140, height: 135 },
+    { id: 'square-north-block', x: 230, y: 0, width: 1140, height: 135 },
   ],
   waypoints: [
     { id: 'square_entry', position: { x: 800, y: 760 }, links: ['square_mid'] },
     {
       id: 'square_mid',
       position: { x: 800, y: 555 },
-      links: ['square_entry', 'old_piano', 'square_west', 'square_east'],
+      links: ['square_entry', 'sealed_piano', 'noi_wait', 'anning_square', 'tiya_square'],
     },
-    { id: 'old_piano', position: { x: 800, y: 315 }, links: ['square_mid'] },
-    { id: 'square_west', position: { x: 470, y: 560 }, links: ['square_mid'] },
-    { id: 'square_east', position: { x: 1130, y: 560 }, links: ['square_mid'] },
+    { id: 'sealed_piano', position: { x: 800, y: 300 }, links: ['square_mid'] },
+    { id: 'noi_wait', position: { x: 650, y: 500 }, links: ['square_mid'] },
+    { id: 'anning_square', position: { x: 1030, y: 620 }, links: ['square_mid'] },
+    { id: 'tiya_square', position: { x: 1120, y: 660 }, links: ['square_mid'] },
   ],
-  npcs: [],
+  npcs: [
+    {
+      id: 'noi_ch0_square',
+      name: '诺伊',
+      position: { x: 650, y: 500 },
+      speed: 82,
+      interactionText: '按 E 与诺伊交谈',
+      spriteSrc: CH0_NOI_SPRITE,
+      schedule: [
+        { minuteOfDay: 0, targetWaypointId: 'noi_wait', activity: '盯着被封住的旧钢琴' },
+      ],
+      mapDialogue: [
+        { speaker: '诺伊', text: '他们说，只要钢琴响，怪物就会来。' },
+      ],
+    },
+    {
+      id: 'anning_ch0_square',
+      name: '安柠',
+      position: { x: 1030, y: 620 },
+      speed: 86,
+      interactionText: '按 E 与安柠交谈',
+      spriteSrc: CH0_ANNING_SPRITE,
+      schedule: [
+        { minuteOfDay: 0, targetWaypointId: 'anning_square', activity: '观察封条和撤离路线' },
+      ],
+      mapDialogue: [
+        { speaker: '安柠', text: '只看。先别让任何东西真的响起来。' },
+      ],
+    },
+    {
+      id: 'tiya_ch0_square',
+      name: '缇雅',
+      position: { x: 1120, y: 660 },
+      speed: 74,
+      interactionText: '按 E 与缇雅交谈',
+      spriteSrc: CH0_TIYA_SPRITE,
+      schedule: [
+        { minuteOfDay: 0, targetWaypointId: 'tiya_square', activity: '看着旧钢琴' },
+      ],
+      mapDialogue: [
+        { speaker: '缇雅', text: '只看一眼。真的只看一眼。' },
+      ],
+    },
+  ],
   quests: [
     {
-      id: 'ch0_reach_old_piano',
-      title: '靠近老钢琴',
-      description: '穿过空荡的广场，看看那架被留在镇中心的旧钢琴。',
-      completionText: '老钢琴就在眼前。附近似乎还有另一个人。',
-      target: { type: 'zone', id: 'ch0-old-piano' },
+      id: 'ch0_reach_sealed_piano',
+      title: '查看禁演旧钢琴',
+      description: '穿过广场，靠近被三层禁演封条缠住的旧钢琴。',
+      completionText: '旧钢琴就在眼前。接下来怎么处理它，由你决定。',
+      target: { type: 'zone', id: 'ch0-sealed-piano' },
     },
   ],
-  initialQuestId: 'ch0_reach_old_piano',
+  initialQuestId: 'ch0_reach_sealed_piano',
   interactionZones: [
     {
-      id: 'ch0-old-piano',
-      name: '老钢琴',
-      area: { x: 650, y: 220, width: 300, height: 190 },
-      interactionText: '按 E 靠近老钢琴',
-      statusText: '琴盖附近落着薄灰。一个陌生的身影就在钢琴旁。',
-      questCompleteId: 'ch0_reach_old_piano',
-      storySceneId: 'ch0_004',
+      id: 'ch0-sealed-piano',
+      name: '被封住的旧钢琴',
+      area: { x: 650, y: 205, width: 300, height: 190 },
+      interactionText: '按 E 查看禁演旧钢琴',
+      statusText: '三层禁演封条缠在琴盖上。雨水下，风干蔷薇贴着封条轻轻颤动。',
+      questCompleteId: 'ch0_reach_sealed_piano',
+      storySceneId: 'ch0_002_silent_town',
     },
     {
-      id: 'ch0-silent-square',
-      name: '空荡的广场',
-      area: { x: 1030, y: 490, width: 190, height: 150 },
-      interactionText: '按 E 观察广场',
-      statusText: '没有叫卖声，也没有晚归的人。只剩脚步声在广场上显得格外清楚。',
+      id: 'ch0-square-rose',
+      name: '风干蔷薇',
+      area: { x: 960, y: 340, width: 150, height: 120 },
+      interactionText: '按 E 查看蔷薇',
+      statusText: '花早已干了，却仍有人把它留在禁演封条旁。',
     },
   ],
 };
