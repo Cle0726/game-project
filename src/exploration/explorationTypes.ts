@@ -23,6 +23,16 @@ export interface ExplorationNpcScheduleEntry {
   activity: string;
 }
 
+export interface ExplorationDialogueLine {
+  speaker: string;
+  text: string;
+}
+
+export interface ExplorationQuestTarget {
+  type: 'npc' | 'zone';
+  id: string;
+}
+
 export interface ExplorationNpcDefinition {
   id: string;
   name: string;
@@ -33,6 +43,7 @@ export interface ExplorationNpcDefinition {
   schedule?: ExplorationNpcScheduleEntry[];
   spriteSrc?: string;
   questCompleteId?: string;
+  mapDialogue?: ExplorationDialogueLine[];
 }
 
 export interface ExplorationInteractionZone {
@@ -51,6 +62,7 @@ export interface ExplorationQuestDefinition {
   description: string;
   completionText: string;
   nextQuestId?: string;
+  target?: ExplorationQuestTarget;
 }
 
 export interface ExplorationRegionAssets {
