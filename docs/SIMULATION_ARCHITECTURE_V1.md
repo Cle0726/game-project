@@ -1,6 +1,6 @@
 # 《宿命回响：残响之途》Simulation Architecture v1
 
-> 状态：设计冻结候选（2026-08-22）
+> 状态：**v1 架构冻结 / Phase A 已完成（2026-08-22）**
 >
 > 目标：保留现有 `game.js / SCENES / BATTLES / TeaBreak / WorldMap` Canonical Runtime，在外层建立可支撑第 0～11 章自由探索、NPC 模拟与后续 Agent 的 Simulation Runtime。
 
@@ -23,39 +23,50 @@
 
 章节和 WorldMap 入口只依赖 `src/simulation/exploration/ExplorationRuntime.ts`。
 
-`legacy scene entry → ExplorationRuntime → FreeRoamPrototype compatibility shell → formal Simulation / Presentation modules`。
+正式运行链：
 
-确定性系统已接入：`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem / ExplorationInputController / ExplorationLoop / ExplorationNpcController`。
+`legacy scene entry → ExplorationRuntime → ExplorationHost → deterministic systems + Pixi presentation`。
 
-Presentation 已接入：`ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`。
+`FreeRoamPrototype` 与全部 `LegacyFreeRoam*Adapter` 已从 Phase A 分支删除；不存在第二套自由探索运行时。
 
-Phase A Adapter 负责把当前第三章兼容壳路由到上述正式模块；外层剧情入口不得直接依赖 Adapter。
+确定性系统：`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem / ExplorationInputController / ExplorationLoop / ExplorationNpcController`。
 
-## 当前已由新 Runtime 控制
+Presentation：`ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`。
 
-- 玩家/NPC 移动与碰撞
-- Waypoint 导航与 NPC 日程
+`ExplorationHost` 直接组合上述系统，并拥有 Pixi `Application` 生命周期、输入绑定、每帧 Loop、NPC orchestration、交互分发、剧情出口与区域 snapshot assembly。
+
+## Phase A 已完成
+
+- `GameState.simulationV1` canonical simulation state
+- 多区域探索存档纳入主游戏存档
+- 旧单区域 localStorage 一次性迁移
+- validated `GameCommand / CommandBus / CommandValidator`
+- append-only `WorldEvent / EventLedger / WorldEventBus`
+- 玩家/NPC 移动、碰撞、Waypoint 导航与日程
 - NPC 靠近玩家/对话暂停与每帧行动规划
 - Keyboard 输入语义与按键状态
-- 每帧执行顺序与 autosave 时机
-- 附近 NPC / interaction zone / Quest gate
+- deterministic frame ordering 与 autosave timing
+- nearby NPC / interaction zone / Quest gate
 - Camera / HUD layout
 - 地图背景、fallback grid、debug overlay
 - Actor Sprite、名字、活动文字
 - HUD、地图对话、Quest marker/highlight
+- direct Pixi `ExplorationHost`
+- 删除 `FreeRoamPrototype` compatibility shell
+- 删除全部 `LegacyFreeRoam*Adapter`
 
-## 剩余 Phase A
-
-`interaction dispatch orchestration / story-exit lifecycle / persistence snapshot assembly / Pixi Application lifecycle / final removal of FreeRoamPrototype compatibility shell`。
-
-下一阶段：`lifecycle cleanup → remove FreeRoamPrototype → chapter0_start`。
+下一阶段从 `chapter0_start` 开始，按章节顺序重构内容；第 0 章第一阶段保持 **LLM OFF**。
 
 ## 质量门槛
 
 - `npm run simulation:guard`：架构依赖边界。
 - `npm run simulation:typecheck`：TypeScript 5.8.3 strict/noUnused，范围为 Simulation + Exploration。
+- `npm run simulation:build`：Vite production build。
+- `.github/workflows/simulation-runtime.yml`：在 PR / 分支 push 上执行以上三项检查。
 
-当前执行环境没有仓库副本，且 shell 无法解析 github.com，因此新 `simulation:typecheck` 尚未在此环境实际执行；不得把它记录为已通过。
+Phase A 最终 Host 切换、旧壳删除后，GitHub Actions 已通过：
+
+`Architecture Guard ✓ / Strict Typecheck ✓ / Production Build ✓`。
 
 ## AI 边界
 
@@ -65,4 +76,4 @@ Phase A Adapter 负责把当前第三章兼容壳路由到上述正式模块；�
 
 Relationship / Emotion / Knowledge / Memory 分离，Memory append-only。NPC 后续使用 L0～L3 Simulation LOD，离屏 NPC 不逐帧寻路。
 
-第0章第一阶段保持 **LLM OFF**，先保证玩法、存档、回滚、剧情桥和战斗返回可靠。
+第 0 章第一阶段保持 **LLM OFF**，先保证玩法、存档、回滚、剧情桥和战斗返回可靠。
