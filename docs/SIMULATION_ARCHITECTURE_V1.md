@@ -4,35 +4,22 @@
 >
 > 目标：保留现有 `game.js / SCENES / BATTLES / TeaBreak / WorldMap` Canonical Runtime，在外层建立可支撑第 0～11 章自由探索、NPC 模拟与后续 Agent 的 Simulation Runtime。
 
-## 四条硬规则
+## 硬规则
 
 1. AI 不拥有世界真相。
 2. AI 不直接执行动作。
 3. AI 不直接修改剧情 Flag、关系数值、奖励、战斗结果或坐标。
 4. AI 只提出结构化 Interpretation / Intent，规则系统负责验证与执行。
 
-```text
-Player / Story / Agent Intent
-→ GameCommand
-→ CommandValidator
-→ State mutation
-→ WorldEvent
-→ Quest / Story / Witness / Memory / Relationship / Agent
-```
+`Player / Story / Agent Intent → GameCommand → CommandValidator → State → WorldEvent → downstream systems`。
 
-## Canonical 与 Simulation
+## Canonical / Simulation 边界
 
-`game.js` 继续承担 `GameState / SCENES / choices / BATTLES / TeaBreak / save / showScene / goToScene`。Phase A 不进行全量 TypeScript 重写。
+`game.js` 继续承担 `GameState / SCENES / choices / BATTLES / TeaBreak / save / showScene / goToScene`。Phase A 不全量重写。
 
-新状态唯一挂载在 `window.GameState.simulationV1`，保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。旧 `cle.exploration.verticalSlice.v1` 只做一次迁移。
+新状态挂载在 `window.GameState.simulationV1`，保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。旧单区域探索存档只做一次迁移。
 
-## Command / Event
-
-当前命令：`region.enter / exploration.return_point.set / quest.complete`。
-
-当前事件：`region.entered / exploration.return_point_set / quest.completed`。
-
-`source: agent` 被 Validator 明确禁止直接完成 Quest。
+当前命令：`region.enter / exploration.return_point.set / quest.complete`。当前事件：`region.entered / exploration.return_point_set / quest.completed`。`source: agent` 不能直接完成 Quest。
 
 ## Stable ExplorationRuntime
 
@@ -45,25 +32,21 @@ legacy scene entry
 → formal Simulation / Presentation modules
 ```
 
-`FreeRoamPrototype` 仅是 Phase A 待删除兼容壳，不再是未来章节开发 API。
+`FreeRoamPrototype` 仅是 Phase A 待删除兼容壳。
 
-## 已接入 live runtime 的系统
+## 已接入 live runtime
 
-确定性：`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`。
+确定性系统：`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`。
 
 Presentation：`ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`。
 
-这些已经接管 Camera/HUD layout、地图背景与 debug overlay、玩家/NPC Sprite、HUD、地图对话、Quest marker/highlight，以及移动/碰撞/交互规则。
+Phase A Adapter：`LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`。
 
-## Phase A Migration Adapters
+这些已经接管现有第三章切片的移动、碰撞、交互、地图背景/debug overlay、Actor View、HUD、地图对话和 Quest marker/highlight。
 
-`LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`。
+## 剩余 Phase A
 
-只用于保持当前第三章切片稳定；正式 Loop/Renderer 完成后全部删除。
-
-## Compatibility shell 剩余职责
-
-`Keyboard input lifecycle / frame update orchestration / NPC schedule-move orchestration / interaction dispatch / story-exit lifecycle / periodic persistence trigger / Pixi Application lifecycle`。
+Compatibility shell 还负责：`keyboard input / frame update orchestration / NPC orchestration / interaction dispatch / story-exit lifecycle / periodic persistence / Pixi Application lifecycle`。
 
 下一阶段：
 
@@ -82,9 +65,5 @@ InputController
 模型只允许输出 `dialogue / interpretation / intent / mood`，不得输出 `relationship delta / canonical flag / quest completion / reward / battle result / coordinates`。
 
 Relationship / Emotion / Knowledge / Memory 分离，Memory append-only。NPC 后续使用 L0～L3 Simulation LOD，离屏 NPC 不逐帧寻路。
-
-## Phase A checkpoint
-
-当前已经完成并接入 live runtime：SimulationState、Persistence、Command/Event、Navigation、Quest、Clock、Schedule、Region、ActorMotion、Collision、Movement、Interaction、World/Actor/HUD/Dialogue/Objective Presentation、稳定 `ExplorationRuntime` 边界和 architecture guard。
 
 第0章第一阶段保持 **LLM OFF**，先保证玩法、存档、回滚、剧情桥和战斗返回可靠。
