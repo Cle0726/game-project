@@ -32,7 +32,6 @@ export interface ExplorationNpcDefinition {
   interactionText: string;
   schedule?: ExplorationNpcScheduleEntry[];
   spriteSrc?: string;
-  spriteScale?: number;
   questCompleteId?: string;
 }
 
@@ -57,7 +56,6 @@ export interface ExplorationQuestDefinition {
 export interface ExplorationRegionAssets {
   backgroundSrc?: string;
   playerSpriteSrc?: string;
-  playerSpriteScale?: number;
 }
 
 export interface ExplorationRegionDefinition {
