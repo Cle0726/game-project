@@ -65,6 +65,12 @@ function callOriginalScene(sceneId: string): boolean {
   }
 }
 
+function markExplorationReturnPoint(): void {
+  if (!window.GameState) return;
+  window.GameState['explorationReturnRegionId'] = PROTOTYPE_REGION.id;
+  window.GameState['explorationReturnEnabled'] = true;
+}
+
 async function enterWhiteAcademyExploration(): Promise<void> {
   if (runtime || mounting) return;
   mounting = true;
@@ -107,6 +113,7 @@ window.leaveExplorationRegion = () => {
 };
 
 window.openStoryFromExploration = (sceneId: string): boolean => {
+  markExplorationReturnPoint();
   destroyRuntime();
   window.gamePhase = 'main_story';
   return callOriginalScene(sceneId);
