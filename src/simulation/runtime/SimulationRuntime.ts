@@ -1,4 +1,5 @@
 import { CommandBus } from '../command/CommandBus';
+import { registerCoreCommandHandlers } from '../command/CoreCommandHandlers';
 import {
   getOrCreateSimulationStateV1,
   readSimulationStateV1,
@@ -9,6 +10,11 @@ export class SimulationRuntime {
   readonly commands = new CommandBus();
   readonly events = this.commands.events;
   private running = false;
+  private disposeCoreCommands: () => void;
+
+  constructor() {
+    this.disposeCoreCommands = registerCoreCommandHandlers(this.commands);
+  }
 
   start(): SimulationStateV1 {
     const state = getOrCreateSimulationStateV1();
@@ -39,6 +45,7 @@ export class SimulationRuntime {
 
   destroy(): void {
     this.stop();
+    this.disposeCoreCommands();
     this.commands.clear();
   }
 }
