@@ -17,8 +17,10 @@ const freeRoam = read('src/exploration/FreeRoamPrototype.ts');
 const collisionSystem = read('src/simulation/exploration/CollisionSystem.ts');
 const movementSystem = read('src/simulation/exploration/MovementSystem.ts');
 const interactionSystem = read('src/simulation/exploration/InteractionSystem.ts');
+const explorationRenderer = read('src/simulation/exploration/ExplorationRenderer.ts');
 const movementAdapter = read('src/simulation/exploration/LegacyFreeRoamMovementAdapter.ts');
 const interactionAdapter = read('src/simulation/exploration/LegacyFreeRoamInteractionAdapter.ts');
+const rendererAdapter = read('src/simulation/exploration/LegacyFreeRoamRendererAdapter.ts');
 const actorMotionSystem = read('src/simulation/exploration/ActorMotionSystem.ts');
 const navigationSystem = read('src/simulation/exploration/NavigationSystem.ts');
 const regionSystem = read('src/simulation/exploration/RegionSystem.ts');
@@ -61,11 +63,17 @@ if (!legacyMain.includes('wireLegacyFreeRoamMovement')) {
 if (!legacyMain.includes('wireLegacyFreeRoamInteraction')) {
   failures.push('exploration-legacy-main.ts must wire live interaction through Simulation systems');
 }
+if (!legacyMain.includes('wireLegacyFreeRoamRenderer')) {
+  failures.push('exploration-legacy-main.ts must wire camera/HUD layout through ExplorationRenderer');
+}
 if (!movementAdapter.includes("from './MovementSystem'")) {
   failures.push('LegacyFreeRoamMovementAdapter.ts must delegate to MovementSystem');
 }
 if (!interactionAdapter.includes("from './InteractionSystem'")) {
   failures.push('LegacyFreeRoamInteractionAdapter.ts must delegate to InteractionSystem');
+}
+if (!rendererAdapter.includes("from './ExplorationRenderer'")) {
+  failures.push('LegacyFreeRoamRendererAdapter.ts must delegate to ExplorationRenderer');
 }
 if (!legacyPathfinding.includes('../simulation/exploration/NavigationSystem')) {
   failures.push('legacy pathfinding.ts must delegate to NavigationSystem');
@@ -102,6 +110,12 @@ if (!interactionSystem.includes('findNearestInteractionActor')) {
 }
 if (!interactionSystem.includes('evaluateQuestInteractionGate')) {
   failures.push('InteractionSystem.ts must own deterministic quest interaction gating');
+}
+if (!explorationRenderer.includes('computeCameraOffset')) {
+  failures.push('ExplorationRenderer.ts must own camera layout math');
+}
+if (!explorationRenderer.includes('computeHudLayout')) {
+  failures.push('ExplorationRenderer.ts must own HUD layout math');
 }
 if (!actorMotionSystem.includes('stepActorMotion')) {
   failures.push('ActorMotionSystem.ts must own renderer-independent walk motion math');
