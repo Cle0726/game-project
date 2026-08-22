@@ -35,13 +35,7 @@ Quest / Story / Witness / Memory / Relationship / Agent
 
 ## SimulationStateV1
 
-唯一新状态容器：
-
-```text
-window.GameState.simulationV1
-```
-
-保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。
+唯一新状态容器是 `window.GameState.simulationV1`，保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。
 
 `LegacyGameStateAdapter` 每次从当前 `window.GameState` 读取，避免 `loadGame()` 整体替换对象后引用失效。
 
