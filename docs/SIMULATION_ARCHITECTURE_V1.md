@@ -1,6 +1,6 @@
 # 《宿命回响：残响之途》Simulation Architecture v1
 
-> 状态：Phase A 实施中（2026-08-22）
+> 状态：设计冻结候选（2026-08-22）
 >
 > 目标：在不推倒现有 `game.js / SCENES / BATTLES / TeaBreak / WorldMap` 的前提下，把自由探索升级为可支撑第 0～11 章、NPC 日程、关系、记忆、信息传播和后续 LLM Agent 的正式 Simulation Runtime。
 
@@ -33,21 +33,9 @@ Player / Story / Agent Intent
 Quest / Story / Witness / Memory / Relationship / Agent
 ```
 
-这个结构综合借鉴：
+## 2. 保留现有 Canonical Runtime
 
-- AI Town：引擎独占核心状态；Agent 异步操作只能提交 input；实时模拟与 LLM 长任务分离。
-- Concordia：Agent 组件化、Game Master、putative action → event resolution、Scene Tracker。
-- Stanford Generative Agents：Perceive / Retrieve / Plan / Reflect / Execute；记忆按相关性、近期性、重要性检索。
-- chasm：事件目击者记忆、save-aware rollback、事件触发行为、AI 后端与游戏 Bridge 分离。
-- Quilltale / Agentic Quest：WorldState 是 ground truth；AI 叙述与提议，Validator 决定是否合法/成功。
-- SOTOPIA / TinyTroupe：社交质量评估、停滞检测、反重复和组件化 Agent。
-- BRING：Story Arc / Phase / Timeline 与优先级任务协调。
-
-## 2. 当前仓库源码评审
-
-### 2.1 应保留的现有核心
-
-`game.js` 继续作为 Legacy Canonical Story Runtime：
+`game.js` 继续承担：
 
 - `GameState`
 - `SCENES`
@@ -57,190 +45,54 @@ Quest / Story / Witness / Memory / Relationship / Agent
 - 当前存档系统
 - `showScene()` / `goToScene()`
 
-短期不做全量 TypeScript 重写。
+Phase A 不做全量 TypeScript 重写。
 
-`src/worldmap/worldMapBridge.ts` 已经证明“typed adapter 包住 legacy global”可行，应扩展这个模式，而不是继续让新系统直接散落访问 `window.GameState`。
+`src/exploration-legacy-main.ts` 只作为旧剧情入口与新 `ExplorationRuntime` 之间的迁移桥；它不能知道具体 Migration Adapter，也不能直接实现 Simulation 规则。
 
-区域数据继续保持数据驱动，Runtime 只读取定义，不把章节内容硬编码进引擎。
+## 3. 单一新状态容器
 
-### 2.2 FreeRoamPrototype 的定位
-
-`FreeRoamPrototype.ts` 仍然作为当前第三章可玩切片的 Pixi 外壳，但不再继续吸收规则逻辑。
-
-Phase A 已经从它的依赖链中抽离：
-
-- 存档 → `SimulationPersistence`
-- 导航 → `NavigationSystem`
-- Quest 状态转换 → `QuestSystem`
-- 时间推进 → `SimulationClock`
-- NPC 日程选择 → `ScheduleSystem`
-- 区域注册 → `RegionSystem`
-- 行走姿态数学 → `ActorMotionSystem`
-
-下一步再把它内部仍然直接拥有的 Movement / Collision / Interaction / Renderer 逐步拔出。
-
-### 2.3 探索存档已迁移
-
-旧 `explorationSave.ts` 曾使用单一 key：
-
-```text
-cle.exploration.verticalSlice.v1
-```
-
-正式 Runtime 改为：
-
-```ts
-GameState.simulationV1
-```
-
-区域状态保存在：
-
-```text
-simulationV1.regions[regionId]
-```
-
-旧单区域 localStorage 只保留一次性迁移读取，迁移成功后删除旧 key。
-
-### 2.4 Scene interception 只作为迁移桥
-
-`exploration-legacy-main.ts` 目前仍通过包裹 `window.showScene / window.goToScene` 拦截 Scene ID，但现在入口已经通过 Simulation Runtime 记录：
-
-- `region.enter`
-- `region.entered`
-- `exploration.return_point.set`
-
-并且只在 Pixi region mount 成功后写入 `region.entered`，防止加载失败污染事件历史。
-
-这个 monkey patch 仍标记为 **Legacy Adapter**，不会成为最终入口设计。
-
-### 2.5 当前 Quest 模型
-
-旧 `questState.ts` 已退化为兼容壳，真实状态转换在：
-
-```text
-src/simulation/quest/QuestSystem.ts
-```
-
-当前探索第一次完成 Quest 时，会通过：
-
-```text
-quest.complete
-→ CommandValidator
-→ quest.completed WorldEvent
-```
-
-进入统一事件账本。
-
-`source: agent` 的 `quest.complete` 会被明确拒绝，落实“AI 不得直接完成任务”。
-
-正式 Quest 后续升级 Objective Graph：
-
-```ts
-QuestDefinition {
-  prerequisites
-  objectives
-  completion
-  failConditions?
-}
-```
-
-Objective 只允许受控 primitive：
-
-```text
-reach / interact / talk / observe / collect / deliver /
-meet / wait / escort / investigate / battle / return
-```
-
-## 3. v1 模块边界
-
-当前已落地的 Phase A 目录：
-
-```text
-src/simulation/
-├── runtime/
-│   ├── SimulationRuntime.ts
-│   └── SimulationClock.ts
-│
-├── state/
-│   ├── SimulationState.ts
-│   ├── LegacyGameStateAdapter.ts
-│   └── SimulationPersistence.ts
-│
-├── command/
-│   ├── GameCommand.ts
-│   ├── CommandBus.ts
-│   ├── CommandValidator.ts
-│   └── CoreCommandHandlers.ts
-│
-├── events/
-│   ├── WorldEvent.ts
-│   ├── WorldEventBus.ts
-│   └── EventLedger.ts
-│
-├── exploration/
-│   ├── SpatialTypes.ts
-│   ├── MovementSystem.ts
-│   ├── CollisionSystem.ts
-│   ├── NavigationSystem.ts
-│   ├── RegionSystem.ts
-│   └── ActorMotionSystem.ts
-│
-├── quest/
-│   └── QuestSystem.ts
-│
-└── agent/
-    └── ScheduleSystem.ts
-```
-
-后续再增加：InteractionSystem、ExplorationRenderer、StoryDirector、AgentRuntime、Knowledge、Memory、Social、WorldDirector。
-
-## 4. 单一状态真相
-
-```ts
-interface SimulationStateV1 {
-  version: 1;
-  clock: {
-    minuteOfDay: number;
-    day: number;
-    seed: number;
-  };
-  currentRegionId?: string;
-  returnPoint?: {
-    regionId: string;
-    x: number;
-    y: number;
-    facing: 'up' | 'down' | 'left' | 'right';
-  };
-  regions: Record<string, RegionRuntimeState>;
-  quests: QuestRuntimeState;
-  agents: Record<string, AgentRuntimeState>;
-  eventCursor: number;
-  eventLedger: WorldEvent[];
-}
-```
-
-存放在：
+正式新增：
 
 ```text
 window.GameState.simulationV1
 ```
 
-任何 TypeScript System 都通过 `LegacyGameStateAdapter` 读取当前 `window.GameState`，禁止缓存旧引用，因为 `loadGame()` 会整体替换 GameState 对象。
+其中保存：
 
-## 5. GameCommand 合约
-
-```ts
-interface GameCommand<T = unknown> {
-  id: string;
-  type: string;
-  source: 'player' | 'story' | 'agent' | 'world';
-  actorId?: string;
-  issuedAt: number;
-  payload: T;
-}
+```text
+clock
+currentRegionId
+returnPoint
+regions
+quests
+agents
+eventCursor
+eventLedger
 ```
 
-当前已注册核心命令：
+`LegacyGameStateAdapter` 每次从当前 `window.GameState` 读取，禁止长期缓存旧对象引用，因为旧 `loadGame()` 会整体替换 GameState。
+
+旧单区域探索存档 `cle.exploration.verticalSlice.v1` 只保留一次迁移兼容；正式区域状态全部进入主存档。
+
+## 4. Command / Event 闭环
+
+现在正式存在：
+
+```text
+GameCommand
+↓
+CommandValidator
+↓
+Command Handler
+↓
+SimulationStateV1
+↓
+WorldEvent
+↓
+EventLedger / WorldEventBus
+```
+
+当前核心命令：
 
 ```text
 region.enter
@@ -248,37 +100,7 @@ exploration.return_point.set
 quest.complete
 ```
 
-例：
-
-```ts
-{
-  type: 'actor.move_to_waypoint',
-  source: 'agent',
-  actorId: 'milo',
-  payload: { waypointId: 'station_platform' }
-}
-```
-
-AI 不得输出直接坐标变更；位置由 Navigation / Movement / Collision 决定。
-
-## 6. WorldEvent 合约
-
-```ts
-interface WorldEvent<T = unknown> {
-  id: string;
-  sequence: number;
-  type: string;
-  gameTime: number;
-  regionId?: string;
-  actorIds: string[];
-  targetIds: string[];
-  importance: number;
-  tags: string[];
-  payload: T;
-}
-```
-
-当前已经产生的正式事件：
+当前核心事件：
 
 ```text
 region.entered
@@ -286,13 +108,143 @@ exploration.return_point_set
 quest.completed
 ```
 
-事件 append-only，`eventCursor` 与 ledger 一起进入主游戏存档。
+硬规则已进入代码：
 
-## 7. Story 架构
+```text
+source: agent
+```
 
-剧情分三类：Canonical Beat / Authored Dynamic Beat / Emergent Beat。
+不能直接完成 Quest。
 
-`StoryPolicy` 控制 Scene 自由度：
+## 5. Exploration Runtime 边界
+
+章节/WorldMap 入口只依赖：
+
+```text
+src/simulation/exploration/ExplorationRuntime.ts
+```
+
+当前迁移结构：
+
+```text
+legacy scene entry
+      ↓
+ExplorationRuntime
+      ↓
+FreeRoamPrototype compatibility shell
+      ↓
+formal Simulation / Presentation modules
+```
+
+`FreeRoamPrototype` 在 Phase A 期间仅作为待替换兼容壳；外层入口不能再直接依赖它。
+
+## 6. 已抽取并已接入实际运行时的 Exploration 模块
+
+### 确定性规则
+
+```text
+NavigationSystem
+QuestSystem
+SimulationClock
+ScheduleSystem
+RegionSystem
+ActorMotionSystem
+CollisionSystem
+MovementSystem
+InteractionSystem
+```
+
+职责：
+
+- Waypoint 路径
+- Quest 状态转换
+- 游戏时间
+- NPC 日程选择
+- Region 注册/查找
+- 角色运动姿态数学
+- 碰撞
+- 玩家/NPC 位移
+- 附近 NPC、区域命中、Quest 门槛
+
+### Renderer / Presentation
+
+```text
+ExplorationRenderer
+ExplorationWorldPresentation
+ExplorationActorViewFactory
+ExplorationHudPresentation
+ExplorationDialoguePresentation
+ExplorationObjectivePresentation
+```
+
+职责：
+
+- Camera / HUD layout 数学
+- 背景、fallback floor/grid、debug navigation overlay
+- 玩家/NPC Sprite、阴影、名字、活动文字构建
+- HUD Pixi 对象
+- 地图内 Dialogue lines/index/callback/panel
+- Quest marker / zone highlight / pulse
+
+以上均已通过 `ExplorationRuntime` 的迁移 Adapter 接管当前第三章可玩切片；它们不是仅存在但未使用的空接口。
+
+## 7. Migration Adapter 原则
+
+目前存在若干：
+
+```text
+LegacyFreeRoamActorViewAdapter
+LegacyFreeRoamWorldViewAdapter
+LegacyFreeRoamMovementAdapter
+LegacyFreeRoamInteractionAdapter
+LegacyFreeRoamPresentationAdapter
+LegacyFreeRoamRendererAdapter
+```
+
+它们只允许存在于 Phase A。
+
+用途是：
+
+1. 保持第三章当前可玩行为稳定。
+2. 把旧实例的方法逐个路由到新系统。
+3. 避免一次性重写 1000+ 行 `FreeRoamPrototype`。
+4. 等新 Renderer/Loop 完整后整体删除。
+
+`src/exploration-legacy-main.ts` 不得 import 这些 Adapter。
+
+## 8. 当前仍留在 FreeRoam compatibility shell 的职责
+
+下一步主要剩余：
+
+```text
+Keyboard input lifecycle
+frame update orchestration
+NPC schedule/move orchestration
+interaction dispatch orchestration
+story open / exit lifecycle
+periodic persistence trigger
+Pixi Application lifecycle
+```
+
+其中实际规则已经大多在新 System 中；下一阶段重点是把“谁在什么时候调用这些系统”抽成正式 Loop/Input Controller。
+
+## 9. Story 架构
+
+剧情分三类：
+
+### Canonical Beat
+
+作者控制的核心事实。AI 无权新增、删除、提前泄露。
+
+### Authored Dynamic Beat
+
+作者定义内容与条件，Director 决定合适时机。
+
+### Emergent Beat
+
+允许 Agent 自由产生普通社交、临时行动和非关键事件，但不得修改 Canon。
+
+`StoryPolicy` 后续控制 Scene 自由度：
 
 ```ts
 {
@@ -303,13 +255,11 @@ quest.completed
 }
 ```
 
-正式听证、Boss 前演出等使用 low + canonicalLock；自由探索日可使用 high。
-
-## 8. Agent / AI 边界
+## 10. Agent / AI 边界
 
 ### Fast Loop（30~60 FPS）
 
-仅：输入、移动、碰撞、动画、摄像机、Trigger。
+输入、移动、碰撞、动画、摄像机、Trigger。
 
 **永不调用 LLM。**
 
@@ -321,24 +271,37 @@ quest.completed
 
 ### Cognitive Loop（异步）
 
-只在重要时刻调用模型：重要玩家对话、重大剧情、新的高重要度事件、重新制定 Goal、Reflection 阈值。
+只在重要时刻调用模型：
 
-模型输出只允许：
+- 重要玩家对话
+- 重大剧情结束
+- 新的高重要度世界事件
+- 需要重新制定 Goal
+- Reflection 阈值达到
 
-```ts
-AgentBrainResult {
-  dialogue?: string;
-  interpretation?: string;
-  intent?: AgentIntent;
-  mood?: string;
-}
+模型输出仅允许：
+
+```text
+dialogue
+interpretation
+intent
+mood
 ```
 
-模型不输出 relationship delta、canonical flag、quest completion、reward、battle result、coordinates。
+模型不输出：
 
-## 9. Relationship / Emotion / Knowledge / Memory
+```text
+relationship delta
+canonical flag
+quest completion
+reward
+battle result
+coordinates
+```
 
-长期规划继续严格分离：
+## 11. Relationship / Emotion / Knowledge / Memory
+
+长期结构保持分离：
 
 ```text
 Relationship = 长期怎么看一个人
@@ -347,73 +310,62 @@ Knowledge    = 知道/相信什么
 Memory       = 经历过什么
 ```
 
-legacy 的 `信任 / 共鸣 / 压力` 暂不删除，由 Adapter 映射。
+Memory append-only；新的理解写成 Belief / Reflection，不篡改旧事件。
 
-Memory append-only；新理解写成 Belief/Reflection，不重写旧事件。
+Knowledge 后续记录来源：
 
-## 10. NPC Simulation LOD
+```text
+witness / told / rumor / document / inference
+```
+
+知道一个 secret 不等于允许说出它。
+
+## 12. NPC Simulation LOD
+
+未来几十个 NPC 采用：
 
 ```text
 L0 玩家附近：完整移动/碰撞/动画/Social
 L1 同区域离镜：简化移动/日程
 L2 其他区域：离屏时间片/TravelState
-L3 Dormant：不模拟路径，只结算必要日程
+L3 Dormant：只结算必要日程
 ```
 
-## 11. Social 防停滞
+离屏角色不逐帧寻路。
 
-正式 Social State：
-
-```text
-idle → invited/noticed → approaching → participating
-     → remembering → cooldown → idle
-```
-
-必须有 pair cooldown、最大回合、每小时社交预算、stale detection、repetition score。
-
-## 12. Phase A 进度
+## 13. Phase A 当前状态
 
 已完成：
 
 ```text
-[x] SimulationStateV1
-[x] LegacyGameStateAdapter
-[x] SimulationPersistence
-[x] GameCommand / Validator / Bus
-[x] WorldEvent / EventLedger / EventBus
-[x] 核心 region/return-point/quest commands
-[x] NavigationSystem + legacy wrapper
-[x] QuestSystem + legacy wrapper
-[x] SimulationClock + ScheduleSystem + legacy wrapper
-[x] RegionSystem + legacy wrapper
-[x] ActorMotionSystem + Pixi legacy adapter
-[x] CollisionSystem（已抽出，待 FreeRoam 接线）
-[x] MovementSystem（已抽出，待 FreeRoam 接线）
-[x] simulation:guard
+SimulationStateV1
+LegacyGameStateAdapter
+SimulationPersistence
+GameCommand / Validator / CommandBus
+WorldEvent / Ledger / Bus
+Navigation / Quest / Clock / Schedule / Region
+ActorMotion / Collision / Movement / Interaction
+ExplorationRenderer
+World / Actor / HUD / Dialogue / Objective Presentation
+stable ExplorationRuntime boundary
+architecture guard
 ```
 
-下一顺序：
+下一阶段：
 
 ```text
-Movement / Collision 接管 FreeRoam
-→ InteractionSystem
-→ ExplorationRenderer
-→ FreeRoamPrototype 退役为正式 ExplorationRuntime
-→ chapter0_start 接入
+InputController
+ExplorationLoop / NPC orchestration
+Story/Exit lifecycle cleanup
+remove FreeRoamPrototype compatibility shell
 ```
 
-## 13. 验证原则
-
-每次重构至少检查：
+完成后进入：
 
 ```text
-旧章节仍能走
-旧存档可迁移
-多区域不会互相覆盖
-加载失败不写假 WorldEvent
-AI source 不能完成 Quest
-Event sequence 单调递增
-FreeRoam 不直接写 window.GameState
+chapter0_start
+↓
+第0章正式自由移动改造
 ```
 
-`npm run simulation:guard` 用于防止架构回退。
+第0章第一阶段仍然 **LLM OFF**。先保证完整玩法、存档、回滚、剧情桥、战斗返回都可靠，再接 Agent Brain Provider。
