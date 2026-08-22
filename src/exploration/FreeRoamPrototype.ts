@@ -49,14 +49,35 @@ export class FreeRoamPrototype {
   private keys = new Set<string>();
   private npcs: NpcRuntime[] = [];
   private clockMinute = PROTOTYPE_DAY_START_MINUTE;
-  private prompt = new Text({ text: '', style: { fill: 0xffffff, fontSize: 18, fontFamily: 'sans-serif' } });
-  private status = new Text({ text: '', style: { fill: 0xe7edf7, fontSize: 15, fontFamily: 'sans-serif' } });
+  private prompt = new Text({
+    text: '',
+    style: {
+      fill: 0xffffff,
+      fontSize: 18,
+      fontFamily: 'sans-serif',
+      stroke: { color: 0x020617, width: 5 },
+    },
+  });
+  private status = new Text({
+    text: '',
+    style: {
+      fill: 0xe7edf7,
+      fontSize: 15,
+      fontFamily: 'sans-serif',
+      stroke: { color: 0x020617, width: 4 },
+    },
+  });
   private clockText = new Text({ text: '', style: { fill: 0xd7e1ef, fontSize: 14, fontFamily: 'sans-serif' } });
-  private questTitle = new Text({ text: '', style: { fill: 0xf3e4b3, fontSize: 18, fontWeight: '600', fontFamily: 'sans-serif' } });
+  private questTitle = new Text({
+    text: '',
+    style: { fill: 0xf3e4b3, fontSize: 18, fontWeight: '600', fontFamily: 'sans-serif' },
+  });
   private questDescription = new Text({
     text: '',
     style: { fill: 0xe2e8f0, fontSize: 14, fontFamily: 'sans-serif', wordWrap: true, wordWrapWidth: 340 },
   });
+  private clockPanel?: Graphics;
+  private controlsText?: Text;
   private nearbyNpc?: NpcRuntime;
   private nearbyZone?: ExplorationInteractionZone;
   private activeQuestId?: string;
@@ -147,7 +168,8 @@ export class FreeRoamPrototype {
       background.zIndex = 0;
       this.world.addChild(background);
       return true;
-    } catch {
+    } catch (error) {
+      console.warn('[exploration] background failed to load; using debug floor', src, error);
       return false;
     }
   }
@@ -233,7 +255,8 @@ export class FreeRoamPrototype {
       const scale = targetHeight / textureHeight;
       sprite.scale.set(scale);
       return sprite;
-    } catch {
+    } catch (error) {
+      console.warn('[exploration] actor sprite failed to load', src, error);
       return undefined;
     }
   }
@@ -289,19 +312,18 @@ export class FreeRoamPrototype {
     this.app.stage.addChild(this.questTitle);
     this.app.stage.addChild(this.questDescription);
 
-    const clockPanel = new Graphics()
+    this.clockPanel = new Graphics()
       .roundRect(0, 0, 190, 42, 10)
       .fill({ color: 0x08111f, alpha: 0.66 })
       .stroke({ width: 1, color: 0x9fb7d5, alpha: 0.35 });
-    clockPanel.position.set(this.app.screen.width - 208, 16);
-    clockPanel.label = 'clock-panel';
-    this.app.stage.addChild(clockPanel);
+    this.clockPanel.position.set(this.app.screen.width - 208, 16);
+    this.app.stage.addChild(this.clockPanel);
 
     this.clockText.anchor.set(0.5, 0.5);
     this.clockText.position.set(this.app.screen.width - 113, 37);
     this.app.stage.addChild(this.clockText);
 
-    const controls = new Text({
+    this.controlsText = new Text({
       text: 'WASD / 方向键 移动   ·   E / 空格 交互   ·   ESC 返回',
       style: {
         fill: 0xf1f5f9,
@@ -310,17 +332,14 @@ export class FreeRoamPrototype {
         stroke: { color: 0x020617, width: 4 },
       },
     });
-    controls.anchor.set(0.5, 1);
-    controls.position.set(this.app.screen.width / 2, this.app.screen.height - 22);
-    controls.label = 'controls';
-    this.app.stage.addChild(controls);
+    this.controlsText.anchor.set(0.5, 1);
+    this.controlsText.position.set(this.app.screen.width / 2, this.app.screen.height - 22);
+    this.app.stage.addChild(this.controlsText);
 
     this.prompt.anchor.set(0.5, 1);
-    this.prompt.style.stroke = { color: 0x020617, width: 5 };
     this.app.stage.addChild(this.prompt);
 
     this.status.position.set(30, 164);
-    this.status.style.stroke = { color: 0x020617, width: 4 };
     this.app.stage.addChild(this.status);
     this.refreshQuestHud();
   }
@@ -494,12 +513,9 @@ export class FreeRoamPrototype {
   }
 
   private updateHudPositions(): void {
-    const clockPanel = this.app.stage.getChildByLabel<Graphics>('clock-panel');
-    if (clockPanel) clockPanel.position.set(this.app.screen.width - 208, 16);
+    this.clockPanel?.position.set(this.app.screen.width - 208, 16);
     this.clockText.position.set(this.app.screen.width - 113, 37);
-
-    const controls = this.app.stage.getChildByLabel<Text>('controls');
-    if (controls) controls.position.set(this.app.screen.width / 2, this.app.screen.height - 22);
+    this.controlsText?.position.set(this.app.screen.width / 2, this.app.screen.height - 22);
   }
 
   private updatePrompt(): void {
