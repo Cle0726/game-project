@@ -48,3 +48,6 @@ jobs:
 
       - name: Strict typecheck
         run: npm run simulation:typecheck
+
+      - name: Production build
+        run: npm run simulation:build
