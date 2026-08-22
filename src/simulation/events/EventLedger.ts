@@ -1,4 +1,7 @@
-import { mutateSimulationStateV1 } from '../state/LegacyGameStateAdapter';
+import {
+  getOrCreateSimulationStateV1,
+  mutateSimulationStateV1,
+} from '../state/LegacyGameStateAdapter';
 import { createWorldEvent, type WorldEvent, type WorldEventDraft } from './WorldEvent';
 
 export function appendWorldEvent<TPayload>(
@@ -20,6 +23,5 @@ export function appendWorldEvent<TPayload>(
 }
 
 export function getWorldEventLedger(): readonly WorldEvent[] {
-  const state = mutateSimulationStateV1(() => undefined);
-  return state.eventLedger;
+  return getOrCreateSimulationStateV1().eventLedger;
 }
