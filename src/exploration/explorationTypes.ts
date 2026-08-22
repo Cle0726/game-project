@@ -11,12 +11,20 @@ export interface RectZone {
   height: number;
 }
 
+export interface ExplorationNpcScheduleEntry {
+  minuteOfDay: number;
+  position: Vec2;
+  activity: string;
+}
+
 export interface ExplorationNpcDefinition {
   id: string;
   name: string;
   position: Vec2;
+  speed?: number;
   storySceneId?: string;
   interactionText: string;
+  schedule?: ExplorationNpcScheduleEntry[];
 }
 
 export interface ExplorationRegionDefinition {
