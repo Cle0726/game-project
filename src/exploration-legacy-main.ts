@@ -2,21 +2,9 @@ import { FreeRoamPrototype } from './exploration/FreeRoamPrototype';
 import { PROTOTYPE_REGION } from './exploration/regionData';
 import { resolveProtagonistExplorationSprite } from './exploration/explorationAssets';
 
-interface LegacyGameState {
-  奏者性别?: string;
-  当前场景ID?: string;
-  currentSceneId?: string;
-  [key: string]: unknown;
-}
-
 declare global {
   interface Window {
-    GameState?: LegacyGameState;
-    gamePhase?: string;
-    showScene?: (sceneId: string) => void;
-    goToScene?: (sceneId: string) => void;
     showMainMenu?: () => void;
-    clearReactWorldMapScreen?: () => void;
     enterExplorationRegion?: (regionId?: string) => void;
     leaveExplorationRegion?: () => void;
     openStoryFromExploration?: (sceneId: string) => boolean;
@@ -85,7 +73,7 @@ async function enterWhiteAcademyExploration(): Promise<void> {
   window.gamePhase = 'exploration';
   host = createHost();
 
-  const playerSpriteSrc = resolveProtagonistExplorationSprite(window.GameState?.奏者性别);
+  const playerSpriteSrc = resolveProtagonistExplorationSprite(window.GameState?.['奏者性别']);
   runtime = new FreeRoamPrototype(PROTOTYPE_REGION, {
     playerSpriteSrc,
     onStoryScene: (sceneId) => {
