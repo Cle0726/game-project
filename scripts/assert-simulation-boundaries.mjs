@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const read = (path) => fs.readFileSync(path, 'utf8');
 
 const explorationSave = read('src/exploration/explorationSave.ts');
+const legacyMain = read('src/exploration-legacy-main.ts');
 const legacyPathfinding = read('src/exploration/pathfinding.ts');
 const legacyQuestState = read('src/exploration/questState.ts');
 const legacySchedule = read('src/exploration/npcSchedule.ts');
@@ -15,6 +16,9 @@ const coreCommands = read('src/simulation/command/CoreCommandHandlers.ts');
 const freeRoam = read('src/exploration/FreeRoamPrototype.ts');
 const collisionSystem = read('src/simulation/exploration/CollisionSystem.ts');
 const movementSystem = read('src/simulation/exploration/MovementSystem.ts');
+const interactionSystem = read('src/simulation/exploration/InteractionSystem.ts');
+const movementAdapter = read('src/simulation/exploration/LegacyFreeRoamMovementAdapter.ts');
+const interactionAdapter = read('src/simulation/exploration/LegacyFreeRoamInteractionAdapter.ts');
 const actorMotionSystem = read('src/simulation/exploration/ActorMotionSystem.ts');
 const navigationSystem = read('src/simulation/exploration/NavigationSystem.ts');
 const regionSystem = read('src/simulation/exploration/RegionSystem.ts');
@@ -51,6 +55,18 @@ if (!coreCommands.includes("type: 'quest.completed'")) {
 if (/window\.GameState/.test(freeRoam)) {
   failures.push('FreeRoamPrototype.ts must not directly mutate window.GameState');
 }
+if (!legacyMain.includes('wireLegacyFreeRoamMovement')) {
+  failures.push('exploration-legacy-main.ts must wire live movement through Simulation systems');
+}
+if (!legacyMain.includes('wireLegacyFreeRoamInteraction')) {
+  failures.push('exploration-legacy-main.ts must wire live interaction through Simulation systems');
+}
+if (!movementAdapter.includes("from './MovementSystem'")) {
+  failures.push('LegacyFreeRoamMovementAdapter.ts must delegate to MovementSystem');
+}
+if (!interactionAdapter.includes("from './InteractionSystem'")) {
+  failures.push('LegacyFreeRoamInteractionAdapter.ts must delegate to InteractionSystem');
+}
 if (!legacyPathfinding.includes('../simulation/exploration/NavigationSystem')) {
   failures.push('legacy pathfinding.ts must delegate to NavigationSystem');
 }
@@ -80,6 +96,12 @@ if (!collisionSystem.includes('moveCircleWithAxisCollision')) {
 }
 if (!movementSystem.includes('moveActorByDelta')) {
   failures.push('MovementSystem.ts must expose deterministic actor movement');
+}
+if (!interactionSystem.includes('findNearestInteractionActor')) {
+  failures.push('InteractionSystem.ts must own deterministic nearby actor selection');
+}
+if (!interactionSystem.includes('evaluateQuestInteractionGate')) {
+  failures.push('InteractionSystem.ts must own deterministic quest interaction gating');
 }
 if (!actorMotionSystem.includes('stepActorMotion')) {
   failures.push('ActorMotionSystem.ts must own renderer-independent walk motion math');
