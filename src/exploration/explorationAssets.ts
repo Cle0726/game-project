@@ -1,6 +1,7 @@
 export const WHITE_ACADEMY_PLAZA_ASSETS = {
-  // Live-game fallback that already exists in the repository. The dedicated walkable
-  // plaza painting can replace this path later without changing exploration logic.
+  // The live branch uses an existing chapter-3 visual so the normal game never falls
+  // back to a programmer grid. Replace only this path when the dedicated walkable
+  // 白谱院前广场 background asset is committed; exploration code stays unchanged.
   backgroundSrc: '/assets/generated/chapter3/keyvisuals/cg_ch3_white_score_main_v01.png',
   protagonistMaleSrc: '/assets/generated/characters/char_protagonist_rinche_male_default_v01.png',
   protagonistFemaleSrc: '/assets/generated/characters/char_protagonist_rinsa_female_default_v01.png',
