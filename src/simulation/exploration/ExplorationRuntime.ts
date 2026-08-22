@@ -6,6 +6,7 @@ import type { ExplorationRegionDefinition } from '../../exploration/explorationT
 import { wireLegacyFreeRoamActorViews } from './LegacyFreeRoamActorViewAdapter';
 import { wireLegacyFreeRoamInput } from './LegacyFreeRoamInputAdapter';
 import { wireLegacyFreeRoamInteraction } from './LegacyFreeRoamInteractionAdapter';
+import { wireLegacyFreeRoamLoop } from './LegacyFreeRoamLoopAdapter';
 import { wireLegacyFreeRoamMovement } from './LegacyFreeRoamMovementAdapter';
 import { wireLegacyFreeRoamPresentation } from './LegacyFreeRoamPresentationAdapter';
 import { wireLegacyFreeRoamRenderer } from './LegacyFreeRoamRendererAdapter';
@@ -17,7 +18,7 @@ export type ExplorationRuntimeOptions = FreeRoamPrototypeOptions;
  * Stable exploration runtime boundary used by story/world-map bridges.
  *
  * During Phase A it composes the existing Pixi FreeRoamPrototype as a renderer shell,
- * then replaces legacy rule/presentation/input methods with the formal Runtime systems.
+ * then replaces legacy rule/presentation/input/loop methods with formal Runtime systems.
  * Callers no longer need to know which parts are still legacy. The wrapped renderer
  * can be replaced later without changing chapter entry code.
  */
@@ -34,8 +35,9 @@ export class ExplorationRuntime {
     wireLegacyFreeRoamMovement(this.renderer, region);
     wireLegacyFreeRoamInteraction(this.renderer, region);
     wireLegacyFreeRoamPresentation(this.renderer, region);
-    wireLegacyFreeRoamInput(this.renderer);
+    const input = wireLegacyFreeRoamInput(this.renderer);
     wireLegacyFreeRoamRenderer(this.renderer, region);
+    wireLegacyFreeRoamLoop(this.renderer, region, input);
   }
 
   mount(host: HTMLElement): Promise<void> {
