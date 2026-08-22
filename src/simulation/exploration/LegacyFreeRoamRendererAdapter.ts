@@ -1,9 +1,10 @@
 import type { FreeRoamPrototype } from '../../exploration/FreeRoamPrototype';
 import type { ExplorationRegionDefinition, Vec2 } from '../../exploration/explorationTypes';
+import {
+  EXPLORATION_DIALOGUE_PANEL_HEIGHT,
+  EXPLORATION_DIALOGUE_PANEL_WIDTH,
+} from './ExplorationDialoguePresentation';
 import { computeCameraOffset, computeHudLayout } from './ExplorationRenderer';
-
-const DIALOGUE_PANEL_WIDTH = 760;
-const DIALOGUE_PANEL_HEIGHT = 128;
 
 interface PositionLike {
   set(x: number, y: number): void;
@@ -57,8 +58,8 @@ export function wireLegacyFreeRoamRenderer(
 
   legacy.updateHudPositions = () => {
     const layout = computeHudLayout(legacy.app.screen, {
-      width: DIALOGUE_PANEL_WIDTH,
-      height: DIALOGUE_PANEL_HEIGHT,
+      width: EXPLORATION_DIALOGUE_PANEL_WIDTH,
+      height: EXPLORATION_DIALOGUE_PANEL_HEIGHT,
     });
 
     legacy.clockPanel?.position.set(layout.clockPanel.x, layout.clockPanel.y);
