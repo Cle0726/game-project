@@ -8,6 +8,7 @@ import { wireLegacyFreeRoamInteraction } from './LegacyFreeRoamInteractionAdapte
 import { wireLegacyFreeRoamMovement } from './LegacyFreeRoamMovementAdapter';
 import { wireLegacyFreeRoamPresentation } from './LegacyFreeRoamPresentationAdapter';
 import { wireLegacyFreeRoamRenderer } from './LegacyFreeRoamRendererAdapter';
+import { wireLegacyFreeRoamWorldView } from './LegacyFreeRoamWorldViewAdapter';
 
 export type ExplorationRuntimeOptions = FreeRoamPrototypeOptions;
 
@@ -28,6 +29,7 @@ export class ExplorationRuntime {
   ) {
     this.renderer = new FreeRoamPrototype(region, options);
     wireLegacyFreeRoamActorViews(this.renderer, region);
+    wireLegacyFreeRoamWorldView(this.renderer, region);
     wireLegacyFreeRoamMovement(this.renderer, region);
     wireLegacyFreeRoamInteraction(this.renderer, region);
     wireLegacyFreeRoamPresentation(this.renderer, region);
