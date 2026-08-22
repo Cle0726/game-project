@@ -14,6 +14,7 @@ const adapter = read('src/simulation/state/LegacyGameStateAdapter.ts');
 const runtime = read('src/simulation/runtime/SimulationRuntime.ts');
 const coreCommands = read('src/simulation/command/CoreCommandHandlers.ts');
 const freeRoam = read('src/exploration/FreeRoamPrototype.ts');
+const explorationRuntime = read('src/simulation/exploration/ExplorationRuntime.ts');
 const collisionSystem = read('src/simulation/exploration/CollisionSystem.ts');
 const movementSystem = read('src/simulation/exploration/MovementSystem.ts');
 const interactionSystem = read('src/simulation/exploration/InteractionSystem.ts');
@@ -57,14 +58,20 @@ if (!coreCommands.includes("type: 'quest.completed'")) {
 if (/window\.GameState/.test(freeRoam)) {
   failures.push('FreeRoamPrototype.ts must not directly mutate window.GameState');
 }
-if (!legacyMain.includes('wireLegacyFreeRoamMovement')) {
-  failures.push('exploration-legacy-main.ts must wire live movement through Simulation systems');
+if (!legacyMain.includes("./simulation/exploration/ExplorationRuntime")) {
+  failures.push('exploration-legacy-main.ts must depend on the stable ExplorationRuntime boundary');
 }
-if (!legacyMain.includes('wireLegacyFreeRoamInteraction')) {
-  failures.push('exploration-legacy-main.ts must wire live interaction through Simulation systems');
+if (legacyMain.includes('LegacyFreeRoamMovementAdapter') || legacyMain.includes('LegacyFreeRoamInteractionAdapter')) {
+  failures.push('exploration-legacy-main.ts must not know individual legacy adapters');
 }
-if (!legacyMain.includes('wireLegacyFreeRoamRenderer')) {
-  failures.push('exploration-legacy-main.ts must wire camera/HUD layout through ExplorationRenderer');
+if (!explorationRuntime.includes('wireLegacyFreeRoamMovement')) {
+  failures.push('ExplorationRuntime.ts must wire live movement through Simulation systems');
+}
+if (!explorationRuntime.includes('wireLegacyFreeRoamInteraction')) {
+  failures.push('ExplorationRuntime.ts must wire live interaction through Simulation systems');
+}
+if (!explorationRuntime.includes('wireLegacyFreeRoamRenderer')) {
+  failures.push('ExplorationRuntime.ts must wire live renderer layout through Simulation systems');
 }
 if (!movementAdapter.includes("from './MovementSystem'")) {
   failures.push('LegacyFreeRoamMovementAdapter.ts must delegate to MovementSystem');
