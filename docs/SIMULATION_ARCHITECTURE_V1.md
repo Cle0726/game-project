@@ -190,7 +190,7 @@ ExplorationObjectivePresentation
 
 ## 7. Migration Adapter 原则
 
-目前存在若干：
+目前存在：
 
 ```text
 LegacyFreeRoamActorViewAdapter
@@ -335,7 +335,7 @@ L3 Dormant：只结算必要日程
 
 ## 13. Phase A 当前状态
 
-已完成：
+已完成并接入 live runtime：
 
 ```text
 SimulationStateV1
