@@ -1,9 +1,6 @@
 declare global {
   interface Window {
-    goToScene?: (sceneId: string) => void;
-    showScene?: (sceneId: string) => void;
     openStoryFromExploration?: (sceneId: string) => boolean;
-    gamePhase?: string;
   }
 }
 
