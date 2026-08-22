@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { WorldMapView } from './worldmap';
 import type { GameStateLike } from './worldmap';
 import type { LocationNode, WorldRegion } from './worldmap';
+import './exploration-legacy-main';
 
 export interface WorldMapScreenState {
   gameState?: GameStateLike;
