@@ -31,8 +31,9 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
   ],
   waypoints: [
     { id: 'south_east_entry', position: { x: 1700, y: 1120 }, links: ['garden_east', 'milo_rest'] },
-    { id: 'garden_east', position: { x: 1530, y: 1050 }, links: ['south_east_entry', 'south_plaza', 'atya_rest'] },
-    { id: 'south_plaza', position: { x: 1350, y: 865 }, links: ['garden_east', 'fountain_east', 'atya_rest'] },
+    { id: 'garden_east', position: { x: 1530, y: 1050 }, links: ['south_east_entry', 'garden_corner', 'atya_rest'] },
+    { id: 'garden_corner', position: { x: 1540, y: 885 }, links: ['garden_east', 'south_plaza'] },
+    { id: 'south_plaza', position: { x: 1350, y: 865 }, links: ['garden_corner', 'fountain_east'] },
     { id: 'fountain_east', position: { x: 1325, y: 690 }, links: ['south_plaza', 'east_mid', 'academy_east'] },
     { id: 'east_mid', position: { x: 1500, y: 725 }, links: ['fountain_east', 'milo_patrol', 'chapel_south'] },
     { id: 'chapel_south', position: { x: 1640, y: 840 }, links: ['east_mid', 'milo_rest'] },
@@ -41,7 +42,7 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
     { id: 'academy_east', position: { x: 1270, y: 355 }, links: ['fountain_east', 'milo_patrol', 'fountain_north'] },
     { id: 'fountain_north', position: { x: 1040, y: 350 }, links: ['academy_east', 'academy_gate'] },
     { id: 'academy_gate', position: { x: 760, y: 360 }, links: ['fountain_north'] },
-    { id: 'atya_rest', position: { x: 1450, y: 1040 }, links: ['garden_east', 'south_plaza'] },
+    { id: 'atya_rest', position: { x: 1550, y: 1020 }, links: ['garden_east'] },
   ],
   quests: [
     {
@@ -81,7 +82,7 @@ export const PROTOTYPE_REGION: ExplorationRegionDefinition = {
     {
       id: 'atya',
       name: '阿缇娅',
-      position: { x: 1450, y: 1040 },
+      position: { x: 1550, y: 1020 },
       speed: 95,
       spriteSrc: WHITE_ACADEMY_PLAZA_ASSETS.atyaSrc,
       interactionText: '按 E 与阿缇娅交谈',
