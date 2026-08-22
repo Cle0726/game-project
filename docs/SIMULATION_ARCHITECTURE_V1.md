@@ -13,27 +13,21 @@
 
 `Player / Story / Agent Intent → GameCommand → CommandValidator → State → WorldEvent → downstream systems`。
 
-## Canonical / Simulation 边界
+## Canonical / Simulation
 
-`game.js` 继续承担 `GameState / SCENES / choices / BATTLES / TeaBreak / save / showScene / goToScene`。Phase A 不全量重写。
-
-新状态挂载在 `window.GameState.simulationV1`，保存 `clock / currentRegionId / returnPoint / regions / quests / agents / eventCursor / eventLedger`。旧单区域探索存档只做一次迁移。
+`game.js` 继续承担 `GameState / SCENES / choices / BATTLES / TeaBreak / save / showScene / goToScene`。新状态挂载在 `window.GameState.simulationV1`；旧单区域探索存档只做一次迁移。
 
 当前命令：`region.enter / exploration.return_point.set / quest.complete`。当前事件：`region.entered / exploration.return_point_set / quest.completed`。`source: agent` 不能直接完成 Quest。
 
-## Stable ExplorationRuntime
+## ExplorationRuntime
 
 章节和 WorldMap 入口只依赖 `src/simulation/exploration/ExplorationRuntime.ts`。
 
 `legacy scene entry → ExplorationRuntime → FreeRoamPrototype compatibility shell → formal Simulation / Presentation modules`。
 
-`FreeRoamPrototype` 仅是 Phase A 待删除兼容壳。
+确定性系统已接入：`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`。
 
-## 已接入 live runtime
-
-确定性系统：`NavigationSystem / QuestSystem / SimulationClock / ScheduleSystem / RegionSystem / ActorMotionSystem / CollisionSystem / MovementSystem / InteractionSystem`。
-
-Presentation：`ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`。
+Presentation 已接入：`ExplorationRenderer / ExplorationWorldPresentation / ExplorationActorViewFactory / ExplorationHudPresentation / ExplorationDialoguePresentation / ExplorationObjectivePresentation`。
 
 Phase A Adapter：`LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapter / LegacyFreeRoamMovementAdapter / LegacyFreeRoamInteractionAdapter / LegacyFreeRoamPresentationAdapter / LegacyFreeRoamRendererAdapter`。
 
@@ -43,7 +37,7 @@ Phase A Adapter：`LegacyFreeRoamActorViewAdapter / LegacyFreeRoamWorldViewAdapt
 
 下一阶段：`InputController → ExplorationLoop/NPC orchestration → lifecycle cleanup → remove FreeRoamPrototype → chapter0_start`。
 
-## AI 后续边界
+## AI 边界
 
 剧情保持 `Canonical Beat / Authored Dynamic Beat / Emergent Beat` 分层。Fast Loop 永不调用 LLM；Simulation Loop 主要使用 TypeScript 规则；Cognitive Loop 只在重要事件异步调用模型。
 
