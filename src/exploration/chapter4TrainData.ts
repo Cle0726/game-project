@@ -8,7 +8,11 @@ const CORRIDOR_BACKGROUND =
 const ALTAR_BACKGROUND =
   '/assets/generated/chapter4/backgrounds/bg_ch4_altar_carriage_v01.png';
 
-const PLAYER_SPRITE = WHITE_ACADEMY_PLAZA_ASSETS.protagonistFallbackSrc;
+const PLAYER_SPRITE_VARIANTS = {
+  male: WHITE_ACADEMY_PLAZA_ASSETS.protagonistMaleSrc,
+  female: WHITE_ACADEMY_PLAZA_ASSETS.protagonistFemaleSrc,
+  fallback: WHITE_ACADEMY_PLAZA_ASSETS.protagonistFallbackSrc,
+} as const;
 
 export const CH4_AUDIENCE_CAR_ENTRY_REGION: ExplorationRegionDefinition = {
   id: 'ch4_nightless_audience_car_entry',
@@ -16,7 +20,7 @@ export const CH4_AUDIENCE_CAR_ENTRY_REGION: ExplorationRegionDefinition = {
   width: 1600,
   height: 900,
   playerSpawn: { x: 245, y: 700 },
-  assets: { backgroundSrc: AUDIENCE_BACKGROUND, playerSpriteSrc: PLAYER_SPRITE },
+  assets: { backgroundSrc: AUDIENCE_BACKGROUND, playerSpriteVariants: PLAYER_SPRITE_VARIANTS },
   collisionZones: [
     { id: 'audience-north-wall', x: 0, y: 0, width: 1600, height: 130 },
     { id: 'audience-south-wall', x: 0, y: 820, width: 1600, height: 80 },
@@ -67,7 +71,7 @@ export const CH4_QILAN_APPROACH_REGION: ExplorationRegionDefinition = {
   width: 1600,
   height: 900,
   playerSpawn: { x: 260, y: 690 },
-  assets: { backgroundSrc: CORRIDOR_BACKGROUND, playerSpriteSrc: PLAYER_SPRITE },
+  assets: { backgroundSrc: CORRIDOR_BACKGROUND, playerSpriteVariants: PLAYER_SPRITE_VARIANTS },
   collisionZones: [
     { id: 'qilan-north-wall', x: 0, y: 0, width: 1600, height: 140 },
     { id: 'qilan-south-wall', x: 0, y: 810, width: 1600, height: 90 },
@@ -118,7 +122,7 @@ export const CH4_ARMORED_CONNECTOR_APPROACH_REGION: ExplorationRegionDefinition 
   width: 1600,
   height: 900,
   playerSpawn: { x: 280, y: 690 },
-  assets: { backgroundSrc: CORRIDOR_BACKGROUND, playerSpriteSrc: PLAYER_SPRITE },
+  assets: { backgroundSrc: CORRIDOR_BACKGROUND, playerSpriteVariants: PLAYER_SPRITE_VARIANTS },
   collisionZones: [
     { id: 'connector-north-wall', x: 0, y: 0, width: 1600, height: 140 },
     { id: 'connector-south-wall', x: 0, y: 810, width: 1600, height: 90 },
@@ -162,7 +166,7 @@ export const CH4_ALTAR_CARRIAGE_APPROACH_REGION: ExplorationRegionDefinition = {
   width: 1600,
   height: 900,
   playerSpawn: { x: 250, y: 700 },
-  assets: { backgroundSrc: ALTAR_BACKGROUND, playerSpriteSrc: PLAYER_SPRITE },
+  assets: { backgroundSrc: ALTAR_BACKGROUND, playerSpriteVariants: PLAYER_SPRITE_VARIANTS },
   collisionZones: [
     { id: 'altar-north-wall', x: 0, y: 0, width: 1600, height: 145 },
     { id: 'altar-south-wall', x: 0, y: 815, width: 1600, height: 85 },
