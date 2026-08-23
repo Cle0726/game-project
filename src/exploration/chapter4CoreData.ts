@@ -44,6 +44,15 @@ export const CH4_POST_SELUOMI_CORE_APPROACH_REGION: ExplorationRegionDefinition 
   initialQuestId: 'ch4_reach_core_car_outer',
   interactionZones: [
     {
+      id: 'ch4-external-intel-event',
+      name: '外侧通讯窗口',
+      area: { x: 730, y: 470, width: 220, height: 115 },
+      interactionText: '按 E 接入阿俞与溪吟',
+      statusText: '列车外侧通讯短暂恢复。阿俞与溪吟一直在外围追踪管风琴核心的拍点差。',
+      storySceneId: 'chapter4_event_E405',
+      once: true,
+    },
+    {
       id: 'ch4-faded-seluomi-halo',
       name: '残留圣咏光环',
       area: { x: 720, y: 180, width: 180, height: 145 },
@@ -145,6 +154,15 @@ export const CH4_FINAL_BOSS_DAIS_APPROACH_REGION: ExplorationRegionDefinition = 
   ],
   initialQuestId: 'ch4_reach_final_boss_dais',
   interactionZones: [
+    {
+      id: 'ch4-organ-dodge-minigame',
+      name: '第七组音管裂口',
+      area: { x: 735, y: 510, width: 230, height: 115 },
+      interactionText: '按 E 进行管风琴节奏躲避',
+      statusText: '黑色音管的冲击并不同步。若之前记录过核心弱点，第七组音管会留下更稳定的半拍裂口。',
+      storySceneId: 'chapter4_event_minigame_organ_dodge',
+      once: true,
+    },
     {
       id: 'ch4-final-boss-dais',
       name: '黑色管风琴指挥台',
