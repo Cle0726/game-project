@@ -7,12 +7,24 @@ const assert = (condition, message) => { if (!condition) failures.push(message);
 
 const game = read('game.js');
 const registry = read('src/exploration/regionRegistry.ts');
+const types = read('src/exploration/explorationTypes.ts');
 const train = read('src/exploration/chapter4TrainData.ts');
 const core = read('src/exploration/chapter4CoreData.ts');
 const bridge = read('src/exploration-legacy-main.ts');
+const host = read('src/simulation/exploration/ExplorationHost.ts');
 const persistence = read('src/simulation/state/SimulationPersistence.ts');
 
-const bridgeScenes = ['ch4_002', 'ch4_006', 'ch4_008', 'ch4_009', 'ch4_011', 'ch4_012', 'ch4_014'];
+const bridgeScenes = [
+  'ch4_002',
+  'ch4_003',
+  'ch4_005',
+  'ch4_006',
+  'ch4_008',
+  'ch4_009',
+  'ch4_011',
+  'ch4_012',
+  'ch4_014',
+];
 for (const sceneId of bridgeScenes) {
   assert(game.includes(`\"${sceneId}\": {`), `Canonical chapter-4 scene ${sceneId} must exist`);
   assert(registry.includes(`sceneId: '${sceneId}'`), `${sceneId} must be registered as an exploration bridge`);
@@ -22,9 +34,7 @@ for (const protectedSceneId of [
   'chapter4_start',
   'ch4_000',
   'ch4_001',
-  'ch4_003',
   'ch4_004',
-  'ch4_005',
   'ch4_007',
   'ch4_010',
   'ch4_013',
@@ -64,6 +74,8 @@ for (const assetPath of [
 
 for (const exportName of [
   'CH4_AUDIENCE_CAR_ENTRY_REGION',
+  'CH4_AUDIENCE_INVESTIGATION_REGION',
+  'CH4_AKA_FOLLOWUP_REGION',
   'CH4_QILAN_APPROACH_REGION',
   'CH4_ARMORED_CONNECTOR_APPROACH_REGION',
   'CH4_ALTAR_CARRIAGE_APPROACH_REGION',
@@ -81,9 +93,9 @@ for (const exportName of [
 }
 
 // Chapter 4 used to force the generic traveler via playerSpriteSrc, overriding the
-// bridge's conductor-gender resolution. All seven regions must expose variants instead.
+// bridge's conductor-gender resolution. Every Chapter-4 region must expose variants.
 for (const [source, expectedCount, label] of [
-  [train, 4, 'train'],
+  [train, 6, 'train'],
   [core, 3, 'core'],
 ]) {
   const variantUses = source.match(/playerSpriteVariants: PLAYER_SPRITE_VARIANTS/g) ?? [];
@@ -105,6 +117,8 @@ for (const [source, expectedCount, label] of [
 
 for (const [source, questId, targetId, sceneId] of [
   [train, 'ch4_enter_audience_car', 'ch4-audience-forward', 'ch4_002'],
+  [train, 'ch4_find_sequence04_after_audience', 'ch4-sequence04-search', 'ch4_003'],
+  [train, 'ch4_return_to_sequence04', 'ch4-sequence04-resonance', 'ch4_005'],
   [train, 'ch4_reach_qilan_chokepoint', 'ch4-qilan-chokepoint', 'ch4_006'],
   [train, 'ch4_reach_armored_connector', 'ch4-armored-connector-door', 'ch4_008'],
   [train, 'ch4_reach_seluomi_standoff', 'ch4-seluomi-standoff', 'ch4_009'],
@@ -124,8 +138,60 @@ for (const [source, questId, targetId, sceneId] of [
   );
 }
 
+// The authored Chapter-4 side scenes used to exist only as dead SCENES entries.
+// They now surface through branch-aware, one-shot physical interactions instead of a
+// random Chapter-4 event pool, so the authored return scenes and values stay untouched.
+for (const sceneId of [
+  'chapter4_event_E401',
+  'chapter4_event_E402',
+  'chapter4_event_E403',
+  'chapter4_event_E404',
+  'chapter4_event_E405',
+  'chapter4_event_minigame_audience_identify',
+  'chapter4_event_minigame_resonance_wakeup',
+  'chapter4_event_minigame_three_side_dispatch',
+  'chapter4_event_minigame_organ_dodge',
+]) {
+  assert(game.includes(`\"${sceneId}\": {`), `Authored Chapter-4 side scene ${sceneId} must exist`);
+  assert(
+    train.includes(`storySceneId: '${sceneId}'`) || core.includes(`storySceneId: '${sceneId}'`),
+    `Authored Chapter-4 side scene ${sceneId} must be physically reachable`,
+  );
+}
+assert(
+  train.includes("requiredGameEvent: 'E401_audience_identified'") &&
+    train.includes("requiredGameEvent: '独奏者的终局'") &&
+    train.includes("requiredGameEvent: '希声看见观众席'") &&
+    train.includes("requiredGameEvent: '三方混战种子'"),
+  'Branch-specific Chapter-4 side interactions must respect their authored story choices',
+);
+assert(
+  train.includes("requiredAnyGameEvents: [") &&
+    train.includes("'零四未鸣共鸣唤醒'") &&
+    train.includes("'阿缇娅同类共鸣零四'") &&
+    train.includes("'弥洛幸存者对话零四'"),
+  'Sequence-04 resonance minigame must unlock after any authored wake-up route',
+);
+assert(
+  types.includes('requiredGameEvent?: string;') &&
+    types.includes('requiredAnyGameEvents?: string[];') &&
+    types.includes('once?: boolean;'),
+  'Exploration interaction zones must support authored-event gates and one-shot use',
+);
+assert(
+  host.includes('getAvailableInteractionZones()') &&
+    host.includes('this.triggeredGameEvents.has(zone.requiredGameEvent)') &&
+    host.includes('this.consumedInteractionZoneIds.push(zone.id)'),
+  'Exploration host must hide unavailable/consumed side interactions',
+);
+assert(
+  persistence.includes('consumedInteractionZoneIds: string[];') &&
+    persistence.includes('consumedInteractionZoneIds: [...snapshot.consumedInteractionZoneIds]'),
+  'One-shot side interactions must persist with the region snapshot',
+);
+
 // ch4_018 explicitly supports replaying the chapter. A replay must not restore the
-// previous run's last coordinates/completed exploration objectives.
+// previous run's last coordinates/completed exploration objectives or one-shot zones.
 assert(
   game.includes('nextScene: "chapter4_start"') && game.includes('nextScene: "ch4_000"'),
   'Chapter 4 must retain its authored replay path through chapter4_start -> ch4_000',
