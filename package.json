@@ -22,6 +22,7 @@
     "chapter0:route-audit": "node scripts/audit-chapter0-route-graph.mjs",
     "chapter1:guard": "node scripts/assert-chapter1-exploration.mjs",
     "chapter1:route-audit": "node scripts/audit-chapter1-route-graph.mjs",
+    "chapter2:guard": "node scripts/assert-chapter2-exploration.mjs",
     "assets:guard": "node scripts/assert-assets-externalized.mjs",
     "musicart:guard": "node scripts/assert-musicart-data-externalized.mjs",
     "musicart-detail:guard": "node scripts/assert-musicart-detail-data-externalized.mjs",
