@@ -27,6 +27,7 @@ import {
 } from './chapter1StationData';
 import { CH1_SEQUENCE04_AFTERMATH_REGION } from './chapter1AftermathData';
 import { CH1_SELUOMI_STANDOFF_APPROACH_REGION } from './chapter1SeluomiApproachData';
+import { CH1_MUJIAN_DEPARTURE_REGION } from './chapter1DepartureData';
 import {
   createRegionRegistry,
   type SceneRegionEntry,
@@ -50,6 +51,7 @@ const REGIONS = [
   CH1_MUJIAN_PLATFORM7_REGION,
   CH1_SEQUENCE04_AFTERMATH_REGION,
   CH1_SELUOMI_STANDOFF_APPROACH_REGION,
+  CH1_MUJIAN_DEPARTURE_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -95,6 +97,11 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   // Platform 7 and follow the abnormal low-frequency resonance. Seluomi herself is
   // revealed only when the exact original ch1_black_008 presentation starts.
   { sceneId: 'ch1_black_008', region: CH1_SELUOMI_STANDOFF_APPROACH_REGION },
+
+  // The three chapter-1 outcomes and optional tea breaks still converge on the authored
+  // ch1_black_013 epilogue. Only after the player chooses to leave do we make the walk
+  // to the station exit physical; the original ch1_black_014 broadcast then plays.
+  { sceneId: 'ch1_black_014', region: CH1_MUJIAN_DEPARTURE_REGION },
 
   // Existing chapter-3 regression slices remain registered against the same runtime.
   { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
