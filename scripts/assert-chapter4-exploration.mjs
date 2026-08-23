@@ -9,6 +9,8 @@ const game = read('game.js');
 const registry = read('src/exploration/regionRegistry.ts');
 const train = read('src/exploration/chapter4TrainData.ts');
 const core = read('src/exploration/chapter4CoreData.ts');
+const bridge = read('src/exploration-legacy-main.ts');
+const persistence = read('src/simulation/state/SimulationPersistence.ts');
 
 const bridgeScenes = ['ch4_002', 'ch4_006', 'ch4_008', 'ch4_009', 'ch4_011', 'ch4_012', 'ch4_014'];
 for (const sceneId of bridgeScenes) {
@@ -78,6 +80,29 @@ for (const exportName of [
   assert(registry.includes(exportName), `Chapter-4 core region ${exportName} must be registered`);
 }
 
+// Chapter 4 used to force the generic traveler via playerSpriteSrc, overriding the
+// bridge's conductor-gender resolution. All seven regions must expose variants instead.
+for (const [source, expectedCount, label] of [
+  [train, 4, 'train'],
+  [core, 3, 'core'],
+]) {
+  const variantUses = source.match(/playerSpriteVariants: PLAYER_SPRITE_VARIANTS/g) ?? [];
+  assert(
+    variantUses.length === expectedCount,
+    `Every chapter-4 ${label} region must use protagonist sprite variants`,
+  );
+  assert(
+    source.includes('protagonistMaleSrc') &&
+      source.includes('protagonistFemaleSrc') &&
+      source.includes('protagonistFallbackSrc'),
+    `Chapter-4 ${label} sprite variants must include male, female, and fallback art`,
+  );
+  assert(
+    !source.includes('playerSpriteSrc: PLAYER_SPRITE'),
+    `Chapter-4 ${label} regions must not force the fallback protagonist sprite`,
+  );
+}
+
 for (const [source, questId, targetId, sceneId] of [
   [train, 'ch4_enter_audience_car', 'ch4-audience-forward', 'ch4_002'],
   [train, 'ch4_reach_qilan_chokepoint', 'ch4-qilan-chokepoint', 'ch4_006'],
@@ -98,6 +123,24 @@ for (const [source, questId, targetId, sceneId] of [
     `${targetId} must return to canonical ${sceneId}`,
   );
 }
+
+// ch4_018 explicitly supports replaying the chapter. A replay must not restore the
+// previous run's last coordinates/completed exploration objectives.
+assert(
+  game.includes('nextScene: "chapter4_start"') && game.includes('nextScene: "ch4_000"'),
+  'Chapter 4 must retain its authored replay path through chapter4_start -> ch4_000',
+);
+assert(
+  persistence.includes('export function resetExplorationProgressByPrefix') &&
+    persistence.includes('delete state.regions[regionId]') &&
+    persistence.includes('state.quests.completedQuestIds = state.quests.completedQuestIds.filter(keepQuest)'),
+  'Simulation persistence must support clearing chapter-local region and quest snapshots',
+);
+assert(
+  bridge.includes("sceneId === 'ch4_000'") &&
+    bridge.includes("resetExplorationProgressByPrefix('ch4_')"),
+  'Entering canonical ch4_000 must reset stale chapter-4 exploration progress before replay',
+);
 
 assert(
   game.includes('value: "ch4_train_infiltrated"') && game.includes('nextScene: "ch4_002"'),
