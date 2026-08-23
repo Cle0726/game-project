@@ -9,6 +9,7 @@ const game = read('game.js');
 const registry = read('src/exploration/regionRegistry.ts');
 const station = read('src/exploration/chapter1StationData.ts');
 const aftermath = read('src/exploration/chapter1AftermathData.ts');
+const seluomiApproach = read('src/exploration/chapter1SeluomiApproachData.ts');
 
 const bridgeScenes = [
   'ch1_black_001',
@@ -16,6 +17,7 @@ const bridgeScenes = [
   'ch1_black_003',
   'ch1_black_005',
   'ch1_black_006',
+  'ch1_black_008',
 ];
 
 for (const sceneId of bridgeScenes) {
@@ -34,10 +36,13 @@ for (const protectedSceneId of [
   'ch1_black_000',
   'ch1_black_004',
   'ch1_black_007',
+  'ch1_black_009',
+  'ch1_black_012',
   'ch1_minigame_intel_trade',
   'ch1_minigame_track_ruts',
   'ch1_minigame_cipher',
   'ch1_minigame_ensemble',
+  'ch1_minigame_escort_yuna',
 ]) {
   assert(
     game.includes(`\"${protectedSceneId}\": {`),
@@ -118,15 +123,11 @@ for (const waypointId of [
   assert(station.includes(`id: '${waypointId}'`), `Missing Mujian station waypoint ${waypointId}`);
 }
 
-// Current Canon convergence guarantees all preparation routes can use one physical
-// Platform-7 approach without duplicating minigame or patrol effects.
 assert(
   game.includes('nextScene: "ch1_black_005"'),
   'Chapter-1 preparation routes must still converge on ch1_black_005',
 );
 
-// Sequence-04 battle remains authoritative. Exploration begins only when its authored
-// battle callback routes into ch1_black_006.
 assert(
   game.includes('showScene("ch1_black_006")'),
   'Sequence-04 battle must still return to canonical ch1_black_006',
@@ -156,8 +157,42 @@ assert(
 );
 
 assert(
+  seluomiApproach.includes('export const CH1_SELUOMI_STANDOFF_APPROACH_REGION'),
+  'Seluomi standoff approach region must exist',
+);
+assert(
+  registry.includes('CH1_SELUOMI_STANDOFF_APPROACH_REGION'),
+  'Seluomi standoff approach region must be registered',
+);
+assert(
+  seluomiApproach.includes("id: 'ch1_follow_low_frequency'") &&
+    seluomiApproach.includes("target: { type: 'zone', id: 'ch1-seluomi-standoff-edge' }"),
+  'Seluomi approach must follow the low-frequency source to a physical zone',
+);
+assert(
+  seluomiApproach.includes("questCompleteId: 'ch1_follow_low_frequency'") &&
+    seluomiApproach.includes("storySceneId: 'ch1_black_008'"),
+  'Low-frequency approach must hand control back to canonical ch1_black_008',
+);
+assert(
+  !seluomiApproach.includes("name: '瑟萝弥'") && !seluomiApproach.includes('spriteSrc:'),
+  'Do not fabricate a Seluomi map sprite when the repository has no dedicated asset',
+);
+assert(
+  game.includes('nextScene: "ch1_black_009"') &&
+    game.includes('nextScene: "ch1_black_012"') &&
+    game.includes('ch1_minigame_escort_yuna'),
+  'Seluomi confrontation tactics and escort minigame must remain canonical',
+);
+assert(
+  game.includes('startBattle("ch1_seluomi_trial"'),
+  'Seluomi boss battle must remain owned by the canonical battle system',
+);
+
+assert(
   !station.includes('DeepSeek') && !station.includes('OpenAI') &&
-    !aftermath.includes('DeepSeek') && !aftermath.includes('OpenAI'),
+    !aftermath.includes('DeepSeek') && !aftermath.includes('OpenAI') &&
+    !seluomiApproach.includes('DeepSeek') && !seluomiApproach.includes('OpenAI'),
   'Chapter-1 exploration must remain LLM OFF',
 );
 
