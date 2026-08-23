@@ -25,6 +25,7 @@ import {
   CH1_MUJIAN_STATION_ARRIVAL_REGION,
   CH1_MUJIAN_STATION_INN_REGION,
 } from './chapter1StationData';
+import { CH1_SEQUENCE04_AFTERMATH_REGION } from './chapter1AftermathData';
 import {
   createRegionRegistry,
   type SceneRegionEntry,
@@ -46,6 +47,7 @@ const REGIONS = [
   CH1_MUJIAN_FIND_ZHONG_REGION,
   CH1_MUJIAN_STATION_INN_REGION,
   CH1_MUJIAN_PLATFORM7_REGION,
+  CH1_SEQUENCE04_AFTERMATH_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -81,6 +83,11 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   { sceneId: 'ch1_black_002', region: CH1_MUJIAN_FIND_ZHONG_REGION },
   { sceneId: 'ch1_black_003', region: CH1_MUJIAN_STATION_INN_REGION },
   { sceneId: 'ch1_black_005', region: CH1_MUJIAN_PLATFORM7_REGION },
+
+  // Sequence-04 battle resolution stays in the authored Battle definition. Once it
+  // routes to ch1_black_006, inspect the two already-canonical traces in-world before
+  // handing control back to the original analysis dialogue.
+  { sceneId: 'ch1_black_006', region: CH1_SEQUENCE04_AFTERMATH_REGION },
 
   // Existing chapter-3 regression slices remain registered against the same runtime.
   { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
