@@ -48,6 +48,11 @@ import {
   CH4_QILAN_APPROACH_REGION,
 } from './chapter4TrainData';
 import {
+  CH4_CORE_ORGAN_ENTRY_REGION,
+  CH4_FINAL_BOSS_DAIS_APPROACH_REGION,
+  CH4_POST_SELUOMI_CORE_APPROACH_REGION,
+} from './chapter4CoreData';
+import {
   createRegionRegistry,
   type SceneRegionEntry,
 } from '../simulation/exploration/RegionSystem';
@@ -84,6 +89,9 @@ const REGIONS = [
   CH4_QILAN_APPROACH_REGION,
   CH4_ARMORED_CONNECTOR_APPROACH_REGION,
   CH4_ALTAR_CARRIAGE_APPROACH_REGION,
+  CH4_POST_SELUOMI_CORE_APPROACH_REGION,
+  CH4_CORE_ORGAN_ENTRY_REGION,
+  CH4_FINAL_BOSS_DAIS_APPROACH_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -121,22 +129,29 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   { sceneId: 'ch3_white_006', region: CH3_ARCHIVE_CORRIDOR_APPROACH_REGION },
   { sceneId: 'ch3_white_008', region: CH3_HEARING_CHAMBER_APPROACH_REGION },
 
-  // Chapter 4 route initialization and the moving-train boarding scene remain authored.
-  // Once ch4_001 unlocks the train map and applies its infiltration event, physically
-  // cross the boarding vestibule before the canonical audience-car reveal.
+  // Keep route setup, value initialization, and the moving-train infiltration authored.
   { sceneId: 'ch4_002', region: CH4_AUDIENCE_CAR_ENTRY_REGION },
 
-  // ch4_002-005 own the rescue/value decisions around the audience car and Sequence 04.
-  // After the wake-up choice resolves, traverse the rear carriage before Qilan appear.
+  // Audience-car rescue choices apply before the rear-car traversal to Qilan.
   { sceneId: 'ch4_006', region: CH4_QILAN_APPROACH_REGION },
 
-  // Persuasion, the Qilan battle, and the optional Sequence-07 node all converge on 008.
-  // Only then traverse the armored connector before Elena's canonical forced entry.
+  // Qilan persuasion/battle and the optional Sequence-07 route converge here.
   { sceneId: 'ch4_008', region: CH4_ARMORED_CONNECTOR_APPROACH_REGION },
 
-  // Elena's three authored responses all converge on the Seluomi standoff. Keep those
-  // truth/affinity effects canonical, then physically advance through the altar car.
+  // Elena's truth/affinity effects apply before the party advances to Seluomi.
   { sceneId: 'ch4_009', region: CH4_ALTAR_CARRIAGE_APPROACH_REGION },
+
+  // Seluomi's final battle remains canonical. Its battle result enters 011, so the
+  // post-battle distance from altar carriage to core-car exterior is physical first.
+  { sceneId: 'ch4_011', region: CH4_POST_SELUOMI_CORE_APPROACH_REGION },
+
+  // ch4_011 explains the organ binding and owns the explicit decision to enter.
+  // After that choice, physically cross the core chamber before Charon's truth scene.
+  { sceneId: 'ch4_012', region: CH4_CORE_ORGAN_ENTRY_REGION },
+
+  // Charon's truth and the full-party prelude remain authored. Only the final approach
+  // from ch4_013 to the organ dais becomes physical before the cinematic boss reveal.
+  { sceneId: 'ch4_014', region: CH4_FINAL_BOSS_DAIS_APPROACH_REGION },
 ];
 
 const registry = createRegionRegistry(REGIONS, SCENE_ENTRIES, PROTOTYPE_REGION.id);
