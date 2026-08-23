@@ -15,6 +15,7 @@ on:
       - 'scripts/assert-chapter2-exploration.mjs'
       - 'scripts/audit-chapter2-route-graph.mjs'
       - 'scripts/assert-chapter3-exploration.mjs'
+      - 'scripts/audit-chapter3-route-graph.mjs'
       - 'tsconfig.simulation.json'
       - 'package.json'
       - 'package-lock.json'
@@ -39,6 +40,7 @@ on:
       - 'scripts/assert-chapter2-exploration.mjs'
       - 'scripts/audit-chapter2-route-graph.mjs'
       - 'scripts/assert-chapter3-exploration.mjs'
+      - 'scripts/audit-chapter3-route-graph.mjs'
       - 'tsconfig.simulation.json'
       - 'package.json'
       - 'package-lock.json'
@@ -87,6 +89,9 @@ jobs:
 
       - name: Chapter 3 exploration guard
         run: npm run chapter3:guard
+
+      - name: Chapter 3 route graph audit
+        run: npm run chapter3:route-audit
 
       - name: Production build
         run: npm run simulation:build
