@@ -5,7 +5,11 @@ const ALTAR_BACKGROUND =
   '/assets/generated/chapter4/backgrounds/bg_ch4_altar_carriage_v01.png';
 const CORE_BACKGROUND =
   '/assets/generated/chapter4/backgrounds/bg_ch4_core_organ_chamber_v01.png';
-const PLAYER_SPRITE = WHITE_ACADEMY_PLAZA_ASSETS.protagonistFallbackSrc;
+const PLAYER_SPRITE_VARIANTS = {
+  male: WHITE_ACADEMY_PLAZA_ASSETS.protagonistMaleSrc,
+  female: WHITE_ACADEMY_PLAZA_ASSETS.protagonistFemaleSrc,
+  fallback: WHITE_ACADEMY_PLAZA_ASSETS.protagonistFallbackSrc,
+} as const;
 
 export const CH4_POST_SELUOMI_CORE_APPROACH_REGION: ExplorationRegionDefinition = {
   id: 'ch4_post_seluomi_core_approach',
@@ -13,7 +17,7 @@ export const CH4_POST_SELUOMI_CORE_APPROACH_REGION: ExplorationRegionDefinition 
   width: 1600,
   height: 900,
   playerSpawn: { x: 270, y: 700 },
-  assets: { backgroundSrc: ALTAR_BACKGROUND, playerSpriteSrc: PLAYER_SPRITE },
+  assets: { backgroundSrc: ALTAR_BACKGROUND, playerSpriteVariants: PLAYER_SPRITE_VARIANTS },
   collisionZones: [
     { id: 'post-seluomi-north-wall', x: 0, y: 0, width: 1600, height: 145 },
     { id: 'post-seluomi-south-wall', x: 0, y: 815, width: 1600, height: 85 },
@@ -64,7 +68,7 @@ export const CH4_CORE_ORGAN_ENTRY_REGION: ExplorationRegionDefinition = {
   width: 1600,
   height: 900,
   playerSpawn: { x: 250, y: 710 },
-  assets: { backgroundSrc: CORE_BACKGROUND, playerSpriteSrc: PLAYER_SPRITE },
+  assets: { backgroundSrc: CORE_BACKGROUND, playerSpriteVariants: PLAYER_SPRITE_VARIANTS },
   collisionZones: [
     { id: 'core-entry-north-wall', x: 0, y: 0, width: 1600, height: 130 },
     { id: 'core-entry-south-wall', x: 0, y: 825, width: 1600, height: 75 },
@@ -115,7 +119,7 @@ export const CH4_FINAL_BOSS_DAIS_APPROACH_REGION: ExplorationRegionDefinition = 
   width: 1600,
   height: 900,
   playerSpawn: { x: 300, y: 710 },
-  assets: { backgroundSrc: CORE_BACKGROUND, playerSpriteSrc: PLAYER_SPRITE },
+  assets: { backgroundSrc: CORE_BACKGROUND, playerSpriteVariants: PLAYER_SPRITE_VARIANTS },
   collisionZones: [
     { id: 'final-dais-north-wall', x: 0, y: 0, width: 1600, height: 130 },
     { id: 'final-dais-south-wall', x: 0, y: 825, width: 1600, height: 75 },
