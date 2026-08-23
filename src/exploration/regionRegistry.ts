@@ -39,6 +39,7 @@ import {
   CH2_OBSERVATORY_DEPARTURE_REGION,
 } from './chapter2CoreData';
 import { CH3_WHITE_ACADEMY_PLAZA_REGION } from './chapter3PlazaData';
+import { CH3_ARCHIVE_CORRIDOR_APPROACH_REGION } from './chapter3ArchiveApproachData';
 import {
   createRegionRegistry,
   type SceneRegionEntry,
@@ -70,6 +71,7 @@ const REGIONS = [
   CH2_CORE_RECORDER_APPROACH_REGION,
   CH2_OBSERVATORY_DEPARTURE_REGION,
   CH3_WHITE_ACADEMY_PLAZA_REGION,
+  CH3_ARCHIVE_CORRIDOR_APPROACH_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -148,10 +150,16 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   // ch3_white_000; only then does the approved plaza slice take control.
   { sceneId: 'ch3_white_000', region: CH3_WHITE_ACADEMY_PLAZA_REGION },
 
-  // Existing archive slices remain registered as chapter-3 regression baselines while
-  // their current Canon placement is audited scene by scene.
+  // The two archive searches line up exactly with current Canon: ch3_white_002 routes
+  // into Milo's prototype-001 record, then both ch3_white_003 choices route into
+  // Anning's father's maintenance record.
   { sceneId: 'ch3_white_003', region: WHITE_ACADEMY_ARCHIVE_MILO_REGION },
   { sceneId: 'ch3_white_004', region: WHITE_ACADEMY_ARCHIVE_ANNING_REGION },
+
+  // ch3_white_005 remains canonical so Wen Bieke's dialogue, hearing-value effects,
+  // and E301-E305 event entry are preserved. Its forward edge to ch3_white_006 becomes
+  // a physical walk from the portrait corridor to the night archive exterior.
+  { sceneId: 'ch3_white_006', region: CH3_ARCHIVE_CORRIDOR_APPROACH_REGION },
 ];
 
 const registry = createRegionRegistry(REGIONS, SCENE_ENTRIES, PROTOTYPE_REGION.id);
