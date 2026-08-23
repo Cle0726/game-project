@@ -52,6 +52,16 @@ function getIssuedAt(): number {
   return Math.max(0, state.clock.day - 1) * 1440 + state.clock.minuteOfDay;
 }
 
+function resolveRegionPlayerSprite(region: ExplorationRegionDefinition): string {
+  const gender = window.GameState?.['奏者性别'];
+  const variants = region.assets?.playerSpriteVariants;
+  if (gender === '男' && variants?.male) return variants.male;
+  if (gender === '女' && variants?.female) return variants.female;
+  if (variants?.fallback) return variants.fallback;
+  if (region.assets?.playerSpriteSrc) return region.assets.playerSpriteSrc;
+  return resolveProtagonistExplorationSprite(gender);
+}
+
 function destroyRuntime(): void {
   runtime?.destroy();
   runtime = undefined;
@@ -111,13 +121,8 @@ async function enterExploration(
   window.gamePhase = 'exploration';
   host = createHost();
 
-  const playerSpriteSrc = resolveProtagonistExplorationSprite(window.GameState?.['奏者性别']);
-
-  // ExplorationRuntime is now the stable boundary. During Phase A it internally
-  // composes the legacy Pixi renderer while routing deterministic rules through the
-  // formal Simulation systems.
   runtime = new ExplorationRuntime(region, {
-    playerSpriteSrc,
+    playerSpriteSrc: resolveRegionPlayerSprite(region),
     onStoryScene: (sceneId) => {
       window.openStoryFromExploration?.(sceneId);
     },

@@ -18,6 +18,8 @@
     "simulation:guard": "node scripts/assert-simulation-boundaries.mjs",
     "simulation:typecheck": "tsc -p tsconfig.simulation.json",
     "simulation:build": "vite build",
+    "chapter0:guard": "node scripts/assert-chapter0-exploration.mjs",
+    "chapter0:route-audit": "node scripts/audit-chapter0-route-graph.mjs",
     "assets:guard": "node scripts/assert-assets-externalized.mjs",
     "musicart:guard": "node scripts/assert-musicart-data-externalized.mjs",
     "musicart-detail:guard": "node scripts/assert-musicart-detail-data-externalized.mjs",
