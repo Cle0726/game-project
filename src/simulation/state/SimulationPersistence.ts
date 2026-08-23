@@ -16,6 +16,7 @@ export interface RegionExplorationSnapshotV1 {
   clockMinute: number;
   activeQuestId?: string;
   completedQuestIds: string[];
+  consumedInteractionZoneIds: string[];
   npcPositions: Record<string, SimulationVec2>;
 }
 
@@ -43,6 +44,7 @@ function toSnapshot(
     clockMinute: state.clock.minuteOfDay,
     activeQuestId: region.activeQuestId,
     completedQuestIds: [...region.completedQuestIds],
+    consumedInteractionZoneIds: [...(region.consumedInteractionZoneIds ?? [])],
     npcPositions: clonePositions(region.npcPositions),
   };
 }
@@ -63,6 +65,11 @@ function readLegacySnapshot(regionId: string): LegacyExplorationSnapshot | undef
       activeQuestId: parsed.activeQuestId,
       completedQuestIds: Array.isArray(parsed.completedQuestIds)
         ? parsed.completedQuestIds.filter((item): item is string => typeof item === 'string')
+        : [],
+      consumedInteractionZoneIds: Array.isArray(parsed.consumedInteractionZoneIds)
+        ? parsed.consumedInteractionZoneIds.filter(
+            (item): item is string => typeof item === 'string',
+          )
         : [],
       npcPositions: clonePositions(parsed.npcPositions),
     };
@@ -110,6 +117,7 @@ export function saveRegionExplorationSnapshot(
       playerPosition: { ...snapshot.playerPosition },
       activeQuestId: snapshot.activeQuestId,
       completedQuestIds: [...snapshot.completedQuestIds],
+      consumedInteractionZoneIds: [...snapshot.consumedInteractionZoneIds],
       npcPositions: clonePositions(snapshot.npcPositions),
       lastVisitedGameTime:
         Math.max(0, state.clock.day - 1) * 1440 + snapshot.clockMinute,
