@@ -25,8 +25,8 @@ export const CH1_SELUOMI_STANDOFF_APPROACH_REGION: ExplorationRegionDefinition =
     { id: 'night_west_lane', position: { x: 620, y: 555 }, links: ['night_south', 'night_north_west'] },
     { id: 'night_north_west', position: { x: 620, y: 310 }, links: ['night_west_lane', 'night_platform7'] },
     { id: 'night_north_east', position: { x: 980, y: 310 }, links: ['night_east_lane', 'night_platform7'] },
-    { id: 'night_platform7', position: { x: 800, y: 210 }, links: ['night_north_west', 'night_north_east', 'night_low_frequency'] },
-    { id: 'night_low_frequency', position: { x: 800, y: 150 }, links: ['night_platform7'] },
+    { id: 'night_platform7', position: { x: 800, y: 230 }, links: ['night_north_west', 'night_north_east', 'night_low_frequency'] },
+    { id: 'night_low_frequency', position: { x: 800, y: 180 }, links: ['night_platform7'] },
   ],
   npcs: [],
   quests: [
@@ -50,7 +50,7 @@ export const CH1_SELUOMI_STANDOFF_APPROACH_REGION: ExplorationRegionDefinition =
     {
       id: 'ch1-seluomi-standoff-edge',
       name: '异常低频源',
-      area: { x: 675, y: 125, width: 250, height: 120 },
+      area: { x: 675, y: 150, width: 250, height: 110 },
       interactionText: '按 E 靠近低频源',
       statusText: '雾墙后的低频共振已经近到能压住呼吸节拍。',
       questCompleteId: 'ch1_follow_low_frequency',
