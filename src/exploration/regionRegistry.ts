@@ -20,6 +20,15 @@ import {
   CH0_RETURN_TO_CHARON_THEATER_REGION,
 } from './chapter0PostContractTravelData';
 import {
+  CH1_MUJIAN_FIND_ZHONG_REGION,
+  CH1_MUJIAN_PLATFORM7_REGION,
+  CH1_MUJIAN_STATION_ARRIVAL_REGION,
+  CH1_MUJIAN_STATION_INN_REGION,
+} from './chapter1StationData';
+import { CH1_SEQUENCE04_AFTERMATH_REGION } from './chapter1AftermathData';
+import { CH1_SELUOMI_STANDOFF_APPROACH_REGION } from './chapter1SeluomiApproachData';
+import { CH1_MUJIAN_DEPARTURE_REGION } from './chapter1DepartureData';
+import {
   createRegionRegistry,
   type SceneRegionEntry,
 } from '../simulation/exploration/RegionSystem';
@@ -36,6 +45,13 @@ const REGIONS = [
   CH0_FORBIDDEN_PERFORMANCE_APPROACH_REGION,
   CH0_POST_BATTLE_DINER_RETREAT_REGION,
   CH0_RETURN_TO_CHARON_THEATER_REGION,
+  CH1_MUJIAN_STATION_ARRIVAL_REGION,
+  CH1_MUJIAN_FIND_ZHONG_REGION,
+  CH1_MUJIAN_STATION_INN_REGION,
+  CH1_MUJIAN_PLATFORM7_REGION,
+  CH1_SEQUENCE04_AFTERMATH_REGION,
+  CH1_SELUOMI_STANDOFF_APPROACH_REGION,
+  CH1_MUJIAN_DEPARTURE_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -64,6 +80,28 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   // the theater before Charron is canonically revealed.
   { sceneId: 'ch0_018_teabreak_not_tiya', region: CH0_POST_BATTLE_DINER_RETREAT_REGION },
   { sceneId: 'ch0_019_charron_revealed', region: CH0_RETURN_TO_CHARON_THEATER_REGION },
+
+  // Chapter 1 keeps chapter1_start, ch1_black_000, and ch1_black_004 canonical. The
+  // travel implied by those authored choices becomes physical on the next scene.
+  { sceneId: 'ch1_black_001', region: CH1_MUJIAN_STATION_ARRIVAL_REGION },
+  { sceneId: 'ch1_black_002', region: CH1_MUJIAN_FIND_ZHONG_REGION },
+  { sceneId: 'ch1_black_003', region: CH1_MUJIAN_STATION_INN_REGION },
+  { sceneId: 'ch1_black_005', region: CH1_MUJIAN_PLATFORM7_REGION },
+
+  // Sequence-04 battle resolution stays in the authored Battle definition. Once it
+  // routes to ch1_black_006, inspect the two already-canonical traces in-world before
+  // handing control back to the original analysis dialogue.
+  { sceneId: 'ch1_black_006', region: CH1_SEQUENCE04_AFTERMATH_REGION },
+
+  // After Yuna's authored night conversation, walk from the station inn back toward
+  // Platform 7 and follow the abnormal low-frequency resonance. Seluomi herself is
+  // revealed only when the exact original ch1_black_008 presentation starts.
+  { sceneId: 'ch1_black_008', region: CH1_SELUOMI_STANDOFF_APPROACH_REGION },
+
+  // The three chapter-1 outcomes and optional tea breaks still converge on the authored
+  // ch1_black_013 epilogue. Only after the player chooses to leave do we make the walk
+  // to the station exit physical; the original ch1_black_014 broadcast then plays.
+  { sceneId: 'ch1_black_014', region: CH1_MUJIAN_DEPARTURE_REGION },
 
   // Existing chapter-3 regression slices remain registered against the same runtime.
   { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
