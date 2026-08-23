@@ -10,6 +10,7 @@ const registry = read('src/exploration/regionRegistry.ts');
 const station = read('src/exploration/chapter1StationData.ts');
 const aftermath = read('src/exploration/chapter1AftermathData.ts');
 const seluomiApproach = read('src/exploration/chapter1SeluomiApproachData.ts');
+const departure = read('src/exploration/chapter1DepartureData.ts');
 
 const bridgeScenes = [
   'ch1_black_001',
@@ -18,6 +19,7 @@ const bridgeScenes = [
   'ch1_black_005',
   'ch1_black_006',
   'ch1_black_008',
+  'ch1_black_014',
 ];
 
 for (const sceneId of bridgeScenes) {
@@ -37,7 +39,11 @@ for (const protectedSceneId of [
   'ch1_black_004',
   'ch1_black_007',
   'ch1_black_009',
+  'ch1_black_010_a',
+  'ch1_black_010_b',
+  'ch1_black_010_c',
   'ch1_black_012',
+  'ch1_black_013',
   'ch1_minigame_intel_trade',
   'ch1_minigame_track_ruts',
   'ch1_minigame_cipher',
@@ -190,9 +196,37 @@ assert(
 );
 
 assert(
+  departure.includes('export const CH1_MUJIAN_DEPARTURE_REGION'),
+  'Mujian station departure region must exist',
+);
+assert(
+  registry.includes('CH1_MUJIAN_DEPARTURE_REGION'),
+  'Mujian station departure region must be registered',
+);
+assert(
+  departure.includes("id: 'ch1_leave_mujian_station'") &&
+    departure.includes("target: { type: 'zone', id: 'ch1-station-departure-exit' }"),
+  'Departure quest must target the physical station exit',
+);
+assert(
+  departure.includes("questCompleteId: 'ch1_leave_mujian_station'") &&
+    departure.includes("storySceneId: 'ch1_black_014'"),
+  'Station exit must hand control back to canonical ch1_black_014',
+);
+assert(
+  game.includes('nextScene: "ch1_black_014"'),
+  'Canonical chapter-1 epilogue must still route to ch1_black_014 when leaving Mujian Station',
+);
+assert(
+  game.includes('nextScene: "chapter2_start"') && game.includes('nextScene: "chapter1_start"'),
+  'Canonical ch1_black_014 route choices must remain available after the broadcast',
+);
+
+assert(
   !station.includes('DeepSeek') && !station.includes('OpenAI') &&
     !aftermath.includes('DeepSeek') && !aftermath.includes('OpenAI') &&
-    !seluomiApproach.includes('DeepSeek') && !seluomiApproach.includes('OpenAI'),
+    !seluomiApproach.includes('DeepSeek') && !seluomiApproach.includes('OpenAI') &&
+    !departure.includes('DeepSeek') && !departure.includes('OpenAI'),
   'Chapter-1 exploration must remain LLM OFF',
 );
 
