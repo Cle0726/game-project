@@ -8,7 +8,7 @@ export const CH1_MUJIAN_DEPARTURE_REGION: ExplorationRegionDefinition = {
   name: '雾茧站 · 离站通道',
   width: 1600,
   height: 900,
-  playerSpawn: { x: 800, y: 390 },
+  playerSpawn: { x: 800, y: 310 },
   assets: { backgroundSrc: STATION_BACKGROUND },
   collisionZones: [
     { id: 'departure-west-structure', x: 0, y: 0, width: 235, height: 900 },
@@ -19,7 +19,7 @@ export const CH1_MUJIAN_DEPARTURE_REGION: ExplorationRegionDefinition = {
     { id: 'departure-east-luggage', x: 1040, y: 610, width: 180, height: 95 },
   ],
   waypoints: [
-    { id: 'departure_start', position: { x: 800, y: 325 }, links: ['departure_west_lane', 'departure_east_lane'] },
+    { id: 'departure_start', position: { x: 800, y: 310 }, links: ['departure_west_lane', 'departure_east_lane'] },
     { id: 'departure_west_lane', position: { x: 620, y: 555 }, links: ['departure_start', 'departure_south'] },
     { id: 'departure_east_lane', position: { x: 980, y: 555 }, links: ['departure_start', 'departure_south'] },
     { id: 'departure_south', position: { x: 800, y: 700 }, links: ['departure_west_lane', 'departure_east_lane', 'departure_exit'] },
