@@ -42,6 +42,12 @@ import { CH3_WHITE_ACADEMY_PLAZA_REGION } from './chapter3PlazaData';
 import { CH3_ARCHIVE_CORRIDOR_APPROACH_REGION } from './chapter3ArchiveApproachData';
 import { CH3_HEARING_CHAMBER_APPROACH_REGION } from './chapter3HearingApproachData';
 import {
+  CH4_ALTAR_CARRIAGE_APPROACH_REGION,
+  CH4_ARMORED_CONNECTOR_APPROACH_REGION,
+  CH4_AUDIENCE_CAR_ENTRY_REGION,
+  CH4_QILAN_APPROACH_REGION,
+} from './chapter4TrainData';
+import {
   createRegionRegistry,
   type SceneRegionEntry,
 } from '../simulation/exploration/RegionSystem';
@@ -74,6 +80,10 @@ const REGIONS = [
   CH3_WHITE_ACADEMY_PLAZA_REGION,
   CH3_ARCHIVE_CORRIDOR_APPROACH_REGION,
   CH3_HEARING_CHAMBER_APPROACH_REGION,
+  CH4_AUDIENCE_CAR_ENTRY_REGION,
+  CH4_QILAN_APPROACH_REGION,
+  CH4_ARMORED_CONNECTOR_APPROACH_REGION,
+  CH4_ALTAR_CARRIAGE_APPROACH_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -105,24 +115,28 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   { sceneId: 'ch2_snow_011', region: CH2_CORE_RECORDER_APPROACH_REGION },
   { sceneId: 'ch2_snow_015', region: CH2_OBSERVATORY_DEPARTURE_REGION },
 
-  // Keep the formal Chapter 3 opening authored. Its route-start choice initializes
-  // hearing state, then ch3_white_000 becomes the physical White Academy front plaza.
   { sceneId: 'ch3_white_000', region: CH3_WHITE_ACADEMY_PLAZA_REGION },
-
-  // The two archive searches line up exactly with current Canon: ch3_white_002 routes
-  // into Milo's prototype-001 record, then ch3_white_003 routes into Anning's record.
   { sceneId: 'ch3_white_003', region: WHITE_ACADEMY_ARCHIVE_MILO_REGION },
   { sceneId: 'ch3_white_004', region: WHITE_ACADEMY_ARCHIVE_ANNING_REGION },
-
-  // Wen Bieke's ch3_white_005 dialogue and E301-E305 entry remain canonical. Once one
-  // of its authored forward choices applies, physically walk to the night archive
-  // exterior before Baizhou's ch3_white_006 contact begins.
   { sceneId: 'ch3_white_006', region: CH3_ARCHIVE_CORRIDOR_APPROACH_REGION },
-
-  // ch3_white_007 and the hearing-statement minigame both converge on ch3_white_008.
-  // Travel to the central hearing chamber only after preparation is complete so the
-  // hearing, its resolution function, and all high/mid/low outcomes remain authored.
   { sceneId: 'ch3_white_008', region: CH3_HEARING_CHAMBER_APPROACH_REGION },
+
+  // Chapter 4 route initialization and the moving-train boarding scene remain authored.
+  // Once ch4_001 unlocks the train map and applies its infiltration event, physically
+  // cross the boarding vestibule before the canonical audience-car reveal.
+  { sceneId: 'ch4_002', region: CH4_AUDIENCE_CAR_ENTRY_REGION },
+
+  // ch4_002-005 own the rescue/value decisions around the audience car and Sequence 04.
+  // After the wake-up choice resolves, traverse the rear carriage before Qilan appear.
+  { sceneId: 'ch4_006', region: CH4_QILAN_APPROACH_REGION },
+
+  // Persuasion, the Qilan battle, and the optional Sequence-07 node all converge on 008.
+  // Only then traverse the armored connector before Elena's canonical forced entry.
+  { sceneId: 'ch4_008', region: CH4_ARMORED_CONNECTOR_APPROACH_REGION },
+
+  // Elena's three authored responses all converge on the Seluomi standoff. Keep those
+  // truth/affinity effects canonical, then physically advance through the altar car.
+  { sceneId: 'ch4_009', region: CH4_ALTAR_CARRIAGE_APPROACH_REGION },
 ];
 
 const registry = createRegionRegistry(REGIONS, SCENE_ENTRIES, PROTOTYPE_REGION.id);
