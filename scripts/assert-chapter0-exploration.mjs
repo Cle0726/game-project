@@ -9,6 +9,7 @@ const game = read('game.js');
 const registry = read('src/exploration/regionRegistry.ts');
 const chapter0 = read('src/exploration/chapter0RegionData.ts');
 const townHub = read('src/exploration/chapter0TownHubData.ts');
+const theaterApproach = read('src/exploration/chapter0TheaterApproachData.ts');
 
 const canonicalBridgeScenes = [
   'ch0_001_road_entrance',
@@ -17,6 +18,7 @@ const canonicalBridgeScenes = [
   'ch0_010_record_shop',
   'ch0_011_backstage_dress',
   'ch0_012_clocktower',
+  'ch0_013_forbidden_performance',
 ];
 
 for (const sceneId of canonicalBridgeScenes) {
@@ -50,6 +52,7 @@ for (const staleSceneId of ["sceneId: 'ch0_001'", "sceneId: 'ch0_003'", "sceneId
 for (const assetPath of [
   'assets/generated/chapter0/backgrounds/bg_ch0_miansha_residential_alley_v01.png',
   'assets/generated/chapter0/backgrounds/bg_ch0_miansha_town_square_piano_v01.png',
+  'assets/generated/chapter0/backgrounds/bg_ch0_abandoned_theater_stage_v01.png',
   'assets/generated/chapter0/sprites/characters/char_ch0_anning_sprite_default_v02.png',
   'assets/generated/chapter0/sprites/characters/char_ch0_tiya_sprite_default_ai_v01.png',
   'assets/generated/chapter0/sprites/characters/char_ch0_noi_sprite_default_v03.png',
@@ -158,9 +161,36 @@ assert(
   townHub.includes('playerSpriteVariants: CH0_PRE_CONTRACT_PLAYER_SPRITES'),
   'Town hub must keep the protagonist in pre-contract chapter-0 state',
 );
+
+assert(
+  theaterApproach.includes("id: 'ch0_reach_forbidden_performance_stage'"),
+  'Forbidden-performance approach quest must exist',
+);
+assert(
+  theaterApproach.includes("target: { type: 'zone', id: 'ch0-forbidden-stage-focus' }"),
+  'Forbidden-performance approach quest must target the stage focus zone',
+);
+assert(
+  theaterApproach.includes("id: 'ch0-forbidden-stage-focus'"),
+  'Forbidden-performance stage focus zone must exist',
+);
+assert(
+  theaterApproach.includes("storySceneId: 'ch0_013_forbidden_performance'"),
+  'Theater approach must return to canonical ch0_013_forbidden_performance',
+);
+assert(
+  theaterApproach.includes('playerSpriteVariants: CH0_PRE_CONTRACT_PLAYER_SPRITES'),
+  'Theater approach must keep the protagonist pre-contract before ch0_015_first_baton',
+);
+assert(
+  registry.includes('CH0_FORBIDDEN_PERFORMANCE_APPROACH_REGION'),
+  'Forbidden-performance approach region must be registered',
+);
+
 assert(
   !chapter0.includes('DeepSeek') && !chapter0.includes('OpenAI') &&
-    !townHub.includes('DeepSeek') && !townHub.includes('OpenAI'),
+    !townHub.includes('DeepSeek') && !townHub.includes('OpenAI') &&
+    !theaterApproach.includes('DeepSeek') && !theaterApproach.includes('OpenAI'),
   'Chapter 0 exploration must remain LLM OFF',
 );
 
