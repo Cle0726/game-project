@@ -8,6 +8,7 @@ import {
 import { getSimulationRuntime } from './simulation/runtime/SimulationRuntime';
 import type { GameCommandSource } from './simulation/command/GameCommand';
 import { ExplorationRuntime } from './simulation/exploration/ExplorationRuntime';
+import { resetExplorationProgressByPrefix } from './simulation/state/SimulationPersistence';
 
 declare global {
   interface Window {
@@ -194,9 +195,19 @@ function tryInterceptScene(sceneId: string): boolean {
   return true;
 }
 
+function prepareCanonicalScene(sceneId: string): void {
+  // ch4_018 explicitly allows returning to chapter4_start and starting the chapter
+  // again. Reset only chapter-local exploration snapshots when that replay actually
+  // advances into ch4_000; canonical story values/events remain untouched.
+  if (sceneId === 'ch4_000') {
+    resetExplorationProgressByPrefix('ch4_');
+  }
+}
+
 if (originalShowScene) {
   window.showScene = (sceneId: string) => {
     if (tryInterceptScene(sceneId)) return;
+    prepareCanonicalScene(sceneId);
     originalShowScene(sceneId);
   };
 }
@@ -204,6 +215,7 @@ if (originalShowScene) {
 if (originalGoToScene) {
   window.goToScene = (sceneId: string) => {
     if (tryInterceptScene(sceneId)) return;
+    prepareCanonicalScene(sceneId);
     originalGoToScene(sceneId);
   };
 }
