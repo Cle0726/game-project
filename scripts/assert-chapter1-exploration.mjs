@@ -8,12 +8,14 @@ const assert = (condition, message) => { if (!condition) failures.push(message);
 const game = read('game.js');
 const registry = read('src/exploration/regionRegistry.ts');
 const station = read('src/exploration/chapter1StationData.ts');
+const aftermath = read('src/exploration/chapter1AftermathData.ts');
 
 const bridgeScenes = [
   'ch1_black_001',
   'ch1_black_002',
   'ch1_black_003',
   'ch1_black_005',
+  'ch1_black_006',
 ];
 
 for (const sceneId of bridgeScenes) {
@@ -31,9 +33,11 @@ for (const protectedSceneId of [
   'chapter1_start',
   'ch1_black_000',
   'ch1_black_004',
+  'ch1_black_007',
   'ch1_minigame_intel_trade',
   'ch1_minigame_track_ruts',
   'ch1_minigame_cipher',
+  'ch1_minigame_ensemble',
 ]) {
   assert(
     game.includes(`\"${protectedSceneId}\": {`),
@@ -120,8 +124,40 @@ assert(
   game.includes('nextScene: "ch1_black_005"'),
   'Chapter-1 preparation routes must still converge on ch1_black_005',
 );
+
+// Sequence-04 battle remains authoritative. Exploration begins only when its authored
+// battle callback routes into ch1_black_006.
 assert(
-  !station.includes('DeepSeek') && !station.includes('OpenAI'),
+  game.includes('showScene("ch1_black_006")'),
+  'Sequence-04 battle must still return to canonical ch1_black_006',
+);
+assert(
+  aftermath.includes('export const CH1_SEQUENCE04_AFTERMATH_REGION'),
+  'Sequence-04 aftermath exploration region must exist',
+);
+assert(
+  registry.includes('CH1_SEQUENCE04_AFTERMATH_REGION'),
+  'Sequence-04 aftermath region must be registered',
+);
+assert(
+  aftermath.includes("id: 'ch1_inspect_sequence04_tracks'") &&
+    aftermath.includes("nextQuestId: 'ch1_inspect_sequence04_score'"),
+  'Sequence-04 aftermath must inspect tracks before the score fragments',
+);
+assert(
+  aftermath.includes("target: { type: 'zone', id: 'ch1-sequence04-tracks' }") &&
+    aftermath.includes("target: { type: 'zone', id: 'ch1-sequence04-score' }"),
+  'Sequence-04 aftermath quests must resolve to their physical evidence zones',
+);
+assert(
+  aftermath.includes("questCompleteId: 'ch1_inspect_sequence04_score'") &&
+    aftermath.includes("storySceneId: 'ch1_black_006'"),
+  'Only the second evidence check may hand control back to canonical ch1_black_006',
+);
+
+assert(
+  !station.includes('DeepSeek') && !station.includes('OpenAI') &&
+    !aftermath.includes('DeepSeek') && !aftermath.includes('OpenAI'),
   'Chapter-1 exploration must remain LLM OFF',
 );
 
