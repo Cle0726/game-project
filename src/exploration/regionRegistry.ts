@@ -20,6 +20,12 @@ import {
   CH0_RETURN_TO_CHARON_THEATER_REGION,
 } from './chapter0PostContractTravelData';
 import {
+  CH1_MUJIAN_FIND_ZHONG_REGION,
+  CH1_MUJIAN_PLATFORM7_REGION,
+  CH1_MUJIAN_STATION_ARRIVAL_REGION,
+  CH1_MUJIAN_STATION_INN_REGION,
+} from './chapter1StationData';
+import {
   createRegionRegistry,
   type SceneRegionEntry,
 } from '../simulation/exploration/RegionSystem';
@@ -36,6 +42,10 @@ const REGIONS = [
   CH0_FORBIDDEN_PERFORMANCE_APPROACH_REGION,
   CH0_POST_BATTLE_DINER_RETREAT_REGION,
   CH0_RETURN_TO_CHARON_THEATER_REGION,
+  CH1_MUJIAN_STATION_ARRIVAL_REGION,
+  CH1_MUJIAN_FIND_ZHONG_REGION,
+  CH1_MUJIAN_STATION_INN_REGION,
+  CH1_MUJIAN_PLATFORM7_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -64,6 +74,13 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   // the theater before Charron is canonically revealed.
   { sceneId: 'ch0_018_teabreak_not_tiya', region: CH0_POST_BATTLE_DINER_RETREAT_REGION },
   { sceneId: 'ch0_019_charron_revealed', region: CH0_RETURN_TO_CHARON_THEATER_REGION },
+
+  // Chapter 1 keeps chapter1_start, ch1_black_000, and ch1_black_004 canonical. The
+  // travel implied by those authored choices becomes physical on the next scene.
+  { sceneId: 'ch1_black_001', region: CH1_MUJIAN_STATION_ARRIVAL_REGION },
+  { sceneId: 'ch1_black_002', region: CH1_MUJIAN_FIND_ZHONG_REGION },
+  { sceneId: 'ch1_black_003', region: CH1_MUJIAN_STATION_INN_REGION },
+  { sceneId: 'ch1_black_005', region: CH1_MUJIAN_PLATFORM7_REGION },
 
   // Existing chapter-3 regression slices remain registered against the same runtime.
   { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
