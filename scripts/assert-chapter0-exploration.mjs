@@ -8,17 +8,22 @@ const assert = (condition, message) => { if (!condition) failures.push(message);
 const game = read('game.js');
 const registry = read('src/exploration/regionRegistry.ts');
 const chapter0 = read('src/exploration/chapter0RegionData.ts');
+const townHub = read('src/exploration/chapter0TownHubData.ts');
 
 const canonicalBridgeScenes = [
   'ch0_001_road_entrance',
   'ch0_002_silent_town',
+  'ch0_009_silent_school',
+  'ch0_010_record_shop',
+  'ch0_011_backstage_dress',
+  'ch0_012_clocktower',
 ];
 
 for (const sceneId of canonicalBridgeScenes) {
   // Require the exact SCENES object key, not a loose substring. This prevents stale
   // aliases such as ch0_001 from accidentally matching ch0_001_road_entrance.
   assert(
-    game.includes(`"${sceneId}": {`),
+    game.includes(`\"${sceneId}\": {`),
     `Canonical scene ${sceneId} must exist as an exact SCENES key in game.js`,
   );
   assert(
@@ -26,6 +31,17 @@ for (const sceneId of canonicalBridgeScenes) {
     `${sceneId} must be registered as an exploration bridge`,
   );
 }
+
+// The authored map-open scene owns dialogue, side-event access, and branch effects.
+// It must play normally; only the destination scenes after the choice are intercepted.
+assert(
+  game.includes('"ch0_008_map_open": {'),
+  'Canonical ch0_008_map_open scene must exist',
+);
+assert(
+  !registry.includes("sceneId: 'ch0_008_map_open'"),
+  'ch0_008_map_open must remain canonical and must not be intercepted',
+);
 
 for (const staleSceneId of ["sceneId: 'ch0_001'", "sceneId: 'ch0_003'", "sceneId: 'ch0_004'"]) {
   assert(!registry.includes(staleSceneId), `Stale chapter-0 bridge must be removed: ${staleSceneId}`);
@@ -37,6 +53,8 @@ for (const assetPath of [
   'assets/generated/chapter0/sprites/characters/char_ch0_anning_sprite_default_v02.png',
   'assets/generated/chapter0/sprites/characters/char_ch0_tiya_sprite_default_ai_v01.png',
   'assets/generated/chapter0/sprites/characters/char_ch0_noi_sprite_default_v03.png',
+  'assets/generated/chapter0/sprites/characters/char_ch0_protagonist_rinche_sprite_pre_contract_v03.png',
+  'assets/generated/chapter0/sprites/characters/char_ch0_protagonist_rinsa_sprite_pre_contract_v03.png',
 ]) {
   assert(exists(assetPath), `Missing chapter-0 exploration asset: ${assetPath}`);
 }
@@ -78,9 +96,72 @@ assert(
   chapter0.includes("storySceneId: 'ch0_002_silent_town'"),
   'Sealed piano must return to canonical ch0_002_silent_town',
 );
+
+const townHubTargets = [
+  {
+    key: 'school',
+    questId: 'ch0_hub_reach_school',
+    zoneId: 'ch0-hub-school-gate',
+    sceneId: 'ch0_009_silent_school',
+    exportName: 'CH0_MIANSHA_TOWN_HUB_SCHOOL_REGION',
+  },
+  {
+    key: 'recordShop',
+    questId: 'ch0_hub_reach_record_shop',
+    zoneId: 'ch0-hub-record-shop',
+    sceneId: 'ch0_010_record_shop',
+    exportName: 'CH0_MIANSHA_TOWN_HUB_RECORD_SHOP_REGION',
+  },
+  {
+    key: 'theater',
+    questId: 'ch0_hub_reach_theater',
+    zoneId: 'ch0-hub-theater-door',
+    sceneId: 'ch0_011_backstage_dress',
+    exportName: 'CH0_MIANSHA_TOWN_HUB_THEATER_REGION',
+  },
+  {
+    key: 'clocktower',
+    questId: 'ch0_hub_reach_clocktower',
+    zoneId: 'ch0-hub-clocktower-gate',
+    sceneId: 'ch0_012_clocktower',
+    exportName: 'CH0_MIANSHA_TOWN_HUB_CLOCKTOWER_REGION',
+  },
+];
+
+for (const target of townHubTargets) {
+  assert(townHub.includes(`key: '${target.key}'`), `Missing town-hub target ${target.key}`);
+  assert(townHub.includes(`questId: '${target.questId}'`), `Missing town-hub quest ${target.questId}`);
+  assert(townHub.includes(`zoneId: '${target.zoneId}'`), `Missing town-hub zone ${target.zoneId}`);
+  assert(townHub.includes(`sceneId: '${target.sceneId}'`), `Town-hub target must return to ${target.sceneId}`);
+  assert(townHub.includes(`export const ${target.exportName}`), `Missing town-hub region export ${target.exportName}`);
+}
+
+for (const waypointId of [
+  'hub_entry',
+  'hub_south_west',
+  'hub_south_east',
+  'hub_west_cross',
+  'hub_east_cross',
+  'hub_north_west',
+  'hub_north_east',
+  'hub_school_gate',
+  'hub_record_gate',
+  'hub_theater_gate',
+  'hub_clock_gate',
+  'hub_anning',
+  'hub_tiya',
+]) {
+  assert(townHub.includes(`id: '${waypointId}'`), `Missing town-hub waypoint ${waypointId}`);
+}
+
 assert(
-  !chapter0.includes('DeepSeek') && !chapter0.includes('OpenAI'),
-  'Chapter 0 first slice must remain LLM OFF',
+  townHub.includes('playerSpriteVariants: CH0_PRE_CONTRACT_PLAYER_SPRITES'),
+  'Town hub must keep the protagonist in pre-contract chapter-0 state',
+);
+assert(
+  !chapter0.includes('DeepSeek') && !chapter0.includes('OpenAI') &&
+    !townHub.includes('DeepSeek') && !townHub.includes('OpenAI'),
+  'Chapter 0 exploration must remain LLM OFF',
 );
 
 if (failures.length) {
