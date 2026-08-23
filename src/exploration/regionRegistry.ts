@@ -34,6 +34,11 @@ import {
   CH2_OBSERVATORY_SNOW_APPROACH_REGION,
 } from './chapter2ObservatoryData';
 import {
+  CH2_CORE_DOOR_POST_BOSS_REGION,
+  CH2_CORE_RECORDER_APPROACH_REGION,
+  CH2_OBSERVATORY_DEPARTURE_REGION,
+} from './chapter2CoreData';
+import {
   createRegionRegistry,
   type SceneRegionEntry,
 } from '../simulation/exploration/RegionSystem';
@@ -60,6 +65,9 @@ const REGIONS = [
   CH2_OBSERVATORY_SNOW_APPROACH_REGION,
   CH2_OBSERVATORY_MAIN_DOOR_REGION,
   CH2_CRYSTAL_CORRIDOR_GUARDIAN_APPROACH_REGION,
+  CH2_CORE_DOOR_POST_BOSS_REGION,
+  CH2_CORE_RECORDER_APPROACH_REGION,
+  CH2_OBSERVATORY_DEPARTURE_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -120,6 +128,18 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   // ch2_snow_005 remains the canonical exploration/minigame menu. Every preparation
   // route converges on ch2_snow_006, so only that deeper corridor traversal is physical.
   { sceneId: 'ch2_snow_006', region: CH2_CRYSTAL_CORRIDOR_GUARDIAN_APPROACH_REGION },
+
+  // Scoreheart Guardian remains a canonical boss. Its result routes to ch2_snow_008;
+  // physically approach the core door before the authored Ningsu reveal starts.
+  { sceneId: 'ch2_snow_008', region: CH2_CORE_DOOR_POST_BOSS_REGION },
+
+  // All three Ningsu-resolution scenes converge on ch2_snow_011 after their authored
+  // effects. Walk through the now-open core chamber to the residual recorder first.
+  { sceneId: 'ch2_snow_011', region: CH2_CORE_RECORDER_APPROACH_REGION },
+
+  // ch2_snow_014 owns the farewell, companion choice, tea breaks and frost training.
+  // Once a route leaves the tower, make the downhill leg physical before ch2_snow_015.
+  { sceneId: 'ch2_snow_015', region: CH2_OBSERVATORY_DEPARTURE_REGION },
 
   // Existing chapter-3 regression slices remain registered against the same runtime.
   { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
