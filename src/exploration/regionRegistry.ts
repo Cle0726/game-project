@@ -16,6 +16,10 @@ import {
 } from './chapter0TownHubData';
 import { CH0_FORBIDDEN_PERFORMANCE_APPROACH_REGION } from './chapter0TheaterApproachData';
 import {
+  CH0_POST_BATTLE_DINER_RETREAT_REGION,
+  CH0_RETURN_TO_CHARON_THEATER_REGION,
+} from './chapter0PostContractTravelData';
+import {
   createRegionRegistry,
   type SceneRegionEntry,
 } from '../simulation/exploration/RegionSystem';
@@ -30,6 +34,8 @@ const REGIONS = [
   CH0_MIANSHA_TOWN_HUB_THEATER_REGION,
   CH0_MIANSHA_TOWN_HUB_CLOCKTOWER_REGION,
   CH0_FORBIDDEN_PERFORMANCE_APPROACH_REGION,
+  CH0_POST_BATTLE_DINER_RETREAT_REGION,
+  CH0_RETURN_TO_CHARON_THEATER_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -52,6 +58,12 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   // After the clocktower investigation, physically return to the old theater and walk
   // onto the stage before the canonical forbidden-performance scene begins.
   { sceneId: 'ch0_013_forbidden_performance', region: CH0_FORBIDDEN_PERFORMANCE_APPROACH_REGION },
+
+  // Combat itself remains canonical. After the stage-crawler win, make the retreat to
+  // the diner physical; after the tea-break choice, follow the knocking sound back to
+  // the theater before Charron is canonically revealed.
+  { sceneId: 'ch0_018_teabreak_not_tiya', region: CH0_POST_BATTLE_DINER_RETREAT_REGION },
+  { sceneId: 'ch0_019_charron_revealed', region: CH0_RETURN_TO_CHARON_THEATER_REGION },
 
   // Existing chapter-3 regression slices remain registered against the same runtime.
   { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
