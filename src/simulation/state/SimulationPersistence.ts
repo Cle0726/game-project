@@ -119,6 +119,39 @@ export function saveRegionExplorationSnapshot(
   return newlyCompletedQuestIds;
 }
 
+/**
+ * Clear chapter-local exploration snapshots so an authored chapter replay starts its
+ * physical traversal from the beginning. Story values and the world event ledger stay
+ * untouched; only region snapshots and quest lifecycle entries with the same prefix are
+ * reset.
+ */
+export function resetExplorationProgressByPrefix(prefix: string): void {
+  const normalizedPrefix = prefix.trim();
+  if (!normalizedPrefix) return;
+
+  mutateSimulationStateV1((state) => {
+    const resetRegionIds = new Set(
+      Object.keys(state.regions).filter((regionId) => regionId.startsWith(normalizedPrefix)),
+    );
+
+    for (const regionId of resetRegionIds) {
+      delete state.regions[regionId];
+    }
+
+    const keepQuest = (questId: string) => !questId.startsWith(normalizedPrefix);
+    state.quests.acceptedQuestIds = state.quests.acceptedQuestIds.filter(keepQuest);
+    state.quests.completedQuestIds = state.quests.completedQuestIds.filter(keepQuest);
+    state.quests.failedQuestIds = state.quests.failedQuestIds.filter(keepQuest);
+
+    if (state.currentRegionId && resetRegionIds.has(state.currentRegionId)) {
+      state.currentRegionId = undefined;
+    }
+    if (state.returnPoint && resetRegionIds.has(state.returnPoint.regionId)) {
+      state.returnPoint = undefined;
+    }
+  });
+}
+
 export function setSimulationReturnPoint(
   regionId: string,
   position: SimulationVec2,
