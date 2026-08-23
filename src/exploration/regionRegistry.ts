@@ -38,6 +38,7 @@ import {
   CH2_CORE_RECORDER_APPROACH_REGION,
   CH2_OBSERVATORY_DEPARTURE_REGION,
 } from './chapter2CoreData';
+import { CH3_WHITE_ACADEMY_PLAZA_REGION } from './chapter3PlazaData';
 import {
   createRegionRegistry,
   type SceneRegionEntry,
@@ -68,6 +69,7 @@ const REGIONS = [
   CH2_CORE_DOOR_POST_BOSS_REGION,
   CH2_CORE_RECORDER_APPROACH_REGION,
   CH2_OBSERVATORY_DEPARTURE_REGION,
+  CH3_WHITE_ACADEMY_PLAZA_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -141,8 +143,13 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   // Once a route leaves the tower, make the downhill leg physical before ch2_snow_015.
   { sceneId: 'ch2_snow_015', region: CH2_OBSERVATORY_DEPARTURE_REGION },
 
-  // Existing chapter-3 regression slices remain registered against the same runtime.
-  { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
+  // Chapter 3 must begin canonically so its opening dialogue and hearing-state reset
+  // run before exploration. The authored 'enter the front plaza' choice advances to
+  // ch3_white_000; only then does the approved plaza slice take control.
+  { sceneId: 'ch3_white_000', region: CH3_WHITE_ACADEMY_PLAZA_REGION },
+
+  // Existing archive slices remain registered as chapter-3 regression baselines while
+  // their current Canon placement is audited scene by scene.
   { sceneId: 'ch3_white_003', region: WHITE_ACADEMY_ARCHIVE_MILO_REGION },
   { sceneId: 'ch3_white_004', region: WHITE_ACADEMY_ARCHIVE_ANNING_REGION },
 ];
