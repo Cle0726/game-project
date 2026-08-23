@@ -14,6 +14,7 @@ import {
   CH0_MIANSHA_TOWN_HUB_SCHOOL_REGION,
   CH0_MIANSHA_TOWN_HUB_THEATER_REGION,
 } from './chapter0TownHubData';
+import { CH0_FORBIDDEN_PERFORMANCE_APPROACH_REGION } from './chapter0TheaterApproachData';
 import {
   createRegionRegistry,
   type SceneRegionEntry,
@@ -28,6 +29,7 @@ const REGIONS = [
   CH0_MIANSHA_TOWN_HUB_RECORD_SHOP_REGION,
   CH0_MIANSHA_TOWN_HUB_THEATER_REGION,
   CH0_MIANSHA_TOWN_HUB_CLOCKTOWER_REGION,
+  CH0_FORBIDDEN_PERFORMANCE_APPROACH_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -46,6 +48,10 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   { sceneId: 'ch0_010_record_shop', region: CH0_MIANSHA_TOWN_HUB_RECORD_SHOP_REGION },
   { sceneId: 'ch0_011_backstage_dress', region: CH0_MIANSHA_TOWN_HUB_THEATER_REGION },
   { sceneId: 'ch0_012_clocktower', region: CH0_MIANSHA_TOWN_HUB_CLOCKTOWER_REGION },
+
+  // After the clocktower investigation, physically return to the old theater and walk
+  // onto the stage before the canonical forbidden-performance scene begins.
+  { sceneId: 'ch0_013_forbidden_performance', region: CH0_FORBIDDEN_PERFORMANCE_APPROACH_REGION },
 
   // Existing chapter-3 regression slices remain registered against the same runtime.
   { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
