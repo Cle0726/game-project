@@ -8,14 +8,12 @@ const assert = (condition, message) => { if (!condition) failures.push(message);
 const game = read('game.js');
 const registry = read('src/exploration/regionRegistry.ts');
 const train = read('src/exploration/chapter4TrainData.ts');
+const core = read('src/exploration/chapter4CoreData.ts');
 
-const bridgeScenes = ['ch4_002', 'ch4_006', 'ch4_008', 'ch4_009'];
+const bridgeScenes = ['ch4_002', 'ch4_006', 'ch4_008', 'ch4_009', 'ch4_011', 'ch4_012', 'ch4_014'];
 for (const sceneId of bridgeScenes) {
   assert(game.includes(`\"${sceneId}\": {`), `Canonical chapter-4 scene ${sceneId} must exist`);
-  assert(
-    registry.includes(`sceneId: '${sceneId}'`),
-    `${sceneId} must be registered as an exploration bridge`,
-  );
+  assert(registry.includes(`sceneId: '${sceneId}'`), `${sceneId} must be registered as an exploration bridge`);
 }
 
 for (const protectedSceneId of [
@@ -27,16 +25,16 @@ for (const protectedSceneId of [
   'ch4_005',
   'ch4_007',
   'ch4_010',
-  'ch4_011',
-  'ch4_012',
   'ch4_013',
-  'ch4_014',
   'ch4_015',
+  'ch4_016',
+  'ch4_017',
+  'ch4_018',
 ]) {
   assert(game.includes(`\"${protectedSceneId}\": {`), `Protected chapter-4 scene ${protectedSceneId} must exist`);
   assert(
     !registry.includes(`sceneId: '${protectedSceneId}'`),
-    `Protected chapter-4 scene ${protectedSceneId} must not be intercepted in this slice`,
+    `Protected chapter-4 scene ${protectedSceneId} must not be intercepted`,
   );
 }
 
@@ -46,10 +44,7 @@ for (const [key, value] of [
   ['真相值', '0'],
   ['伊莱娜隐藏好感值', '0'],
 ]) {
-  assert(
-    game.includes(`key: \"${key}\", value: ${value}`),
-    `chapter4_start must keep canonical initialization for ${key}`,
-  );
+  assert(game.includes(`key: \"${key}\", value: ${value}`), `chapter4_start must initialize ${key}`);
 }
 assert(
   game.includes('value: "chapter4_route_started"') && game.includes('nextScene: "ch4_000"'),
@@ -60,6 +55,7 @@ for (const assetPath of [
   'assets/generated/chapter4/backgrounds/bg_ch4_audience_car_v01.png',
   'assets/generated/chapter4/backgrounds/bg_ch4_nightless_train_corridor_v01.png',
   'assets/generated/chapter4/backgrounds/bg_ch4_altar_carriage_v01.png',
+  'assets/generated/chapter4/backgrounds/bg_ch4_core_organ_chamber_v01.png',
 ]) {
   assert(exists(assetPath), `Missing chapter-4 exploration asset: ${assetPath}`);
 }
@@ -73,43 +69,46 @@ for (const exportName of [
   assert(train.includes(`export const ${exportName}`), `Missing chapter-4 region export ${exportName}`);
   assert(registry.includes(exportName), `Chapter-4 region ${exportName} must be registered`);
 }
-
-for (const [questId, targetId, sceneId] of [
-  ['ch4_enter_audience_car', 'ch4-audience-forward', 'ch4_002'],
-  ['ch4_reach_qilan_chokepoint', 'ch4-qilan-chokepoint', 'ch4_006'],
-  ['ch4_reach_armored_connector', 'ch4-armored-connector-door', 'ch4_008'],
-  ['ch4_reach_seluomi_standoff', 'ch4-seluomi-standoff', 'ch4_009'],
+for (const exportName of [
+  'CH4_POST_SELUOMI_CORE_APPROACH_REGION',
+  'CH4_CORE_ORGAN_ENTRY_REGION',
+  'CH4_FINAL_BOSS_DAIS_APPROACH_REGION',
 ]) {
-  assert(train.includes(`id: '${questId}'`), `Missing chapter-4 quest ${questId}`);
+  assert(core.includes(`export const ${exportName}`), `Missing chapter-4 core region export ${exportName}`);
+  assert(registry.includes(exportName), `Chapter-4 core region ${exportName} must be registered`);
+}
+
+for (const [source, questId, targetId, sceneId] of [
+  [train, 'ch4_enter_audience_car', 'ch4-audience-forward', 'ch4_002'],
+  [train, 'ch4_reach_qilan_chokepoint', 'ch4-qilan-chokepoint', 'ch4_006'],
+  [train, 'ch4_reach_armored_connector', 'ch4-armored-connector-door', 'ch4_008'],
+  [train, 'ch4_reach_seluomi_standoff', 'ch4-seluomi-standoff', 'ch4_009'],
+  [core, 'ch4_reach_core_car_outer', 'ch4-core-car-outer', 'ch4_011'],
+  [core, 'ch4_enter_core_organ_chamber', 'ch4-charon-conversation', 'ch4_012'],
+  [core, 'ch4_reach_final_boss_dais', 'ch4-final-boss-dais', 'ch4_014'],
+]) {
+  assert(source.includes(`id: '${questId}'`), `Missing chapter-4 quest ${questId}`);
   assert(
-    train.includes(`target: { type: 'zone', id: '${targetId}' }`),
+    source.includes(`target: { type: 'zone', id: '${targetId}' }`),
     `Quest ${questId} must target physical zone ${targetId}`,
   );
-  assert(train.includes(`id: '${targetId}'`), `Missing chapter-4 target zone ${targetId}`);
+  assert(source.includes(`id: '${targetId}'`), `Missing chapter-4 target zone ${targetId}`);
   assert(
-    train.includes(`questCompleteId: '${questId}'`) && train.includes(`storySceneId: '${sceneId}'`),
+    source.includes(`questCompleteId: '${questId}'`) && source.includes(`storySceneId: '${sceneId}'`),
     `${targetId} must return to canonical ${sceneId}`,
   );
 }
 
 assert(
   game.includes('value: "ch4_train_infiltrated"') && game.includes('nextScene: "ch4_002"'),
-  'Train infiltration event must apply before the audience-car exploration bridge',
+  'Train infiltration event must apply before ch4_002 exploration',
 );
+assert(game.includes('nextScene: "ch4_006"'), 'Sequence-04 wake-up choices must converge on ch4_006');
 assert(
-  game.includes('nextScene: "ch4_006"'),
-  'All Sequence-04 wake-up choices must still converge on ch4_006',
-);
-assert(
-  game.includes('startBattle("ch4_qilan_duo"') &&
-    game.includes('nextScene: "ch4_007"') &&
-    game.includes('nextScene: "ch4_008"'),
+  game.includes('startBattle("ch4_qilan_duo"') && game.includes('nextScene: "ch4_007"') && game.includes('nextScene: "ch4_008"'),
   'Qilan persuasion, battle, and optional Sequence-07 branch must remain canonical',
 );
-assert(
-  game.includes('showScene("ch4_008")'),
-  'The canonical Qilan battle must still return to ch4_008',
-);
+assert(game.includes('showScene("ch4_008")'), 'Qilan battle must still return to ch4_008');
 assert(
   game.includes('key: "伊莱娜隐藏好感值"') && game.includes('nextScene: "ch4_009"'),
   'Elena response effects must remain canonical before ch4_009',
@@ -118,9 +117,22 @@ assert(
   game.includes('nextScene: "ch4_010"') && game.includes('startBattle("ch4_seluomi_final"'),
   'Seluomi standoff and final battle must remain canonical',
 );
+assert(
+  game.includes('showScene("ch4_011")'),
+  'Seluomi battle must still return to ch4_011 before the post-battle traversal',
+);
+assert(
+  game.includes('nextScene: "ch4_012"') && game.includes('nextScene: "ch4_013"') && game.includes('nextScene: "ch4_014"'),
+  'Core-car truth and final-prelude scene edges must remain canonical',
+);
+assert(
+  game.includes('startBattle("ch4_charon_final"'),
+  'Charon final battle must remain owned by the canonical battle system',
+);
 
 assert(
-  !train.includes('DeepSeek') && !train.includes('OpenAI'),
+  !train.includes('DeepSeek') && !train.includes('OpenAI') &&
+    !core.includes('DeepSeek') && !core.includes('OpenAI'),
   'Chapter-4 exploration must remain LLM OFF',
 );
 
