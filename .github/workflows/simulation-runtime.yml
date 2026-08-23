@@ -9,6 +9,7 @@ on:
       - 'src/worldmap/worldMapBridge.ts'
       - 'scripts/assert-simulation-boundaries.mjs'
       - 'scripts/assert-chapter0-exploration.mjs'
+      - 'scripts/audit-chapter0-route-graph.mjs'
       - 'tsconfig.simulation.json'
       - 'package.json'
       - 'package-lock.json'
@@ -24,6 +25,7 @@ on:
       - 'src/worldmap/worldMapBridge.ts'
       - 'scripts/assert-simulation-boundaries.mjs'
       - 'scripts/assert-chapter0-exploration.mjs'
+      - 'scripts/audit-chapter0-route-graph.mjs'
       - 'tsconfig.simulation.json'
       - 'package.json'
       - 'package-lock.json'
@@ -54,6 +56,9 @@ jobs:
 
       - name: Chapter 0 exploration guard
         run: npm run chapter0:guard
+
+      - name: Chapter 0 route graph audit
+        run: npm run chapter0:route-audit
 
       - name: Production build
         run: npm run simulation:build
