@@ -42,9 +42,11 @@ import { CH3_WHITE_ACADEMY_PLAZA_REGION } from './chapter3PlazaData';
 import { CH3_ARCHIVE_CORRIDOR_APPROACH_REGION } from './chapter3ArchiveApproachData';
 import { CH3_HEARING_CHAMBER_APPROACH_REGION } from './chapter3HearingApproachData';
 import {
+  CH4_AKA_FOLLOWUP_REGION,
   CH4_ALTAR_CARRIAGE_APPROACH_REGION,
   CH4_ARMORED_CONNECTOR_APPROACH_REGION,
   CH4_AUDIENCE_CAR_ENTRY_REGION,
+  CH4_AUDIENCE_INVESTIGATION_REGION,
   CH4_QILAN_APPROACH_REGION,
 } from './chapter4TrainData';
 import {
@@ -86,6 +88,8 @@ const REGIONS = [
   CH3_ARCHIVE_CORRIDOR_APPROACH_REGION,
   CH3_HEARING_CHAMBER_APPROACH_REGION,
   CH4_AUDIENCE_CAR_ENTRY_REGION,
+  CH4_AUDIENCE_INVESTIGATION_REGION,
+  CH4_AKA_FOLLOWUP_REGION,
   CH4_QILAN_APPROACH_REGION,
   CH4_ARMORED_CONNECTOR_APPROACH_REGION,
   CH4_ALTAR_CARRIAGE_APPROACH_REGION,
@@ -131,6 +135,14 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
 
   // Keep route setup, value initialization, and the moving-train infiltration authored.
   { sceneId: 'ch4_002', region: CH4_AUDIENCE_CAR_ENTRY_REGION },
+
+  // ch4_002 resolves the first audience choice. Before ch4_003, expose the authored
+  // E401/audience-identification content as physical optional investigations.
+  { sceneId: 'ch4_003', region: CH4_AUDIENCE_INVESTIGATION_REGION },
+
+  // ch4_004 resolves the soloist choice. Before the Sequence-04 wake-up scene, let the
+  // player physically revisit Aka when that authored branch was chosen.
+  { sceneId: 'ch4_005', region: CH4_AKA_FOLLOWUP_REGION },
 
   // Audience-car rescue choices apply before the rear-car traversal to Qilan.
   { sceneId: 'ch4_006', region: CH4_QILAN_APPROACH_REGION },
