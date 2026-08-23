@@ -96,6 +96,8 @@ export class ExplorationHost implements ExplorationLoopPort {
   private nearbyZone?: ExplorationInteractionZone;
   private activeQuestId?: string;
   private completedQuestIds: string[] = [];
+  private consumedInteractionZoneIds: string[] = [];
+  private readonly triggeredGameEvents: ReadonlySet<string>;
   private clockMinute = DEFAULT_CLOCK_MINUTE;
   private destroyed = false;
   private mounted = false;
@@ -107,6 +109,7 @@ export class ExplorationHost implements ExplorationLoopPort {
   ) {
     this.playerPosition = { ...region.playerSpawn };
     this.activeQuestId = region.initialQuestId;
+    this.triggeredGameEvents = this.readTriggeredGameEvents();
 
     if (typeof window !== 'undefined') {
       this.initialSnapshot = loadRegionExplorationSnapshot(region.id);
@@ -115,6 +118,9 @@ export class ExplorationHost implements ExplorationLoopPort {
         this.clockMinute = this.initialSnapshot.clockMinute;
         this.activeQuestId = this.initialSnapshot.activeQuestId ?? region.initialQuestId;
         this.completedQuestIds = [...this.initialSnapshot.completedQuestIds];
+        this.consumedInteractionZoneIds = [
+          ...this.initialSnapshot.consumedInteractionZoneIds,
+        ];
       }
     }
   }
@@ -243,7 +249,7 @@ export class ExplorationHost implements ExplorationLoopPort {
       INTERACTION_DISTANCE,
     );
     this.nearbyZone = findContainingInteractionZone(
-      this.region.interactionZones,
+      this.getAvailableInteractionZones(),
       this.playerPosition,
     );
   }
@@ -287,7 +293,7 @@ export class ExplorationHost implements ExplorationLoopPort {
       deltaSeconds,
       quest?.target,
       this.npcs.map((npc) => ({ id: npc.definition.id, position: npc.position })),
-      this.region.interactionZones,
+      this.getAvailableInteractionZones(),
     );
   }
 
@@ -302,6 +308,7 @@ export class ExplorationHost implements ExplorationLoopPort {
       clockMinute: this.clockMinute,
       activeQuestId: this.activeQuestId,
       completedQuestIds: [...this.completedQuestIds],
+      consumedInteractionZoneIds: [...this.consumedInteractionZoneIds],
       npcPositions: Object.fromEntries(
         this.npcs.map((npc) => [npc.definition.id, { ...npc.position }]),
       ),
@@ -471,6 +478,8 @@ export class ExplorationHost implements ExplorationLoopPort {
   }
 
   private interactWithZone(zone: ExplorationInteractionZone): void {
+    if (!this.isInteractionZoneAvailable(zone)) return;
+
     const gate = evaluateQuestInteractionGate({
       requiredQuestId: zone.questCompleteId,
       activeQuestId: this.activeQuestId,
@@ -491,6 +500,10 @@ export class ExplorationHost implements ExplorationLoopPort {
     }
 
     this.tryCompleteQuest(zone.questCompleteId);
+    if (zone.once && !this.consumedInteractionZoneIds.includes(zone.id)) {
+      this.consumedInteractionZoneIds.push(zone.id);
+      this.persistState();
+    }
     if (zone.statusText && this.hud) this.hud.status.text = zone.statusText;
     if (zone.storySceneId) this.openStory(zone.storySceneId);
   }
@@ -530,6 +543,32 @@ export class ExplorationHost implements ExplorationLoopPort {
       return;
     }
     this.hud.setQuest(`◆ ${quest.title}`, quest.description);
+  }
+
+  private getAvailableInteractionZones(): ExplorationInteractionZone[] | undefined {
+    return this.region.interactionZones?.filter((zone) => this.isInteractionZoneAvailable(zone));
+  }
+
+  private isInteractionZoneAvailable(zone: ExplorationInteractionZone): boolean {
+    if (zone.once && this.consumedInteractionZoneIds.includes(zone.id)) return false;
+    if (zone.requiredGameEvent && !this.triggeredGameEvents.has(zone.requiredGameEvent)) {
+      return false;
+    }
+    if (
+      zone.requiredAnyGameEvents?.length &&
+      !zone.requiredAnyGameEvents.some((eventId) => this.triggeredGameEvents.has(eventId))
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  private readTriggeredGameEvents(): Set<string> {
+    if (typeof window === 'undefined') return new Set();
+    const legacyWindow = window as Window & { GameState?: Record<string, unknown> };
+    const events = legacyWindow.GameState?.['已触发事件'];
+    if (!Array.isArray(events)) return new Set();
+    return new Set(events.filter((item): item is string => typeof item === 'string'));
   }
 
   private openStory(sceneId: string): void {
