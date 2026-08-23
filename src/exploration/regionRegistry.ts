@@ -29,6 +29,11 @@ import { CH1_SEQUENCE04_AFTERMATH_REGION } from './chapter1AftermathData';
 import { CH1_SELUOMI_STANDOFF_APPROACH_REGION } from './chapter1SeluomiApproachData';
 import { CH1_MUJIAN_DEPARTURE_REGION } from './chapter1DepartureData';
 import {
+  CH2_CRYSTAL_CORRIDOR_GUARDIAN_APPROACH_REGION,
+  CH2_OBSERVATORY_MAIN_DOOR_REGION,
+  CH2_OBSERVATORY_SNOW_APPROACH_REGION,
+} from './chapter2ObservatoryData';
+import {
   createRegionRegistry,
   type SceneRegionEntry,
 } from '../simulation/exploration/RegionSystem';
@@ -52,6 +57,9 @@ const REGIONS = [
   CH1_SEQUENCE04_AFTERMATH_REGION,
   CH1_SELUOMI_STANDOFF_APPROACH_REGION,
   CH1_MUJIAN_DEPARTURE_REGION,
+  CH2_OBSERVATORY_SNOW_APPROACH_REGION,
+  CH2_OBSERVATORY_MAIN_DOOR_REGION,
+  CH2_CRYSTAL_CORRIDOR_GUARDIAN_APPROACH_REGION,
   PROTOTYPE_REGION,
   WHITE_ACADEMY_ARCHIVE_MILO_REGION,
   WHITE_ACADEMY_ARCHIVE_ANNING_REGION,
@@ -102,6 +110,16 @@ const SCENE_ENTRIES: ExplorationSceneEntry[] = [
   // ch1_black_013 epilogue. Only after the player chooses to leave do we make the walk
   // to the station exit physical; the original ch1_black_014 broadcast then plays.
   { sceneId: 'ch1_black_014', region: CH1_MUJIAN_DEPARTURE_REGION },
+
+  // Chapter 2 keeps the route opening and snow-trek dialogue canonical. The final snow
+  // approach becomes physical before ch2_snow_002. Its authored exterior choice effects
+  // then apply before a second physical walk reaches the main door and ch2_snow_003.
+  { sceneId: 'ch2_snow_002', region: CH2_OBSERVATORY_SNOW_APPROACH_REGION },
+  { sceneId: 'ch2_snow_003', region: CH2_OBSERVATORY_MAIN_DOOR_REGION },
+
+  // ch2_snow_005 remains the canonical exploration/minigame menu. Every preparation
+  // route converges on ch2_snow_006, so only that deeper corridor traversal is physical.
+  { sceneId: 'ch2_snow_006', region: CH2_CRYSTAL_CORRIDOR_GUARDIAN_APPROACH_REGION },
 
   // Existing chapter-3 regression slices remain registered against the same runtime.
   { sceneId: 'chapter3_white_start', region: PROTOTYPE_REGION },
