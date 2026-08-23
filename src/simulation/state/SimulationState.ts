@@ -25,6 +25,8 @@ export interface RegionRuntimeStateV1 {
   npcPositions: Record<string, SimulationVec2>;
   activeQuestId?: string;
   completedQuestIds: string[];
+  /** One-shot physical interactions already consumed in this region. */
+  consumedInteractionZoneIds?: string[];
   lastVisitedGameTime?: number;
 }
 
