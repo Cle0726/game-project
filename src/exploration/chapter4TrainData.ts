@@ -65,6 +65,129 @@ export const CH4_AUDIENCE_CAR_ENTRY_REGION: ExplorationRegionDefinition = {
   ],
 };
 
+/**
+ * Runs after ch4_002. It turns the authored E401 branch and audience-identification
+ * minigame into optional physical investigations before the party reaches Sequence-04.
+ */
+export const CH4_AUDIENCE_INVESTIGATION_REGION: ExplorationRegionDefinition = {
+  id: 'ch4_nightless_audience_investigation',
+  name: '不夜巡演号 · 观众席调查段',
+  width: 1600,
+  height: 900,
+  playerSpawn: { x: 250, y: 700 },
+  assets: { backgroundSrc: AUDIENCE_BACKGROUND, playerSpriteVariants: PLAYER_SPRITE_VARIANTS },
+  collisionZones: [
+    { id: 'audience-investigation-north-wall', x: 0, y: 0, width: 1600, height: 130 },
+    { id: 'audience-investigation-south-wall', x: 0, y: 820, width: 1600, height: 80 },
+    { id: 'audience-investigation-seat-bank-west', x: 360, y: 210, width: 310, height: 300 },
+    { id: 'audience-investigation-seat-bank-east', x: 930, y: 210, width: 310, height: 300 },
+  ],
+  waypoints: [
+    { id: 'audience_investigation_start', position: { x: 250, y: 700 }, links: ['audience_investigation_west'] },
+    { id: 'audience_investigation_west', position: { x: 560, y: 650 }, links: ['audience_investigation_start', 'audience_investigation_center'] },
+    { id: 'audience_investigation_center', position: { x: 800, y: 650 }, links: ['audience_investigation_west', 'audience_investigation_east'] },
+    { id: 'audience_investigation_east', position: { x: 1080, y: 650 }, links: ['audience_investigation_center', 'sequence04_search'] },
+    { id: 'sequence04_search', position: { x: 1370, y: 605 }, links: ['audience_investigation_east'] },
+  ],
+  npcs: [],
+  quests: [
+    {
+      id: 'ch4_find_sequence04_after_audience',
+      title: '继续寻找零四',
+      description: '如果刚才选择逐一辨认观众席，可以顺路做更深入的调查；主线目标仍是找到零四。',
+      completionText: '弥洛在相似面容里认出了那道带着断裂节拍器痕迹的身影。',
+      target: { type: 'zone', id: 'ch4-sequence04-search' },
+    },
+  ],
+  initialQuestId: 'ch4_find_sequence04_after_audience',
+  interactionZones: [
+    {
+      id: 'ch4-audience-records-event',
+      name: '仍有反应的编号席',
+      area: { x: 700, y: 540, width: 180, height: 100 },
+      interactionText: '按 E 逐一核对编号',
+      statusText: '几名静默序列的停顿并不完全一致。那些错误节拍像是还没有熄灭的自主反应。',
+      storySceneId: 'chapter4_event_E401',
+      requiredGameEvent: 'E401_audience_identified',
+      once: true,
+    },
+    {
+      id: 'ch4-audience-identify-minigame',
+      name: '假掌声辨认点',
+      area: { x: 900, y: 540, width: 180, height: 100 },
+      interactionText: '按 E 进行观众席辨认挑战',
+      statusText: '广播掌声与真实反应之间存在半拍误差，可以用来筛出仍有自主反应的人。',
+      storySceneId: 'chapter4_event_minigame_audience_identify',
+      requiredGameEvent: 'E401_audience_identified',
+      once: true,
+    },
+    {
+      id: 'ch4-sequence04-search',
+      name: '零四所在区域',
+      area: { x: 1270, y: 500, width: 250, height: 220 },
+      interactionText: '按 E 继续寻找零四',
+      statusText: '相似的鼓掌姿态里，有一道身影的节拍痕迹与弥洛记忆中的零四一致。',
+      questCompleteId: 'ch4_find_sequence04_after_audience',
+      storySceneId: 'ch4_003',
+    },
+  ],
+};
+
+/** Physical follow-up to the ch4_004 choice about the lone soloist Aka. */
+export const CH4_AKA_FOLLOWUP_REGION: ExplorationRegionDefinition = {
+  id: 'ch4_nightless_aka_followup',
+  name: '不夜巡演号 · 独奏者侧廊',
+  width: 1600,
+  height: 900,
+  playerSpawn: { x: 255, y: 700 },
+  assets: { backgroundSrc: AUDIENCE_BACKGROUND, playerSpriteVariants: PLAYER_SPRITE_VARIANTS },
+  collisionZones: [
+    { id: 'aka-followup-north-wall', x: 0, y: 0, width: 1600, height: 130 },
+    { id: 'aka-followup-south-wall', x: 0, y: 820, width: 1600, height: 80 },
+    { id: 'aka-followup-seat-bank-west', x: 360, y: 210, width: 310, height: 300 },
+    { id: 'aka-followup-seat-bank-east', x: 930, y: 210, width: 310, height: 300 },
+  ],
+  waypoints: [
+    { id: 'aka_followup_start', position: { x: 255, y: 700 }, links: ['aka_followup_west'] },
+    { id: 'aka_followup_west', position: { x: 570, y: 650 }, links: ['aka_followup_start', 'aka_followup_center'] },
+    { id: 'aka_followup_center', position: { x: 810, y: 650 }, links: ['aka_followup_west', 'aka_followup_east'] },
+    { id: 'aka_followup_east', position: { x: 1090, y: 650 }, links: ['aka_followup_center', 'sequence04_resonance'] },
+    { id: 'sequence04_resonance', position: { x: 1370, y: 600 }, links: ['aka_followup_east'] },
+  ],
+  npcs: [],
+  quests: [
+    {
+      id: 'ch4_return_to_sequence04',
+      title: '回到零四身边',
+      description: '赤的独奏仍在车厢阴影里回响。处理完眼前的选择后，回到零四身边继续唤醒。',
+      completionText: '阿缇娅在零四身边蹲下，准备以最轻的一拍回应她自己的残响。',
+      target: { type: 'zone', id: 'ch4-sequence04-resonance' },
+    },
+  ],
+  initialQuestId: 'ch4_return_to_sequence04',
+  interactionZones: [
+    {
+      id: 'ch4-aka-side-event',
+      name: '赤的空座独奏',
+      area: { x: 730, y: 540, width: 210, height: 105 },
+      interactionText: '按 E 再听一小节',
+      statusText: '她仍对着空座演奏。靠近并不会立刻得到回应，但这一次有人真正坐下来听。',
+      storySceneId: 'chapter4_event_E402',
+      requiredGameEvent: '独奏者的终局',
+      once: true,
+    },
+    {
+      id: 'ch4-sequence04-resonance',
+      name: '零四所在座席',
+      area: { x: 1270, y: 500, width: 250, height: 220 },
+      interactionText: '按 E 回到零四身边',
+      statusText: '她的手仍维持着固定鼓掌姿态，但眼里的暗金色已经出现极轻的波动。',
+      questCompleteId: 'ch4_return_to_sequence04',
+      storySceneId: 'ch4_005',
+    },
+  ],
+};
+
 export const CH4_QILAN_APPROACH_REGION: ExplorationRegionDefinition = {
   id: 'ch4_nightless_qilan_approach',
   name: '不夜巡演号 · 观众席后段',
@@ -97,6 +220,20 @@ export const CH4_QILAN_APPROACH_REGION: ExplorationRegionDefinition = {
   ],
   initialQuestId: 'ch4_reach_qilan_chokepoint',
   interactionZones: [
+    {
+      id: 'ch4-resonance-wakeup-minigame',
+      name: '零四残响稳定点',
+      area: { x: 730, y: 440, width: 200, height: 120 },
+      interactionText: '按 E 进行节拍共鸣稳定',
+      statusText: '离开观众席前，还能再用一次克制的节拍确认零四是否真正脱离假掌声。',
+      storySceneId: 'chapter4_event_minigame_resonance_wakeup',
+      requiredAnyGameEvents: [
+        '零四未鸣共鸣唤醒',
+        '阿缇娅同类共鸣零四',
+        '弥洛幸存者对话零四',
+      ],
+      once: true,
+    },
     {
       id: 'ch4-severed-command-cable',
       name: '命令广播线',
@@ -149,6 +286,15 @@ export const CH4_ARMORED_CONNECTOR_APPROACH_REGION: ExplorationRegionDefinition 
   initialQuestId: 'ch4_reach_armored_connector',
   interactionZones: [
     {
+      id: 'ch4-tour-faction-split-event',
+      name: '损坏广播线旁的争执',
+      area: { x: 730, y: 445, width: 210, height: 115 },
+      interactionText: '按 E 接近墨昭与芸苓',
+      statusText: '巡演派内部的争吵已经压过广播噪声。白谱院档案也许能让这道裂缝继续扩大。',
+      storySceneId: 'chapter4_event_E403',
+      once: true,
+    },
+    {
       id: 'ch4-armored-connector-door',
       name: '装甲连接门',
       area: { x: 1270, y: 445, width: 270, height: 235 },
@@ -192,6 +338,26 @@ export const CH4_ALTAR_CARRIAGE_APPROACH_REGION: ExplorationRegionDefinition = {
   ],
   initialQuestId: 'ch4_reach_seluomi_standoff',
   interactionZones: [
+    {
+      id: 'ch4-hisheng-side-event',
+      name: '希声的停顿',
+      area: { x: 660, y: 475, width: 190, height: 110 },
+      interactionText: '按 E 与希声说话',
+      statusText: '她看过观众席后没有立刻跟上伊莱娜。这个停顿第一次不像等待命令。',
+      storySceneId: 'chapter4_event_E404',
+      requiredGameEvent: '希声看见观众席',
+      once: true,
+    },
+    {
+      id: 'ch4-three-side-dispatch-minigame',
+      name: '三方混战狭道',
+      area: { x: 875, y: 475, width: 190, height: 110 },
+      interactionText: '按 E 进行三方混战调度',
+      statusText: '主角队伍、巡演派残部与静默署都在抢同一条狭窄退路，必须先决定保护顺序。',
+      storySceneId: 'chapter4_event_minigame_three_side_dispatch',
+      requiredGameEvent: '三方混战种子',
+      once: true,
+    },
     {
       id: 'ch4-altar-score-stand',
       name: '祭坛谱架',
