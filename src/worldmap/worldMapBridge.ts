@@ -72,18 +72,31 @@ export function goToMainStoryScene(sceneId: string): void {
 }
 
 export function inferChapterProgress(gameState?: GameStateLike): number | undefined {
-  if (typeof gameState?.chapterProgress === 'number') return gameState.chapterProgress;
+  if (!gameState) return undefined;
 
-  const sceneId = gameState?.当前场景ID ?? gameState?.currentSceneId;
-  if (!sceneId) return undefined;
+  const candidates: number[] = [];
+  if (typeof gameState.chapterProgress === 'number' && Number.isFinite(gameState.chapterProgress)) {
+    candidates.push(gameState.chapterProgress);
+  }
 
-  const compactMatch = sceneId.match(/^ch(\d+)_/);
-  if (compactMatch) return Number(compactMatch[1]);
+  const sceneId = gameState.当前场景ID ?? gameState.currentSceneId;
+  if (sceneId) {
+    const compactMatch = sceneId.match(/^ch(\d+)_/);
+    if (compactMatch) candidates.push(Number(compactMatch[1]));
 
-  const chapterMatch = sceneId.match(/^chapter(\d+)/);
-  if (chapterMatch) return Number(chapterMatch[1]);
+    const chapterMatch = sceneId.match(/^chapter(\d+)/);
+    if (chapterMatch) candidates.push(Number(chapterMatch[1]));
+  }
 
-  return undefined;
+  const triggeredEvents = gameState.已触发事件 ?? gameState.triggeredEvents ?? [];
+  for (const eventId of triggeredEvents) {
+    const completedChapterMatch = eventId.match(/^chapter(\d+)_complete(?:$|_)/);
+    if (completedChapterMatch) {
+      candidates.push(Number(completedChapterMatch[1]) + 1);
+    }
+  }
+
+  return candidates.length ? Math.max(...candidates) : undefined;
 }
 
 export function getRelationshipValue(
