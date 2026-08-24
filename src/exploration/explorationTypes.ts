@@ -54,6 +54,12 @@ export interface ExplorationInteractionZone {
   storySceneId?: string;
   statusText?: string;
   questCompleteId?: string;
+  /** Show this zone only after the authored legacy event has happened. */
+  requiredGameEvent?: string;
+  /** Show this zone after any one of the authored legacy events has happened. */
+  requiredAnyGameEvents?: string[];
+  /** Consume this physical interaction after one successful use in the region snapshot. */
+  once?: boolean;
 }
 
 export interface ExplorationQuestDefinition {

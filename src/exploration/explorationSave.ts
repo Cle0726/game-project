@@ -11,6 +11,8 @@ export interface ExplorationSaveState {
   clockMinute: number;
   activeQuestId?: string;
   completedQuestIds: string[];
+  /** Optional for compatibility with callers that predate one-shot interaction state. */
+  consumedInteractionZoneIds?: string[];
   npcPositions: Record<string, { x: number; y: number }>;
 }
 
@@ -24,7 +26,17 @@ export function loadExplorationSave(regionId: string): ExplorationSaveState | un
 }
 
 export function saveExplorationState(state: ExplorationSaveState): void {
-  const newlyCompletedQuestIds = saveRegionExplorationSnapshot(state);
+  const newlyCompletedQuestIds = saveRegionExplorationSnapshot({
+    regionId: state.regionId,
+    playerPosition: { ...state.playerPosition },
+    clockMinute: state.clockMinute,
+    activeQuestId: state.activeQuestId,
+    completedQuestIds: [...state.completedQuestIds],
+    consumedInteractionZoneIds: [...(state.consumedInteractionZoneIds ?? [])],
+    npcPositions: Object.fromEntries(
+      Object.entries(state.npcPositions).map(([id, position]) => [id, { ...position }]),
+    ),
+  });
   if (!newlyCompletedQuestIds.length) return;
 
   const runtime = getSimulationRuntime();
