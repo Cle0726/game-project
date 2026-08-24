@@ -13,6 +13,8 @@ const core = read('src/exploration/chapter4CoreData.ts');
 const bridge = read('src/exploration-legacy-main.ts');
 const host = read('src/simulation/exploration/ExplorationHost.ts');
 const persistence = read('src/simulation/state/SimulationPersistence.ts');
+const worldMapBridge = read('src/worldmap/worldMapBridge.ts');
+const worldMapData = read('src/worldmap/worldMapData.ts');
 
 const bridgeScenes = [
   'ch4_002',
@@ -206,6 +208,24 @@ assert(
   bridge.includes("sceneId === 'ch4_000'") &&
     bridge.includes("resetExplorationProgressByPrefix('ch4_')"),
   'Entering canonical ch4_000 must reset stale chapter-4 exploration progress before replay',
+);
+
+// The authored ch4_018 completion choice still stores chapterProgress=4. The world map
+// must therefore treat chapter4_complete as progress 5 or Chapter 5 remains locked.
+assert(
+  game.includes('value: "chapter4_complete"'),
+  'Chapter 4 epilogue must emit chapter4_complete',
+);
+assert(
+  worldMapData.includes("id: 'chapter5_floating_circus'") &&
+    worldMapData.includes("unlockCondition: { type: 'chapter_progress', minChapter: 5 }"),
+  'Chapter 5 world-map region must retain its progress-5 unlock contract',
+);
+assert(
+  worldMapBridge.includes("eventId.match(/^chapter(\\d+)_complete(?:$|_)/)") &&
+    worldMapBridge.includes('candidates.push(Number(completedChapterMatch[1]) + 1)') &&
+    worldMapBridge.includes('Math.max(...candidates)'),
+  'World-map progress inference must advance from chapter completion events without discarding explicit progress',
 );
 
 assert(
