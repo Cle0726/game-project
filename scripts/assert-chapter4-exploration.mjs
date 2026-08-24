@@ -15,6 +15,8 @@ const host = read('src/simulation/exploration/ExplorationHost.ts');
 const persistence = read('src/simulation/state/SimulationPersistence.ts');
 const worldMapBridge = read('src/worldmap/worldMapBridge.ts');
 const worldMapData = read('src/worldmap/worldMapData.ts');
+const regionMapView = read('src/worldmap/components/RegionMapView.tsx');
+const worldMapView = read('src/worldmap/components/WorldMapView.tsx');
 
 const bridgeScenes = [
   'ch4_002',
@@ -226,6 +228,26 @@ assert(
     worldMapBridge.includes('candidates.push(Number(completedChapterMatch[1]) + 1)') &&
     worldMapBridge.includes('Math.max(...candidates)'),
   'World-map progress inference must advance from chapter completion events without discarding explicit progress',
+);
+
+// Region maps previously trusted static node data, so an unlocked chapter exposed its
+// finale and branch-only side scenes immediately. Runtime access must now be derived
+// from story progress, and exploration-owned Chapter-4 events cannot launch directly.
+assert(
+  worldMapBridge.includes('export function getWorldMapNodeAccess') &&
+    worldMapBridge.includes("nodeId.startsWith('chapter4_event_')") &&
+    worldMapBridge.includes('nodePosition.step > currentPosition.step'),
+  'World-map bridge must gate future nodes and reserve Chapter-4 physical side scenes for Exploration',
+);
+assert(
+  regionMapView.includes('getWorldMapNodeAccess(node, region, gameState)') &&
+    regionMapView.includes('disabled={!access.isAccessible}') &&
+    regionMapView.includes("!access.isAccessible ? 'is-locked' : ''"),
+  'Region map buttons must enforce derived node accessibility instead of static atlas flags',
+);
+assert(
+  worldMapView.includes('gameState={gameState}'),
+  'World map must pass the live GameState into RegionMapView node gating',
 );
 
 assert(
