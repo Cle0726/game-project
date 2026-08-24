@@ -2,16 +2,19 @@ import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import {
   getTeaBreakContextType,
+  getWorldMapNodeAccess,
   goToMainStoryScene,
   openTeaBreakFromWorldMap,
   resolveMainStorySceneId
 } from '../worldMapBridge';
+import type { GameStateLike } from '../worldMapBridge';
 import type { LocationNode, WorldRegion } from '../worldMapTypes';
 import { getRevisitLines, RevisitPrompt } from './RevisitPrompt';
 import './WorldMap.css';
 
 export interface RegionMapViewProps {
   region: WorldRegion;
+  gameState?: GameStateLike;
   nodes?: LocationNode[];
   layerTitle?: string;
   onBackToWorld?: () => void;
@@ -30,13 +33,14 @@ interface RegionLayer {
   nodes: LocationNode[];
 }
 
-function getNodeAriaLabel(node: LocationNode): string {
-  const status = node.isCompleted ? '已完成' : '未完成';
+function getNodeAriaLabel(node: LocationNode, isCompleted: boolean, isAccessible: boolean): string {
+  const status = !isAccessible ? '尚未解锁' : isCompleted ? '已完成' : '可进入';
   return `${node.name}，${status}`;
 }
 
 export function RegionMapView({
   region,
+  gameState = window.GameState,
   nodes,
   layerTitle,
   onBackToWorld,
@@ -86,22 +90,32 @@ export function RegionMapView({
   }
 
   function enterNode(node: LocationNode): void {
-    if (node.nodeType === 'sublevel_entry' && node.sublevels?.length) {
-      setLayerStack((current) => [...current, { title: node.name, nodes: node.sublevels ?? [] }]);
+    const access = getWorldMapNodeAccess(node, region, gameState);
+    if (!access.isAccessible) return;
+
+    const effectiveNode = access.isCompleted === node.isCompleted
+      ? node
+      : { ...node, isCompleted: access.isCompleted };
+
+    if (effectiveNode.nodeType === 'sublevel_entry' && effectiveNode.sublevels?.length) {
+      setLayerStack((current) => [
+        ...current,
+        { title: effectiveNode.name, nodes: effectiveNode.sublevels ?? [] }
+      ]);
       return;
     }
 
-    if (node.nodeType === 'tuning_platform') {
-      enterTeaBreakNode(node);
+    if (effectiveNode.nodeType === 'tuning_platform') {
+      enterTeaBreakNode(effectiveNode);
       return;
     }
 
-    if (node.nodeType === 'story' && node.isCompleted && node.isRevisitable) {
-      setRevisitNode(node);
+    if (effectiveNode.nodeType === 'story' && effectiveNode.isCompleted && effectiveNode.isRevisitable) {
+      setRevisitNode(effectiveNode);
       return;
     }
 
-    enterMainStoryNode(node);
+    enterMainStoryNode(effectiveNode);
   }
 
   function enterTeaBreakNode(node: LocationNode): void {
@@ -181,34 +195,39 @@ export function RegionMapView({
       </header>
 
       <div className="region-map__stage">
-        {activeNodes.map((node) => (
-          <button
-            key={node.id}
-            type="button"
-            className={[
-              'location-node',
-              `location-node--${node.nodeType}`,
-              node.isCompleted ? 'is-completed' : 'is-unfinished',
-              node.sublevels?.length ? 'has-sublevels' : ''
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            style={
-              {
-                '--node-x': `${node.positionPercent.x}%`,
-                '--node-y': `${node.positionPercent.y}%`
-              } as CSSProperties
-            }
-            aria-label={getNodeAriaLabel(node)}
-            onClick={() => enterNode(node)}
-          >
-            <span className="location-node__marker">
-              <span className="location-node__core" />
-              {node.sublevels?.length ? <span className="location-node__expand">›</span> : null}
-            </span>
-            <span className="location-node__banner">{node.name}</span>
-          </button>
-        ))}
+        {activeNodes.map((node) => {
+          const access = getWorldMapNodeAccess(node, region, gameState);
+          return (
+            <button
+              key={node.id}
+              type="button"
+              disabled={!access.isAccessible}
+              className={[
+                'location-node',
+                `location-node--${node.nodeType}`,
+                access.isCompleted ? 'is-completed' : 'is-unfinished',
+                !access.isAccessible ? 'is-locked' : '',
+                node.sublevels?.length ? 'has-sublevels' : ''
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={
+                {
+                  '--node-x': `${node.positionPercent.x}%`,
+                  '--node-y': `${node.positionPercent.y}%`
+                } as CSSProperties
+              }
+              aria-label={getNodeAriaLabel(node, access.isCompleted, access.isAccessible)}
+              onClick={() => enterNode(node)}
+            >
+              <span className="location-node__marker">
+                <span className="location-node__core" />
+                {node.sublevels?.length ? <span className="location-node__expand">›</span> : null}
+              </span>
+              <span className="location-node__banner">{node.name}</span>
+            </button>
+          );
+        })}
       </div>
 
       <aside className={`region-minimap ${isOverviewOpen ? 'is-open' : ''}`}>
