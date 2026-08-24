@@ -107,6 +107,7 @@ export function WorldMapView({
     return (
       <RegionMapView
         region={selectedRegion}
+        gameState={gameState}
         onBackToWorld={() => setSelectedRegion(null)}
         onEnterScene={onEnterScene}
         onRevisitScene={onRevisitScene}
